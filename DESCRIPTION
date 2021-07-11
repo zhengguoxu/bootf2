@@ -1,7 +1,7 @@
 Package: bootf2
 Type: Package
 Title: Compare Dissolution Profiles Using Bootstrap Methodology
-Version: 0.1.9000
+Version: 0.1.0
 Date: 2021-07-11
 Authors@R: person(given = "Zhengguo",
                   family = "Xu",

@@ -1,0 +1,30 @@
+Package: bootf2
+Type: Package
+Title: Compare Dissolution Profiles Using Bootstrap Methodology
+Version: 0.1.9000
+Date: 2021-07-11
+Authors@R: person(given = "Zhengguo",
+                  family = "Xu",
+                  role = c("aut", "cre"),
+                  email = "zhengguoxu@gmail.com")
+Description: The main purpose of the package is to compare dissolution 
+  profiles using boostrap methodology. The package can also be used to 
+  simulate dissolution profiles based on mathematical modelling.
+License: GPL (>=3) + file LICENSE
+URL: https://github.com/Zhengguo-Xu/bootf2
+BugReports: https://github.com/Zhengguo-Xu/bootf2/issues
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Depends: R (>= 4.0.0)
+Imports: 
+    ggplot2,
+    minpack.lm,
+    MASS,
+    readxl,
+    stats
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

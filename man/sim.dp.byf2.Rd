@@ -137,6 +137,10 @@ d.r <- sim.dp(tp, model.par = mod.par.r, seed = 100, n.units = 120L,
               plot = FALSE)
 
 model.par1 <- sim.dp.byf2(sim.dp.out = d.r, target.f2 = 60, seed = 123)
-model.par2 <- sim.dp.byf2(sim.dp.out = d.r, target.f2 = c(59.95, 60.04))
+model.par2 <- sim.dp.byf2(sim.dp.out = d.r, target.f2 = c(59.95, 60.04),
+                          seed = 123)
+model.par3 <- sim.dp.byf2(tp = d.r$sim.summary$time,
+                          dp = d.r$sim.summary$dp,
+                          target.f2 = c(59.99, 60.01), seed = 123)
 
 }

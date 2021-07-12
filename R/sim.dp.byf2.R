@@ -114,7 +114,11 @@
 #'               plot = FALSE)
 #'
 #' model.par1 <- sim.dp.byf2(sim.dp.out = d.r, target.f2 = 60, seed = 123)
-#' model.par2 <- sim.dp.byf2(sim.dp.out = d.r, target.f2 = c(59.95, 60.04))
+#' model.par2 <- sim.dp.byf2(sim.dp.out = d.r, target.f2 = c(59.95, 60.04),
+#'                           seed = 123)
+#' model.par3 <- sim.dp.byf2(tp = d.r$sim.summary$time,
+#'                           dp = d.r$sim.summary$dp,
+#'                           target.f2 = c(59.99, 60.01), seed = 123)
 #'
 #' @export
 sim.dp.byf2 <- function(tp, dp, sim.dp.out, target.f2, seed,
@@ -248,12 +252,12 @@ sim.dp.byf2 <- function(tp, dp, sim.dp.out, target.f2, seed,
     }
 
     # remove time 0 if any
-    tp     <- tp[tp > 0]
     ref.dp <- dp[tp > 0]
+    tp     <- tp[tp > 0]
     data.r <- data.frame(tp = tp, dp = ref.dp, stringsAsFactors = FALSE)
 
     # function for modelling ref.pop to get parameters # add here mod.ref
-    mod.par <- mod.ref(tp = tp, ref.dp = data.r$dp, digits = digits,
+    mod.par <- mod.ref(tp = data.r$tp, ref.dp = data.r$dp, digits = digits,
                        model = model, time.unit = time.unit)
 
 

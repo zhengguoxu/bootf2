@@ -4,6 +4,12 @@
 #' @name helper
 NULL
 
+# Contents:
+## - bpwhisker.l
+## - bpwhisker.u
+## - ci.header
+## - mod.ref
+
 #' @rdname helper
 # upper and lower whisker for boxplot
 
@@ -20,6 +26,21 @@ bpwhisker.u <- function(x) {
   max(x[x <= qt75 + 1.5*(qt75 - qt25)], na.rm = TRUE)
 }
 
+#' @param digits An integer indicating the decimal points for the output.
+#' @rdname helper
+ci.header <- function(digits) {
+  # need some trick for print format depending on user set decimal
+  # for CI type: "%23s", rest "%3s", lower, "%3s", upper
+  # header ----
+  if (digits <= 2) {
+    cat("         Types of         Lower   Upper\n",
+        "   Confidence Intervals   <----------->\n", sep = "")
+  } else {
+    cat("         Types of         Lower", rep(" ", 2*digits - 1),
+        "Upper\n", "   Confidence Intervals   <----",
+        rep("-", 2*digits - 1), "---->\n", sep = "")
+  }
+}
 
 #' @param tp,ref.dp Numeric vector of time points \code{tp} and their
 #'   corresponding mean dissolution profiles \code{ref.dp}.
@@ -120,3 +141,6 @@ mod.ref <- function(tp, ref.dp, digits = 4, model, time.unit) {
   }# end Weibull model fitting
   return(mod.par)
 } # end function mod.ref
+
+
+

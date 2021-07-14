@@ -4,6 +4,7 @@
 \alias{helper}
 \alias{bpwhisker.l}
 \alias{bpwhisker.u}
+\alias{ci.header}
 \alias{mod.ref}
 \title{Helper Functions}
 \usage{
@@ -11,15 +12,17 @@ bpwhisker.l(x)
 
 bpwhisker.u(x)
 
+ci.header(digits)
+
 mod.ref(tp, ref.dp, digits = 4, model, time.unit)
 }
 \arguments{
 \item{x}{Numeric vector}
 
+\item{digits}{An integer indicating the decimal points for the output.}
+
 \item{tp, ref.dp}{Numeric vector of time points \code{tp} and their
 corresponding mean dissolution profiles \code{ref.dp}.}
-
-\item{digits}{An integer indicating the decimal points for the output.}
 
 \item{model}{Strings of model names. Currently only 'Weibull' and
 'first-order' models are supported.}

@@ -1,6 +1,6 @@
 bootf2
 ================
-2021-07-17
+2021-07-26
 
 -   [Installation](#installation)
 -   [Introduction](#introduction)
@@ -9,15 +9,12 @@ bootf2
     -   [Function `calcf2()`](#function-calcf2)
     -   [Function `sim.dp.byf2()`](#function-simdpbyf2)
     -   [Function `bootf2()`](#function-bootf2)
+-   [Disclaimer](#disclaimer)
 -   [References](#references)
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 ## Installation
-
-This is the development version, so it is not available on CRAN yet. You
-can install it from [GitHub](https://github.com/) with
-package`devtools`.
 
 ``` r
 # install.packages("devtools") 
@@ -29,32 +26,48 @@ devtools::install_github("zhengguoxu/bootf2")
 <!-- badges: start -->
 <!-- badges: end -->
 
-Initially, the package `bootf2` was developed to compare the dissolution
-profiles using bootstrap *f*<sub>2</sub> method, as recommended recently
-by several regulatory
+The package `bootf2` was developed to compare the dissolution profiles
+using bootstrap *f*<sub>2</sub> method, as recommended recently by
+several regulatory
 agencies<sup>[1](#ref-EMA-2018-09-QA.MSD.DISSO)–[4](#ref-Mandula-2019-05-WS)</sup>.
 Several additional functions were added later to simulate the
 dissolution profiles.
 
 There are 4 main functions:
 
--   `sim.dp()` to simulate dissolution profile.
--   `calcf2()` to calculate similarity factor *f*<sub>2</sub> according
-    to different regulatory rules.
--   `sim.dp.byf2()` to find a dissolution profile that, when compared to
-    a given reference profile, has *f*<sub>2</sub> equal to the
-    predefined target *f*<sub>2</sub>.
--   `bootf2()` for the estimation of confidence intervals of
-    *f*<sub>2</sub>.
+1.  `sim.dp()` to simulate dissolution profile using mathematical models
+    or multivariate normal distribution. See vignette [Simulation of
+    Dissolution Profiles](vignettes/sim.dp.md).
+2.  `calcf2()` to calculate similarity factor *f*<sub>2</sub> according
+    to different regulatory rules. See vignette [Calculating Similarity
+    Factor *f*<sub>2</sub>](vignettes/calcf2.md).
+3.  `sim.dp.byf2()` to find a dissolution profile that, when compared to
+    a given reference profile, has *f*<sub>2</sub> value equal to the
+    predefined target *f*<sub>2</sub>. See vignette [Simulation of
+    Dissolution Profiles with Predefined Target
+    *f*<sub>2</sub>](vignettes/sim.dp.byf2.md).
+4.  `bootf2()` to estimate the confidence intervals of *f*<sub>2</sub>s
+    using bootstrap method. See vignette [Confidence Intervals of
+    *f*<sub>2</sub> Using Bootstrap Method](vignettes/bootf2.md).
 
-The basic usage is given below as brief demonstration. The details of
-functions are explained in their corresponding vignettes, while some
-common topics are included in the vignette [Introduction to
+The basic usage is given below as a brief demonstration. The details of
+functions are explained in their respective vignettes, and some common
+topics are discussed in the vignette [Introduction to
 bootf2](vignettes/introduction.md).
 
 ## Examples
 
 ### Function `sim.dp()`
+
+The complete list of arguments are shown below. Read package vignette
+with `vignette("sim.dp", package = "bootf2")` for more details.
+
+``` r
+dat <- sim.dp(tp, model = c("Weibull", "first-order"), model.par,
+              seed, product, dp, dp.cv, ascending = FALSE, n.units = 12L,
+              max.disso = 105, message = FALSE, plot = TRUE,
+              time.unit = c("min", "h"), plot.max.unit = 36L)
+```
 
 For the most basic use, the minimum required argument is `tp`, the
 vector of time points for the dissolution. To avoid changing the content
@@ -166,24 +179,26 @@ print(d.ref$sim.plot)
 
 <img src="man/figures/README-simdp-plot-1.png" width="100%" />
 
-The complete arguments are shown below. More details can be viewed in
-the package vignette by `vignette("sim.dp", package = "bootf2")`.
-
-``` r
-dat <- sim.dp(tp, model = c("Weibull", "first-order"), model.par,
-              seed, product, dp, dp.cv, ascending = FALSE, n.units = 12L,
-              max.disso = 105, message = FALSE, plot = TRUE,
-              time.unit = c("min", "h"), plot.max.unit = 36L)
-```
-
 ### Function `calcf2()`
 
-The minimum required arguments are dissolution profiles for test and
-reference, e.g., `calcf2(test, ref)`. Data can be read from an Excel
-file. For interactive use, the `test` and `ref` can be data frames with
-the time as the first column and individual units as the rest columns.
-The `sim.disso` data frame in the output of `sim.dp()` comes with the
-correct format, as shown above.
+The complete list of arguments are shown below. Read the package
+vignette with `vignette("calcf2", package = "bootf2")` for more details.
+
+``` r
+dat <- calcf2(test, ref, regulation = c("EMA", "FDA", "WHO"),
+              path.in, file.in, path.out, file.out, digits = 2L,
+              cv.rule = TRUE, min.points = 3L, both.TR.85 = FALSE,
+              f2.type = c("est.f2", "exp.f2", "bc.f2", "vc.exp.f2",
+                          "vc.bc.f2", "all"), plot = TRUE,
+              message = TRUE, time.unit = c("min", "h"),
+              plot.start.time = 0, plot.max.unit = 24L)
+```
+
+The minimum required arguments are dissolution profiles for `test` and
+`ref`. Data can be read from an Excel file. For interactive use, the
+`test` and `ref` can be data frames with the time as the first column
+and individual units as the rest columns. The `sim.disso` data frame in
+the output of `sim.dp()` comes with the correct format, as shown above.
 
 ``` r
 # simulate a test data
@@ -225,18 +240,8 @@ function will stop and show some messages.
 ``` r
 # simulate reference with CV% not fulfil the criterion 
 d.r2 <- sim.dp(tp, seed = 456)
-d.r2$sim.summary
-```
 
-<div data-pagedtable="false">
-
-<script data-pagedtable-source type="application/json">
-{"columns":[{"label":["product"],"name":[1],"type":["chr"],"align":["left"]},{"label":["time"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["dp"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["dp.cv"],"name":[4],"type":["lgl"],"align":["right"]},{"label":["sim.mean"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["sim.median"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["sim.cv"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["sim.var"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["sim.sd"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["sim.min"],"name":[10],"type":["dbl"],"align":["right"]},{"label":["sim.max"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["sim.qt05"],"name":[12],"type":["dbl"],"align":["right"]},{"label":["sim.qt25"],"name":[13],"type":["dbl"],"align":["right"]},{"label":["sim.qt75"],"name":[14],"type":["dbl"],"align":["right"]},{"label":["sim.qt95"],"name":[15],"type":["dbl"],"align":["right"]}],"data":[{"1":"LWL4216","2":"0","3":"0.00000","4":"NA","5":"0.00000","6":"0.00000","7":"0.000000","8":"0.00000","9":"0.000000","10":"0.00000","11":"0.00000","12":"0.00000","13":"0.00000","14":"0.00000","15":"0.00000"},{"1":"LWL4216","2":"5","3":"40.34113","4":"NA","5":"40.58672","6":"41.80670","7":"26.432697","8":"115.09354","9":"10.728166","10":"19.53981","11":"61.22352","12":"23.47979","13":"36.71898","14":"45.57355","15":"54.47309"},{"1":"LWL4216","2":"10","3":"62.35050","4":"NA","5":"64.46633","6":"66.34211","7":"17.836940","8":"132.22290","9":"11.498822","10":"41.70382","11":"81.85290","12":"43.97261","13":"60.47527","14":"71.65643","15":"77.09973"},{"1":"LWL4216","2":"15","3":"75.43591","4":"NA","5":"77.95486","6":"82.49419","7":"14.125419","8":"121.25205","9":"11.011451","10":"59.68043","11":"90.92986","12":"59.78431","13":"70.18733","14":"85.40015","15":"90.46134"},{"1":"LWL4216","2":"20","3":"83.40617","4":"NA","5":"85.36077","6":"89.56867","7":"11.079036","8":"89.43769","9":"9.457150","10":"70.24499","11":"96.35407","12":"71.57080","13":"76.68573","14":"93.20216","15":"95.73646"},{"1":"LWL4216","2":"30","3":"91.39903","4":"NA","5":"91.98773","6":"93.49207","7":"6.849871","8":"39.70312","9":"6.301041","10":"83.11474","11":"99.76324","12":"83.41645","13":"86.46009","14":"97.33652","15":"99.13142"},{"1":"LWL4216","2":"45","3":"95.31945","4":"NA","5":"95.20269","6":"94.56145","7":"4.193580","8":"15.93926","9":"3.992401","10":"88.70081","11":"101.45909","12":"90.06261","13":"92.38262","14":"98.78765","15":"100.36438"},{"1":"LWL4216","2":"60","3":"96.33039","4":"NA","5":"96.26318","6":"96.59041","7":"3.443959","8":"10.99098","9":"3.315264","10":"91.25553","11":"101.60724","12":"91.75410","13":"93.91981","14":"98.91278","15":"100.52078"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
-  </script>
-
-</div>
-
-``` r
+# output with error message
 calcf2(d.test$sim.disso, d.r2$sim.disso)
 # The f2 method was applied according to EMA's BE guideline.
 # 
@@ -261,26 +266,29 @@ calcf2(d.test$sim.disso, d.r2$sim.disso)
 # Error in calcf2(d.test$sim.disso, d.r2$sim.disso): You should consider alternative methods such as bootstrap f2.
 ```
 
-The complete arguments are show below. More details can be viewed in the
-package vignette by `vignette("calcf2", package = "bootf2")`.
+### Function `sim.dp.byf2()`
+
+The complete list of arguments are shown below. Read the package
+vignette with `vignette("sim.dp.byf2", package = "bootf2")` for more
+details.
 
 ``` r
-dat <- calcf2(test, ref, regulation = c("EMA", "FDA", "WHO"),
-              path.in, file.in, path.out, file.out, digits = 2L,
-              cv.rule = TRUE, min.points = 3L, both.TR.85 = FALSE,
-              f2.type = c("est.f2", "exp.f2", "bc.f2", "vc.exp.f2",
-                          "vc.bc.f2", "all"), plot = TRUE,
-              message = TRUE, time.unit = c("min", "h"),
-              plot.start.time = 0, plot.max.unit = 24L)
+dat <- sim.dp.byf2(tp, dp, sim.dp.out, target.f2, seed,
+                   regulation = c("EMA", "FDA", "WHO"),
+                   model = c("Weibull", "first-order"), digits = 2L,
+                   min.points = 3L, both.TR.85 = FALSE, max.disso = 105,
+                   model.par.cv = 50, fix.fmax.cv = 0, random.factor = 3,
+                   sim.target = c("ref.pop", "ref.median", "ref.mean"),
+                   time.unit = c("min", "h"), message = TRUE, plot = TRUE)
 ```
-
-### Function `sim.dp.byf2()`
 
 Given any dissolution profile `dp` at time points `tp`, and target
 *f*<sub>2</sub> value, this function will find another dissolution
 profile such that when the newly simulated profile is compared to the
 `dp`, the calculated *f*<sub>2</sub> will be equal to the target
-*f*<sub>2</sub>.
+*f*<sub>2</sub>. If `target.f2` is specified as a range, such as
+`target.f2 = c(52.05, 53.04)`, then the calculated *f*<sub>2</sub> with
+simulated profile will be within this range.
 
 ``` r
 # mean dissolution profile fo tp
@@ -307,9 +315,9 @@ d.t2 <- sim.dp.byf2(tp, dp, target.f2 = 60, seed = 123)
     # 7   45  92 87.33950 -4.660501
     # 8   60  95 89.48884 -5.511159
 
-If you don’t like the shape of the profile, you can run the function
-many times with different `seed` number until you get the shape that you
-are willing to accept.
+If you don’t like the shape of the simulated profile, you can run the
+function many times with different `seed` number until you get the shape
+that you are willing to accept.
 
 The model parameters in the output are more useful in simulation studies
 since they can be used as initial model parameter input to the function
@@ -317,24 +325,32 @@ since they can be used as initial model parameter input to the function
 have known *f*<sub>2</sub> value when compared to target dissolution
 profile.
 
-The complete arguments are show below. More details can be viewed in the
-package vignette by `vignette("sim.dp.byf2", package = "bootf2")`.
+### Function `bootf2()`
+
+The complete list of arguments are shown below. Read the package
+vignette with `vignette("bootf2", package = "bootf2")` for more details.
 
 ``` r
-dat <- sim.dp.byf2(tp, dp, sim.dp.out, target.f2, seed,
-                   regulation = c("EMA", "FDA", "WHO"),
-                   model = c("Weibull", "first-order"), digits = 2L,
-                   min.points = 3L, both.TR.85 = FALSE, max.disso = 105,
-                   model.par.cv = 50, fix.fmax.cv = 0, random.factor = 3,
-                   sim.target = c("ref.pop", "ref.median", "ref.mean"),
-                   time.unit = c("min", "h"), message = TRUE, plot = TRUE)
+dat <- bootf2(test, ref, path.in, file.in, path.out, file.out,
+                   n.boots = 10000L, seed = 306L, digits = 2L, alpha = 0.05,
+                   regulation = c("EMA", "FDA", "WHO"), min.points = 1L,
+                   both.TR.85 = FALSE, print.report = TRUE,
+                   report.style = c("concise", "intermediate", "detailed"),
+                   f2.type = c("all", "est.f2", "exp.f2", "bc.f2",
+                               "vc.exp.f2", "vc.bc.f2"),
+                   ci.type = c("all", "normal", "basic", "percentile",
+                               "bca.jackknife", "bca.boot"),
+                   quantile.type = c("all", 1:9, "boot"),
+                   jackknife.type = c("nt+nr", "nt*nr", "nt=nr"),
+                   time.unit = c("min", "h"), output.to.screen = TRUE,
+                   sim.data.out = FALSE)
 ```
-
-### Function `bootf2()`
 
 The minimum required arguments are dissolution profiles of `test` and
 `ref`. The function can output many different 90% confidence intervals
-for several *f*<sub>2</sub> estimators.
+for several *f*<sub>2</sub> estimators. With default settings, the
+function prints all confidence intervals for all *f*<sub>2</sub>
+estimators, and the result will be save in a text file.
 
 ``` r
 # get test and reference data set with correct format
@@ -366,28 +382,28 @@ t_vs_r <- bootf2(test, ref, n.boots = 100L)
 # ----------------------
 #   - with original data                :   64.24
 #   - with original data (by Jackknife) :   64.26
-#   - with bootstrapped data (Mean)     :   65.58
-#   - with bootstrapped data (Median)   :   64.24
+#   - with bootstrapped data (Mean)     :   65.12
+#   - with bootstrapped data (Median)   :   63.81
 # 
 # -----------------------
 # * Confidence Intervals
 # -----------------------
 #          Types of         Lower   Upper
 #    Confidence Intervals   <----------->
-#                  Normal   46.94   78.86
-#                   Basic   43.90   75.45
-#     Percentile (Type 1)   53.01   82.77
-#     Percentile (Type 2)   53.23   83.72
-#     Percentile (Type 3)   53.01   82.77
-#     Percentile (Type 4)   53.01   82.77
-#     Percentile (Type 5)   53.23   83.72
-#     Percentile (Type 6)   53.03   84.58
-#     Percentile (Type 7)   53.42   82.86
-#     Percentile (Type 8)   53.16   84.01
-#     Percentile (Type 9)   53.18   83.94
-#     Percentile (boot)     53.03   84.57
-#         BCa (Jackknife)   53.20   86.19
-#              BCa (boot)   53.39   88.46
+#                  Normal   47.80   78.90
+#                   Basic   45.07   75.99
+#     Percentile (Type 1)   52.47   79.52
+#     Percentile (Type 2)   52.63   81.57
+#     Percentile (Type 3)   52.47   79.52
+#     Percentile (Type 4)   52.47   79.52
+#     Percentile (Type 5)   52.63   81.57
+#     Percentile (Type 6)   52.49   83.42
+#     Percentile (Type 7)   52.77   79.72
+#     Percentile (Type 8)   52.58   82.19
+#     Percentile (Type 9)   52.59   82.03
+#     Percentile (boot)     52.49   83.40
+#         BCa (Jackknife)   52.91   83.96
+#              BCa (boot)   52.89   83.88
 #   ----------------------------------------------------
 #   Out of 100 bootstrapped data sets,
 #   - Number of f2 calculated with 1 time point :   0
@@ -401,28 +417,28 @@ t_vs_r <- bootf2(test, ref, n.boots = 100L)
 # ---------------------
 #   - with original data                :   61.59
 #   - with original data (by Jackknife) :   61.46
-#   - with bootstrapped data (Mean)     :   62.02
-#   - with bootstrapped data (Median)   :   62.08
+#   - with bootstrapped data (Mean)     :   61.72
+#   - with bootstrapped data (Median)   :   61.22
 # 
 # -----------------------
 # * Confidence Intervals
 # -----------------------
 #          Types of         Lower   Upper
 #    Confidence Intervals   <----------->
-#                  Normal   50.08   72.24
-#                   Basic   50.57   71.73
-#     Percentile (Type 1)   51.39   71.92
-#     Percentile (Type 2)   51.87   72.28
-#     Percentile (Type 3)   51.39   71.92
-#     Percentile (Type 4)   51.39   71.92
-#     Percentile (Type 5)   51.87   72.28
-#     Percentile (Type 6)   51.44   72.61
-#     Percentile (Type 7)   52.30   71.95
-#     Percentile (Type 8)   51.73   72.39
-#     Percentile (Type 9)   51.77   72.36
-#     Percentile (boot)     51.45   72.61
-#         BCa (Jackknife)   48.22   71.27
-#              BCa (boot)   47.95   71.16
+#                  Normal   49.97   72.93
+#                   Basic   50.89   72.00
+#     Percentile (Type 1)   51.17   72.08
+#     Percentile (Type 2)   51.27   72.19
+#     Percentile (Type 3)   51.17   72.08
+#     Percentile (Type 4)   51.17   72.08
+#     Percentile (Type 5)   51.27   72.19
+#     Percentile (Type 6)   51.18   72.29
+#     Percentile (Type 7)   51.36   72.10
+#     Percentile (Type 8)   51.24   72.22
+#     Percentile (Type 9)   51.25   72.22
+#     Percentile (boot)     51.18   72.29
+#         BCa (Jackknife)   51.81   73.86
+#              BCa (boot)   51.52   73.01
 #   ----------------------------------------------------
 #   Out of 100 bootstrapped data sets,
 #   - Number of f2 calculated with 1 time point :   0
@@ -436,33 +452,33 @@ t_vs_r <- bootf2(test, ref, n.boots = 100L)
 # ---------------------------
 #   - with original data                :   67.75
 #   - with original data (by Jackknife) :   68.09
-#   - with bootstrapped data (Mean)     :   68.32
-#   - with bootstrapped data (Median)   :   66.14
+#   - with bootstrapped data (Mean)     :   69.12
+#   - with bootstrapped data (Median)   :   63.96
 # 
 # -----------------------
 # * Confidence Intervals
 # -----------------------
 #          Types of         Lower   Upper
 #    Confidence Intervals   <----------->
-#                  Normal   47.44   86.92
-#                   Basic   42.87   82.41
-#     Percentile (Type 1)   54.34   91.57
-#     Percentile (Type 2)   54.34   91.57
-#     Percentile (Type 3)   54.34   90.19
-#     Percentile (Type 4)   52.82   90.75
-#     Percentile (Type 5)   54.34   91.44
-#     Percentile (Type 6)   53.01   92.70
-#     Percentile (Type 7)   54.34   90.81
-#     Percentile (Type 8)   54.15   91.73
-#     Percentile (Type 9)   54.29   91.61
-#     Percentile (boot)     53.09   92.63
-#         BCa (Jackknife)   55.66   100.33
-#              BCa (boot)   56.31   103.99
+#                  Normal   42.08   90.69
+#                   Basic   36.23   82.10
+#     Percentile (Type 1)   53.68   97.93
+#     Percentile (Type 2)   53.68   97.93
+#     Percentile (Type 3)   53.68   97.01
+#     Percentile (Type 4)   53.35   97.42
+#     Percentile (Type 5)   53.68   97.88
+#     Percentile (Type 6)   53.39   99.35
+#     Percentile (Type 7)   53.70   97.47
+#     Percentile (Type 8)   53.61   98.28
+#     Percentile (Type 9)   53.63   98.15
+#     Percentile (boot)     53.40   99.27
+#         BCa (Jackknife)   54.10   112.67
+#              BCa (boot)   54.12   112.83
 #   ----------------------------------------------------
 #   Out of 100 bootstrapped data sets,
 #   - Number of f2 calculated with 1 time point :   0
 #   - Number of f2 calculated with 2 time point :   0
-#   - Number of f2 cannot be calculated (NA)    :   8
+#   - Number of f2 cannot be calculated (NA)    :   9
 #   ----------------------------------------------------
 # ______________________________________________________________________
 # 
@@ -471,28 +487,28 @@ t_vs_r <- bootf2(test, ref, n.boots = 100L)
 # ----------------------------------------
 #   - with original data                :   61.58
 #   - with original data (by Jackknife) :   61.44
-#   - with bootstrapped data (Mean)     :   61.82
-#   - with bootstrapped data (Median)   :   62.01
+#   - with bootstrapped data (Mean)     :   61.48
+#   - with bootstrapped data (Median)   :   61.02
 # 
 # -----------------------
 # * Confidence Intervals
 # -----------------------
 #          Types of         Lower   Upper
 #    Confidence Intervals   <----------->
-#                  Normal   50.44   72.24
-#                   Basic   50.97   71.74
-#     Percentile (Type 1)   51.37   70.97
-#     Percentile (Type 2)   51.83   71.62
-#     Percentile (Type 3)   51.37   70.97
-#     Percentile (Type 4)   51.37   70.97
-#     Percentile (Type 5)   51.83   71.62
-#     Percentile (Type 6)   51.42   72.20
-#     Percentile (Type 7)   52.24   71.04
-#     Percentile (Type 8)   51.69   71.81
-#     Percentile (Type 9)   51.73   71.76
-#     Percentile (boot)     51.42   72.20
-#         BCa (Jackknife)   48.30   70.90
-#              BCa (boot)   47.75   70.86
+#                  Normal   50.52   72.84
+#                   Basic   51.72   72.03
+#     Percentile (Type 1)   51.13   71.33
+#     Percentile (Type 2)   51.17   71.39
+#     Percentile (Type 3)   51.13   71.33
+#     Percentile (Type 4)   51.13   71.33
+#     Percentile (Type 5)   51.17   71.39
+#     Percentile (Type 6)   51.14   71.44
+#     Percentile (Type 7)   51.20   71.34
+#     Percentile (Type 8)   51.16   71.41
+#     Percentile (Type 9)   51.16   71.40
+#     Percentile (boot)     51.14   71.44
+#         BCa (Jackknife)   51.79   73.44
+#              BCa (boot)   51.39   72.89
 #   ----------------------------------------------------
 #   Out of 100 bootstrapped data sets,
 #   - Number of f2 calculated with 1 time point :   0
@@ -506,33 +522,33 @@ t_vs_r <- bootf2(test, ref, n.boots = 100L)
 # -----------------------------------------
 #   - with original data                :   67.76
 #   - with original data (by Jackknife) :   68.13
-#   - with bootstrapped data (Mean)     :   69.11
-#   - with bootstrapped data (Median)   :   66.49
+#   - with bootstrapped data (Mean)     :   68.35
+#   - with bootstrapped data (Median)   :   63.92
 # 
 # -----------------------
 # * Confidence Intervals
 # -----------------------
 #          Types of         Lower   Upper
 #    Confidence Intervals   <----------->
-#                  Normal   43.85   88.99
-#                   Basic   40.14   82.31
-#     Percentile (Type 1)   54.47   94.89
-#     Percentile (Type 2)   54.47   94.89
-#     Percentile (Type 3)   54.47   92.17
-#     Percentile (Type 4)   52.95   93.26
-#     Percentile (Type 5)   54.48   94.62
-#     Percentile (Type 6)   53.14   95.42
-#     Percentile (Type 7)   54.49   93.40
-#     Percentile (Type 8)   54.28   94.97
-#     Percentile (Type 9)   54.43   94.91
-#     Percentile (boot)     53.22   95.39
-#         BCa (Jackknife)   54.84   101.37
-#              BCa (boot)   55.30   101.78
+#                  Normal   44.89   89.46
+#                   Basic   37.74   82.13
+#     Percentile (Type 1)   53.81   97.58
+#     Percentile (Type 2)   53.81   97.58
+#     Percentile (Type 3)   53.04   97.58
+#     Percentile (Type 4)   53.34   97.27
+#     Percentile (Type 5)   53.73   97.62
+#     Percentile (Type 6)   53.38   97.80
+#     Percentile (Type 7)   53.81   97.31
+#     Percentile (Type 8)   53.61   97.68
+#     Percentile (Type 9)   53.64   97.66
+#     Percentile (boot)     53.40   97.79
+#         BCa (Jackknife)   53.97   100.49
+#              BCa (boot)   54.08   100.50
 #   ----------------------------------------------------
 #   Out of 100 bootstrapped data sets,
 #   - Number of f2 calculated with 1 time point :   0
 #   - Number of f2 calculated with 2 time point :   0
-#   - Number of f2 cannot be calculated (NA)    :   8
+#   - Number of f2 cannot be calculated (NA)    :   12
 #   ----------------------------------------------------
 # ______________________________________________________________________
 # 
@@ -546,7 +562,7 @@ t_vs_r <- bootf2(test, ref, n.boots = 100L)
 #   - test              :   test
 #   - ref               :   ref
 #   - n.boots           :   100
-#   - seed              :   306
+#   - seed              :   1408431195
 #   - digits            :   2
 #   - alpha             :   0.05 (90% CI)
 #   - regulation        :   EMA
@@ -564,48 +580,34 @@ t_vs_r <- bootf2(test, ref, n.boots = 100L)
 #   - path.in           :   NA
 #   - file.in           :   NA
 #   - path.out          :   /home/zhengguo/github/bootf2/
-#   - file.out          :   test_vs_ref_CEST_2021-07-17_011256.txt
+#   - file.out          :   test_vs_ref_CEST_2021-07-26_221503.txt
 # 
 # ---------------------
 # * System Information
 # ---------------------
-#   - Operating System Name     :   Linux 5.4.0-77-generic
-#   - Operating System Version  :   #86-Ubuntu SMP Thu Jun 17 02:35:03 UTC 2021
+#   - Operating System Name     :   Linux 5.4.0-80-generic
+#   - Operating System Version  :   #90-Ubuntu SMP Fri Jul 9 22:49:44 UTC 2021
 #   - Machine Node Name         :   MyHomeLinuxPC
 #   - User Name                 :   zhengguo
 #   - Time Zone                 :   Europe/Madrid
 #   - R Version                 :   4.1.0 (2021-05-18)
 # ______________________________________________________________________
 # 
-# The current report was generated at 01:12:56 on 2021-07-17 CEST by
+# The current report was generated at 22:15:04 on 2021-07-26 CEST by
 # user 'zhengguo' on machine 'MyHomeLinuxPC', and saved as text file
-# 'test_vs_ref_CEST_2021-07-17_011256.txt' at the location:
+# 'test_vs_ref_CEST_2021-07-26_221503.txt' at the location:
 # '/home/zhengguo/github/bootf2/'.
 # ======================================================================
 ```
 
-With default settings, the function prints all confidence intervals for
-all *f*<sub>2</sub> estimators, and the result will be save in a text
-file.
+## Disclaimer
 
-The complete arguments are shown below. More details can be viewed in
-the package vignette by `vignette("bootf2", package = "bootf2")`.
-
-``` r
-dat <- bootf2(test, ref, path.in, file.in, path.out, file.out,
-                   n.boots = 10000L, seed = 306L, digits = 2L, alpha = 0.05,
-                   regulation = c("EMA", "FDA", "WHO"), min.points = 1L,
-                   both.TR.85 = FALSE, print.report = TRUE,
-                   report.style = c("concise", "intermediate", "detailed"),
-                   f2.type = c("all", "est.f2", "exp.f2", "bc.f2",
-                               "vc.exp.f2", "vc.bc.f2"),
-                   ci.type = c("all", "normal", "basic", "percentile",
-                               "bca.jackknife", "bca.boot"),
-                   quantile.type = c("all", 1:9, "boot"),
-                   jackknife.type = c("nt+nr", "nt*nr", "nt=nr"),
-                   time.unit = c("min", "h"), output.to.screen = TRUE,
-                   sim.data.out = FALSE)
-```
+***Despite the best efforts the author has put into, the package is
+offered without any guarantee of accuracy and absolutely no warranty.
+Validation of the package, especially when it is used in regulatory
+field, is the responsibility of the users. The author accept absolutely
+no liability for any financial loss or risk to public health resulting
+from the use of this package.***
 
 ## References
 

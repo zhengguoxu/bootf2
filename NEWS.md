@@ -1,8 +1,14 @@
+# bootf2 0.3.0
+
+* Change stop to warning for FDA CV rule in `calcf2()`.
+* Round CV with precision `digits` then compared to 20%/10% rule.
+* Add message for case with `both.TR.85 = TRUE` and `regulation = "FDA"`.
+* Fix bug with missing `dp.cv` in `sim.dp()`.
+
 # bootf2 0.2.0
 
 * Added the main function `bootf2()` foe the bootstrap $f_2$.
 * Added README.Rmd and vignettes for each main function
-
 
 # bootf2 0.1.0
 

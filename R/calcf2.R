@@ -145,16 +145,16 @@ calcf2 <- function(test, ref, regulation = c("EMA", "FDA", "WHO"),
   time.unit  <- match.arg(time.unit)
 
   if (all(isTRUE(both.TR.85), regulation != "FDA")) {
-    stop("'both.TR.85 = TRUE' is only valid when 'regulation = FDA'.")
+    stop("\n'both.TR.85 = TRUE' is only valid when 'regulation = FDA'.")
   }
 
   if (any(all(!missing(path.out), missing(file.out)),
           all(missing(path.out), !missing(file.out)))) {
-    stop("You should provided both 'path.out' and 'file.out'.")
+    stop("\nYou should provided both 'path.out' and 'file.out'.")
   }
 
   if (any(missing(test), missing(ref))) {
-    stop("Both 'test' and 'ref' have to be specified.")
+    stop("\nBoth 'test' and 'ref' have to be specified.")
   }
 
   # read data ------------------------------------------------------------------
@@ -164,15 +164,15 @@ calcf2 <- function(test, ref, regulation = c("EMA", "FDA", "WHO"),
     data.t <- as.matrix(test, rownames.force = FALSE)
     data.r <- as.matrix(ref, rownames.force = FALSE)
   } else if (all(missing(path.in), !missing(file.in))) {
-    stop("Please provide the directory 'path.in' where the file is stored.")
+    stop("\nPlease provide the directory 'path.in' where the file is stored.")
   } else {# for path.in not missing
     if (missing(file.in)) {
-      stop("Please provide the name of the data file.")
+      stop("\nPlease provide the name of the data file.")
     }
 
     # if path.in specified incorrectly
     if (!dir.exists(path.in)) {
-      stop("The directory you specified does not exist. Check your spelling.")
+      stop("\nThe directory you specified does not exist. Check your spelling.")
     }
 
     path.in <- normalizePath(path.in, winslash = "/")
@@ -180,7 +180,7 @@ calcf2 <- function(test, ref, regulation = c("EMA", "FDA", "WHO"),
                       path.in, paste0(path.in, "/"))
     file.in <- paste0(path.in, file.in)
     if (!file.exists(file.in)) {
-      stop(paste0("The file you specified does not exist. Don't forget to include",
+      stop(paste0("\nThe file you specified does not exist. Don't forget to include",
                   "\nthe extension 'xlsx' or 'xls' in the file name."))
     }
 
@@ -195,7 +195,7 @@ calcf2 <- function(test, ref, regulation = c("EMA", "FDA", "WHO"),
 
   # time points for T and R have to be same
   if (!all(data.t[, 1] == data.r[, 1])) {
-    stop("Time points of two data sets should be same! ",
+    stop("\nTime points of two data sets should be same! ",
          "Please check your data.\n\n")
   }
 
@@ -248,7 +248,11 @@ calcf2 <- function(test, ref, regulation = c("EMA", "FDA", "WHO"),
         break
       }
     }
-  }
+    msg1 <- paste0("*Note: Argument 'both.TR.85' is 'TRUE', which is the wrong ",
+                   "interpretation\nof the guidance. This should only be used ",
+                   "for cases such as checking the\ncalculation published in ",
+                   "the old literature.\n\n")
+  } else msg1 <- NULL
 
   # mean data points used for f2 calculation
   mt.tp85 <- mean.tr[1:tp85, 2]
@@ -304,10 +308,10 @@ calcf2 <- function(test, ref, regulation = c("EMA", "FDA", "WHO"),
       }
 
       # now check if CV is OK. better rounded CV first then compare
-      # to 20%/10% rule. express CV without decimal.
-      if (any(all(cv.tp != 0, round(dtr[1:cv.tp, 4:5], 0) <= 20,
-                  round(dtr[(cv.tp + 1):tp85, 4:5], 0) <= 10),
-              all(cv.tp == 0, round(dtr[1:tp85, 4:5], 0) <= 10))) {
+      # to 20%/10% rule. express CV precision with digits
+      if (any(all(cv.tp != 0, round(dtr[1:cv.tp, 4:5], digits) <= 20,
+                  round(dtr[(cv.tp + 1):tp85, 4:5], digits) <= 10),
+              all(cv.tp == 0, round(dtr[1:tp85, 4:5], digits) <= 10))) {
         cv.ok <- TRUE
       } else {
         cv.ok <- FALSE
@@ -356,7 +360,7 @@ calcf2 <- function(test, ref, regulation = c("EMA", "FDA", "WHO"),
   # overkill for simple f2 calculation but just in case someone need it
   if (all(!missing(path.out), !missing(file.out))) {
     if (!dir.exists(path.out)) {
-      stop("The directory you specified does not exist. Check your spelling.")
+      stop("\nThe directory you specified does not exist. Check your spelling.")
     }
 
     path.out <- normalizePath(path.out, winslash = "/")
@@ -428,7 +432,12 @@ calcf2 <- function(test, ref, regulation = c("EMA", "FDA", "WHO"),
       } else if (all(isTRUE(cv.rule), isFALSE(cv.ok))) {# cv not ok
         cat("CV criteria not fulfilled; therefore, f2 method cannot",
             "be applied.\n\n")
-        stop("You should consider alternative methods such as bootstrap f2.\n\n")
+        if (regulation != "FDA") {
+          stop("\nYou should consider alternative methods such as bootstrap f2.\n\n")
+        } else {
+          warning("CV criteria not strictly fulfilled; you might want to ",
+                  "consider \nalternative method such as bootstrap f2.\n\n" )
+        }
       } else if (isFALSE(cv.rule)) {
         cat("CV has not been checked.\n\n")
       }
@@ -467,20 +476,24 @@ calcf2 <- function(test, ref, regulation = c("EMA", "FDA", "WHO"),
             "but you have\n", tp85,
             ifelse(tp85 > 1, " points only.\n\n", " point only.\n\n"), sep = "")
       }
-      cat("\nEstimated f2 = ", round(est.f2, digits), "\n\n", sep = "")
-    } else {
-      # just for fun
+      cat("\nEstimated f2 = ", round(est.f2, digits),
+          ifelse(is.null(msg1), "\n\n", "*\n\n"), sep = "")
+      cat(msg1)
+    } else {# not really useful. just for fun
       cat("The following f2 estimators are applicable for bootstrap method only.\n")
       cat("The time points above the dashed line are used in f2 calculation.\n")
       # exp.f2 --------------------------------------------------
       if (all(f2.type == "exp.f2", isFALSE(use.mean))) {
-        cat("\nExpected f2 = ", round(exp.f2, digits), "\n\n", sep = "")
+        cat("\nExpected f2 = ", round(exp.f2, digits),
+            ifelse(is.null(msg1), "\n\n", "*\n\n"), sep = "")
+        cat(msg1)
       }
 
       # vc.exp.f2 -----------------------------------------------
       if (all(f2.type == "vc.exp.f2", isFALSE(use.mean))) {
         cat("\nVariance-corrected expected f2 = ", round(vc.exp.f2, digits),
-            "\n\n", sep = "")
+            ifelse(is.null(msg1), "\n\n", "*\n\n"), sep = "")
+        cat(msg1)
       }
 
       # bc.f2 and vc.bc.f2 could be NA depending on variance ----
@@ -489,7 +502,10 @@ calcf2 <- function(test, ref, regulation = c("EMA", "FDA", "WHO"),
         if (sum.mean.sqr - sum.mean.var <= -tp85) {
           cat("*\nBias-corrected f2 cannot be calculated. See Shah's article\n",
               "for details (Pharm. Res., 1998, 15(6), 889-896).\n\n", sep = "")
-        } else cat("\n\n")
+        } else {
+          cat(ifelse(is.null(msg1), "\n\n", "*\n\n"))
+          cat(msg1)
+        }
       }
 
       if (all(f2.type == "vc.bc.f2", isFALSE(use.mean))) {
@@ -499,32 +515,55 @@ calcf2 <- function(test, ref, regulation = c("EMA", "FDA", "WHO"),
           cat("*\nVariance- and bias-corrected f2 cannot be calculated. See\n",
               "Shah's article for details (Pharm. Res., 1998, 15(6), 889-896).",
               "\n\n", sep = "")
-        } else cat("\n\n")
+        } else {
+          cat(ifelse(is.null(msg1), "\n\n", "*\n\n"))
+          cat(msg1)
+        }
       }
 
       if (all(f2.type == "all", isFALSE(use.mean))) {
-        cat("\n                   Estimated f2 = ", round(est.f2, digits), "\n",
-            sep = "")
-        cat("                    Expected f2 = ", round(exp.f2, digits), "\n",
-            sep = "")
+        cat("\n                   Estimated f2 = ", round(est.f2, digits),
+            ifelse(is.null(msg1), "\n", "*\n"), sep = "")
+
+        cat("                    Expected f2 = ", round(exp.f2, digits),
+            ifelse(is.null(msg1), "\n", "*\n"), sep = "")
+
         cat(" Variance-corrected expected f2 = ", round(vc.exp.f2, digits),
-            "\n", sep = "")
-        cat("              Bias-corrected f2 = ", round(bc.f2, digits),
-            ifelse(sum.mean.sqr - sum.mean.var <= -tp85, "*\n", "\n"), sep = "")
-        cat("Variance- and bias-corrected f2 = ", round(vc.bc.f2, digits),
-            ifelse(sum.mean.sqr - sum.mean.var.w <= -tp85, "*\n", "\n"),
-            sep = "")
+            ifelse(is.null(msg1), "\n", "*\n"), sep = "")
+
+        if (is.null(msg1)) {
+          cat("              Bias-corrected f2 = ", round(bc.f2, digits),
+              ifelse(sum.mean.sqr - sum.mean.var <= -tp85, "*\n", "\n"),
+              sep = "")
+        } else {
+          cat("              Bias-corrected f2 = ", round(bc.f2, digits),
+              ifelse(sum.mean.sqr - sum.mean.var <= -tp85, "**\n", "*\n"),
+              sep = "")
+        }
+
+        if (is.null(msg1)) {
+          cat("Variance- and bias-corrected f2 = ", round(vc.bc.f2, digits),
+              ifelse(sum.mean.sqr - sum.mean.var.w <= -tp85, "*\n", "\n"),
+              sep = "")
+        } else {
+          cat("Variance- and bias-corrected f2 = ", round(vc.bc.f2, digits),
+              ifelse(sum.mean.sqr - sum.mean.var.w <= -tp85, "**\n", "*\n"),
+              sep = "")
+        }
+
         if (sum.mean.sqr - sum.mean.var <= -tp85) {
           cat("---------------------------------\n")
           cat("*Bias-corrected f2 cannot be calculated. See Shah's article\n",
               "for details (Pharm. Res., 1998, 15(6), 889-896).\n\n", sep = "")
         }
+
         if (sum.mean.sqr - sum.mean.var.w <= -tp85) {
           cat("---------------------------------\n")
           cat("*Variance- and bias-corrected f2 cannot be calculated. See\n",
               "Shah's article for details (Pharm. Res., 1998, 15(6), 889-896).",
               "\n\n", sep = "")
         }
+        cat(msg1)
       }# end f2.type = all
     }
   }# end message

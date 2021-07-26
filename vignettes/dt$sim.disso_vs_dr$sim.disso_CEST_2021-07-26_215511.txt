@@ -1,0 +1,240 @@
+=================================================================
+|                                                               |
+|  Comparison of Dissolution Profiles by Bootstrap f2 Method.   |
+|_______________________________________________________________|
+|                                                               |
+| Smimilarity Criterion:                                        |
+| ----------------------                                        |
+|     To conclude similarity, the lower limit of 90% confidence |
+| interval should be greater than or equal to 50.               |
+|                                                               |
+=================================================================
+
+============================================
+|              Main Results:               |
+|  f2 and Its Confidence Intervals (CI)s   |
+============================================
+
+----------------------
+* Estimated f2 Values
+----------------------
+  - with original data                :   51.06
+  - with original data (by Jackknife) :   51.07
+  - with bootstrapped data (Mean)     :   51.09
+  - with bootstrapped data (Median)   :   50.7
+
+-----------------------
+* Confidence Intervals
+-----------------------
+         Types of         Lower   Upper
+   Confidence Intervals   <----------->
+                 Normal   44.57   57.47
+                  Basic   44.02   57.61
+    Percentile (Type 1)   44.50   57.16
+    Percentile (Type 2)   44.59   57.65
+    Percentile (Type 3)   44.50   57.16
+    Percentile (Type 4)   44.50   57.16
+    Percentile (Type 5)   44.59   57.65
+    Percentile (Type 6)   44.51   58.10
+    Percentile (Type 7)   44.68   57.21
+    Percentile (Type 8)   44.56   57.80
+    Percentile (Type 9)   44.57   57.77
+    Percentile (boot)     44.51   58.10
+        BCa (Jackknife)   44.83   59.84
+             BCa (boot)   44.87   59.88
+  ----------------------------------------------------
+  Out of 100 bootstrapped data sets,
+  - Number of f2 calculated with 1 time point :   0
+  - Number of f2 calculated with 2 time point :   0
+  - Number of f2 cannot be calculated (NA)    :   0
+  ----------------------------------------------------
+______________________________________________________________________
+
+---------------------
+* Expected f2 Values
+---------------------
+  - with original data                :   50.59
+  - with original data (by Jackknife) :   50.58
+  - with bootstrapped data (Mean)     :   50.68
+  - with bootstrapped data (Median)   :   50.35
+
+-----------------------
+* Confidence Intervals
+-----------------------
+         Types of         Lower   Upper
+   Confidence Intervals   <----------->
+                 Normal   44.20   56.81
+                  Basic   43.55   56.89
+    Percentile (Type 1)   44.29   56.69
+    Percentile (Type 2)   44.33   57.19
+    Percentile (Type 3)   44.29   56.69
+    Percentile (Type 4)   44.29   56.69
+    Percentile (Type 5)   44.33   57.19
+    Percentile (Type 6)   44.30   57.63
+    Percentile (Type 7)   44.35   56.74
+    Percentile (Type 8)   44.32   57.34
+    Percentile (Type 9)   44.32   57.30
+    Percentile (boot)     44.30   57.63
+        BCa (Jackknife)   44.30   57.66
+             BCa (boot)   44.32   57.95
+  ----------------------------------------------------
+  Out of 100 bootstrapped data sets,
+  - Number of f2 calculated with 1 time point :   0
+  - Number of f2 calculated with 2 time point :   0
+  - Number of f2 cannot be calculated (NA)    :   0
+  ----------------------------------------------------
+______________________________________________________________________
+
+---------------------------
+* Bias-Corrected f2 Values
+---------------------------
+  - with original data                :   51.54
+  - with original data (by Jackknife) :   51.58
+  - with bootstrapped data (Mean)     :   51.53
+  - with bootstrapped data (Median)   :   51.17
+
+-----------------------
+* Confidence Intervals
+-----------------------
+         Types of         Lower   Upper
+   Confidence Intervals   <----------->
+                 Normal   44.92   58.18
+                  Basic   44.50   58.43
+    Percentile (Type 1)   44.64   57.78
+    Percentile (Type 2)   44.83   58.21
+    Percentile (Type 3)   44.64   57.78
+    Percentile (Type 4)   44.64   57.78
+    Percentile (Type 5)   44.83   58.21
+    Percentile (Type 6)   44.66   58.59
+    Percentile (Type 7)   45.01   57.83
+    Percentile (Type 8)   44.78   58.34
+    Percentile (Type 9)   44.79   58.31
+    Percentile (boot)     44.66   58.59
+        BCa (Jackknife)   45.38   60.91
+             BCa (boot)   45.45   60.91
+  ----------------------------------------------------
+  Out of 100 bootstrapped data sets,
+  - Number of f2 calculated with 1 time point :   0
+  - Number of f2 calculated with 2 time point :   0
+  - Number of f2 cannot be calculated (NA)    :   0
+  ----------------------------------------------------
+______________________________________________________________________
+
+----------------------------------------
+* Variance-corrected Expected f2 Values
+----------------------------------------
+  - with original data                :   50.58
+  - with original data (by Jackknife) :   50.57
+  - with bootstrapped data (Mean)     :   50.63
+  - with bootstrapped data (Median)   :   50.33
+
+-----------------------
+* Confidence Intervals
+-----------------------
+         Types of         Lower   Upper
+   Confidence Intervals   <----------->
+                 Normal   44.24   56.82
+                  Basic   43.61   56.89
+    Percentile (Type 1)   44.27   56.65
+    Percentile (Type 2)   44.30   57.12
+    Percentile (Type 3)   44.27   56.65
+    Percentile (Type 4)   44.27   56.65
+    Percentile (Type 5)   44.30   57.12
+    Percentile (Type 6)   44.27   57.55
+    Percentile (Type 7)   44.33   56.70
+    Percentile (Type 8)   44.29   57.27
+    Percentile (Type 9)   44.29   57.23
+    Percentile (boot)     44.27   57.55
+        BCa (Jackknife)   44.28   57.62
+             BCa (boot)   44.30   57.81
+  ----------------------------------------------------
+  Out of 100 bootstrapped data sets,
+  - Number of f2 calculated with 1 time point :   0
+  - Number of f2 calculated with 2 time point :   0
+  - Number of f2 cannot be calculated (NA)    :   0
+  ----------------------------------------------------
+______________________________________________________________________
+
+-----------------------------------------
+* Variance- and Bias-Corrected f2 Values
+-----------------------------------------
+  - with original data                :   51.56
+  - with original data (by Jackknife) :   51.6
+  - with bootstrapped data (Mean)     :   51.58
+  - with bootstrapped data (Median)   :   51.18
+
+-----------------------
+* Confidence Intervals
+-----------------------
+         Types of         Lower   Upper
+   Confidence Intervals   <----------->
+                 Normal   44.88   58.18
+                  Basic   44.43   58.42
+    Percentile (Type 1)   44.67   57.93
+    Percentile (Type 2)   44.87   58.33
+    Percentile (Type 3)   44.67   57.93
+    Percentile (Type 4)   44.67   57.93
+    Percentile (Type 5)   44.87   58.33
+    Percentile (Type 6)   44.69   58.69
+    Percentile (Type 7)   45.05   57.97
+    Percentile (Type 8)   44.81   58.45
+    Percentile (Type 9)   44.82   58.42
+    Percentile (boot)     44.69   58.68
+        BCa (Jackknife)   45.22   61.07
+             BCa (boot)   45.27   61.12
+  ----------------------------------------------------
+  Out of 100 bootstrapped data sets,
+  - Number of f2 calculated with 1 time point :   0
+  - Number of f2 calculated with 2 time point :   0
+  - Number of f2 cannot be calculated (NA)    :   0
+  ----------------------------------------------------
+______________________________________________________________________
+
+============================================
+| Function Settings and System Information |
+============================================
+
+---------------------
+* Function Settings
+---------------------
+  - test              :   dt$sim.disso
+  - ref               :   dr$sim.disso
+  - n.boots           :   100
+  - seed              :   306
+  - digits            :   2
+  - alpha             :   0.05 (90% CI)
+  - regulation        :   EMA
+  - min.points        :   1
+  - both.TR.85        :   FALSE
+  - print.report      :   TRUE
+  - report.style      :   concise
+  - f2.type           :   all
+  - ci.type           :   all
+  - quantile.type     :   all
+  - jackknife.type    :   nt+nr
+  - time.unit         :   min
+  - output.to.screen  :   TRUE
+  - sim.data.out      :   FALSE
+  - path.in           :   NA
+  - file.in           :   NA
+  - path.out          :   /home/zhengguo/github/bootf2/vignettes/
+  - file.out          :   dt$sim.disso_vs_dr$sim.disso_CEST_2021-07-26_215511.txt
+
+---------------------
+* System Information
+---------------------
+  - Operating System Name     :   Linux 5.4.0-80-generic
+  - Operating System Version  :   #90-Ubuntu SMP Fri Jul 9 22:49:44 UTC 2021
+  - Machine Node Name         :   MyHomeLinuxPC
+  - User Name                 :   zhengguo
+  - Time Zone                 :   Europe/Madrid
+  - R Version                 :   4.1.0 (2021-05-18)
+  - Package bootf2 Version    :   0.3.0
+______________________________________________________________________
+
+The current report was generated at 21:55:11 on 2021-07-26 CEST by
+user 'zhengguo' on machine 'MyHomeLinuxPC', and saved as text file
+'dt$sim.disso_vs_dr$sim.disso_CEST_2021-07-26_215511.txt' at the location:
+'/home/zhengguo/github/bootf2/vignettes/'.
+======================================================================
+

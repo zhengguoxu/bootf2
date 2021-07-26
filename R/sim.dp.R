@@ -6,9 +6,10 @@
 #' @importFrom MASS mvrnorm
 #' @usage
 #' sim.dp(tp, model = c("Weibull", "first-order"), model.par,
-#'        seed, product, dp, dp.cv, ascending = FALSE, n.units = 12L,
-#'        max.disso = 105, message = FALSE, plot = TRUE,
-#'        time.unit = c("min", "h"), plot.max.unit = 36L)
+#'        seed = NULL, product, dp, dp.cv = NULL, ascending = FALSE,
+#'        n.units = 12L, max.disso = 105, message = FALSE,
+#'        plot = TRUE, time.unit = c("min", "h"),
+#'        plot.max.unit = 36L)
 #'
 #' @param tp Numeric vector of time points for the dissolution profiles.
 #' @param model Character strings of model names. Currently only 'Weibull' and
@@ -23,7 +24,8 @@
 #' @param dp,dp.cv Numeric vectors of mean dissolution profile (\code{dp}) and
 #'   its corresponding CV% (\code{dp.cv}). See Details.
 #' @param ascending Logical. If \code{TRUE}, simulated profiles will always
-#'   increase with time. Only applicable when See Details.
+#'   increase with time. Only applicable when multivariate normal distribution
+#'   approach is used. See Details.
 #' @param n.units An integer indicating the number of individual profiles
 #'   to be simulated.
 #' @param max.disso Numeric value for the maximum possible dissolution.
@@ -67,8 +69,8 @@
 #' ## Use models (Recommended Approach)
 #'
 #'   The first-order model is expressed as \deqn{f_t = f_\mathrm{max}%
-#'   \left(1 - e^{-k_1\(t - t_\mathrm{lag}\right)}\right).}{f(t) = fmax%
-#'   (1 - exp(-k1(t - tlag))),}
+#'   \left(1 - e^{-k\(t - t_\mathrm{lag}\right)}\right).}{f(t) = fmax%
+#'   (1 - exp(-k(t - tlag))),}
 #'   and the Weibull model was expressed either as \deqn{f_t = f_\mathrm{max}%
 #'   \left(1 - e^{-\left(\frac{t - t_\mathrm{lag}}{\mathrm{MDT}}%
 #'   \right)^\beta}\right)}{f(t) = fmax (1 - exp(-((t - tlag)/MDT)^\beta))} or
@@ -77,7 +79,7 @@
 #'   where \eqn{f_\mathrm{max}}{fmax} is the maximum dissolution, MDT is
 #'   the mean dissolution time, \eqn{t_\mathrm{lag}}{tlag} is the lag time,
 #'   \eqn{\alpha}{\alpha} and \eqn{\beta}{\beta} are the scale and shape factor
-#'   in Weibull function, and \eqn{k_1}{k1} is the rate constant in the
+#'   in Weibull function, and \eqn{k}{k} is the rate constant in the
 #'   first-order model. Obviously, The two Weibull models are mathematically
 #'   equivalent by letting \eqn{\alpha = \mathrm{MDT}^\beta}{\alpha = MDT^\beta}.
 #'   The second expression of Weibull model was included to be compatible to
@@ -92,13 +94,13 @@
 #'   population model parameters.
 #'
 #'   Therefore, \code{model.par} should be supplied as a named list of 6
-#'   parameters for the first-order model (\code{fmax/fmax.cv}, \code{k1/k1.cv},
+#'   parameters for the first-order model (\code{fmax/fmax.cv}, \code{k/k.cv},
 #'   and \code{tlag/tlag.cv}), and 8 parameters for Weibull model
 #'   (\code{fmax/fmax.cv}, \code{tlag/tlag.cv}, \code{beta/beta.cv}, and
 #'   either \code{alpha/alpha.cv} or \code{mdt/mdt.cv}, depending on the
 #'   mathematical formula used). For example:
 #'
-#'   - \code{model.par = list(fmax = 100, fmax.cv = 5, k1 = 0.6, k1.cv = 25,
+#'   - \code{model.par = list(fmax = 100, fmax.cv = 5, k = 0.6, k.cv = 25,
 #'     tlag = 0, tlag.cv = 0)} for the first-order model.
 #'   - \code{model.par = list(fmax = 100, fmax.cv = 5, tlag = 5, tlag.cv = 10,
 #'     mdt = 15, mdt.cv = 20, beta = 1.5, beta.cv = 5)}, or
@@ -168,9 +170,10 @@
 #'
 #' @export
 sim.dp <- function(tp, model = c("Weibull", "first-order"), model.par,
-                   seed, product, dp, dp.cv, ascending = FALSE, n.units = 12L,
-                   max.disso = 105, message = FALSE, plot = TRUE,
-                   time.unit = c("min", "h"), plot.max.unit = 36L){
+                   seed = NULL, product, dp, dp.cv = NULL, ascending = FALSE,
+                   n.units = 12L, max.disso = 105, message = FALSE,
+                   plot = TRUE, time.unit = c("min", "h"),
+                   plot.max.unit = 36L){
   # initial checking -----------------------------------------------------------
   model     <- match.arg(model)
   time.unit <- match.arg(time.unit)
@@ -182,7 +185,7 @@ sim.dp <- function(tp, model = c("Weibull", "first-order"), model.par,
   #   oldseed <- NULL
 
   # if no seed is provided, generate one
-  if (missing(seed)) {
+  if (is.null(seed)) {
     seed <- sample(1:(.Machine$integer.max - 1), 1)
   }
   set.seed(seed)
@@ -195,10 +198,10 @@ sim.dp <- function(tp, model = c("Weibull", "first-order"), model.par,
   # if model.par is given by user, check for error
   if (!missing(model.par)){
     if (model == "first-order") {
-      if (length(setdiff(c("fmax", "fmax.cv", "k1", "k1.cv", "tlag", "tlag.cv"),
+      if (length(setdiff(c("fmax", "fmax.cv", "k", "k.cv", "tlag", "tlag.cv"),
                          names(model.par))) != 0) {
         stop("Model parameters are incorrect. Three pairs of parameters are\n",
-             "required: 'fmax/fmax.cv', 'k1/k1.cv', and 'tlag/tlag.cv'.\n")
+             "required: 'fmax/fmax.cv', 'k/k.cv', and 'tlag/tlag.cv'.\n")
       }
     } else {
       if (all(length(setdiff(c("fmax", "fmax.cv", "tlag", "tlag.cv",
@@ -244,14 +247,14 @@ sim.dp <- function(tp, model = c("Weibull", "first-order"), model.par,
         if (time.unit == "min") {# typical IR dosage form if unit is 'min'
           model.par <- list(fmax = round(100*exp(rnorm(1, 0, 0.025)), 2),
                             fmax.cv = 3,
-                            k1 = round(0.15*exp(rnorm(1, 0, 0.4)), 6),
-                            k1.cv = 40,
+                            k = round(0.15*exp(rnorm(1, 0, 0.4)), 6),
+                            k.cv = 40,
                             tlag = 0, tlag.cv = 0)
         } else {# typical ER dosage form if unit is 'h'
           model.par <- list(fmax = round(98*exp(rnorm(1, 0, 0.03)), 2),
                             fmax.cv = 3,
-                            k1 = round(0.3*exp(rnorm(1, 0, 0.4)), 6),
-                            k1.cv = 40,
+                            k = round(0.3*exp(rnorm(1, 0, 0.4)), 6),
+                            k.cv = 40,
                             tlag = round(0.3*exp(rnorm(1, 0, 0.25)), 2),
                             tlag.cv = 20)
         }# end missing model.par for first-order model
@@ -289,10 +292,10 @@ sim.dp <- function(tp, model = c("Weibull", "first-order"), model.par,
 
     if (model == "first-order") {### first-order -----------
       # target mean dissolution profile
-      dp <- model.par$fmax*(1 - exp(-model.par$k1*tp.adj))
+      dp <- model.par$fmax*(1 - exp(-model.par$k*tp.adj))
 
       # individual model par
-      k1.ind <- model.par$k1*exp(rnorm(n.units, 0, model.par$k1.cv/100))
+      k.ind <- model.par$k*exp(rnorm(n.units, 0, model.par$k.cv/100))
 
       # individual dissolution data. each column is one unit
       dp.ind <- matrix(NA, nrow = length(tp), ncol = n.units)
@@ -300,13 +303,13 @@ sim.dp <- function(tp, model = c("Weibull", "first-order"), model.par,
       for (i in seq_len(n.units)) {
         tp.adj.ind <- tp - tlag.ind[i]
         tp.adj.ind[tp.adj.ind < 0] <- 0
-        dp.ind[, i] <- fmax.ind[i]*(1 - exp(-k1.ind[i]*tp.adj.ind))
+        dp.ind[, i] <- fmax.ind[i]*(1 - exp(-k.ind[i]*tp.adj.ind))
       }
 
       # save individual parameters for output
       model.par.ind <- data.frame(
         fmax.ind = fmax.ind,
-        k1.ind   = k1.ind,
+        k.ind    = k.ind,
         tlag.ind = tlag.ind,
         tringsAsFactors = FALSE
       )
@@ -315,8 +318,8 @@ sim.dp <- function(tp, model = c("Weibull", "first-order"), model.par,
       sim.info <- data.frame(
         fmax      = model.par$fmax,
         fmax.cv   = model.par$fmax.cv,
-        k1        = model.par$k1,
-        k1.cv     = model.par$k1.cv,
+        k         = model.par$k,
+        k.cv      = model.par$k.cv,
         tlag      = model.par$tlag,
         tlag.cv   = model.par$tlag.cv,
         seed      = seed,
@@ -422,8 +425,8 @@ sim.dp <- function(tp, model = c("Weibull", "first-order"), model.par,
       cat("- tlag      = ", model.par$tlag, "\n", sep = "")
       cat("- tlag.cv   = ", model.par$tlag.cv, "%\n", sep = "")
       if (model == "first-order") {
-        cat("- k1        = ", model.par$k1, "\n", sep = "")
-        cat("- k1.cv     = ", model.par$k1.cv, "%\n\n", sep = "")
+        cat("- k         = ", model.par$k, "\n", sep = "")
+        cat("- k.cv      = ", model.par$k.cv, "%\n\n", sep = "")
       } else if (model == "Weibull") {
         if ("mdt" %in% names(model.par)) {
           cat("- mdt       = ", model.par$mdt, "\n", sep = "")
@@ -453,7 +456,7 @@ sim.dp <- function(tp, model = c("Weibull", "first-order"), model.par,
     ## generate dp.cv if missing -------------------------------------
     # CV 20% for time points up to 10 min, 10% for the rest points,
     # unless release is > 90%, in which case CV 5%.
-    if (missing(dp.cv)) {
+    if (is.null(dp.cv)) {
       # initialize cv 10% for all points.
       dp.cv <- rep(10, length(tp))
 
@@ -482,8 +485,6 @@ sim.dp <- function(tp, model = c("Weibull", "first-order"), model.par,
             "time points where dissolution is greater than 90%, and 10% for\n",
             "the rest time points.\n\n", sep = "")
       }
-    } else {# if dp.cv not missing
-      dp.cv[!is.finite(dp.cv)] <- 0
     }
 
     # Get sd for random number generation
@@ -537,7 +538,8 @@ sim.dp <- function(tp, model = c("Weibull", "first-order"), model.par,
   # add time 0 for better plot
   tp    <- c(0, tp)
   dp    <- c(0, dp)
-  dp.cv <- ifelse(isTRUE(use.model), rep(NA, length(tp)), c(0, dp.cv))
+  dp.cv <- c(0, dp.cv)
+  if (isTRUE(use.model)) dp.cv <- rep(NA, length(tp))
 
   dp.ind   <- rbind(rep(0, NCOL(dp.ind)), dp.ind)
 

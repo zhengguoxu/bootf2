@@ -5,9 +5,10 @@
 \title{Simulate Dissolution Profiles}
 \usage{
 sim.dp(tp, model = c("Weibull", "first-order"), model.par,
-       seed, product, dp, dp.cv, ascending = FALSE, n.units = 12L,
-       max.disso = 105, message = FALSE, plot = TRUE,
-       time.unit = c("min", "h"), plot.max.unit = 36L)
+       seed = NULL, product, dp, dp.cv = NULL, ascending = FALSE,
+       n.units = 12L, max.disso = 105, message = FALSE,
+       plot = TRUE, time.unit = c("min", "h"),
+       plot.max.unit = 36L)
 }
 \arguments{
 \item{tp}{Numeric vector of time points for the dissolution profiles.}
@@ -29,7 +30,8 @@ will be generated.}
 its corresponding CV\% (\code{dp.cv}). See Details.}
 
 \item{ascending}{Logical. If \code{TRUE}, simulated profiles will always
-increase with time. Only applicable when See Details.}
+increase with time. Only applicable when multivariate normal distribution
+approach is used. See Details.}
 
 \item{n.units}{An integer indicating the number of individual profiles
 to be simulated.}
@@ -84,8 +86,8 @@ should be supplier by user; if not, it will be generated automatically.
 \subsection{Use models (Recommended Approach)}{
 
 The first-order model is expressed as \deqn{f_t = f_\mathrm{max}%
-  \left(1 - e^{-k_1\(t - t_\mathrm{lag}\right)}\right).}{f(t) = fmax%
-  (1 - exp(-k1(t - tlag))),}
+  \left(1 - e^{-k\(t - t_\mathrm{lag}\right)}\right).}{f(t) = fmax%
+  (1 - exp(-k(t - tlag))),}
 and the Weibull model was expressed either as \deqn{f_t = f_\mathrm{max}%
   \left(1 - e^{-\left(\frac{t - t_\mathrm{lag}}{\mathrm{MDT}}%
   \right)^\beta}\right)}{f(t) = fmax (1 - exp(-((t - tlag)/MDT)^\beta))} or
@@ -94,7 +96,7 @@ and the Weibull model was expressed either as \deqn{f_t = f_\mathrm{max}%
 where \eqn{f_\mathrm{max}}{fmax} is the maximum dissolution, MDT is
 the mean dissolution time, \eqn{t_\mathrm{lag}}{tlag} is the lag time,
 \eqn{\alpha}{\alpha} and \eqn{\beta}{\beta} are the scale and shape factor
-in Weibull function, and \eqn{k_1}{k1} is the rate constant in the
+in Weibull function, and \eqn{k}{k} is the rate constant in the
 first-order model. Obviously, The two Weibull models are mathematically
 equivalent by letting \eqn{\alpha = \mathrm{MDT}^\beta}{\alpha = MDT^\beta}.
 The second expression of Weibull model was included to be compatible to
@@ -109,13 +111,13 @@ normal distribution with mean zero and variance \eqn{\sigma^2} (σ = CV/100);
 population model parameters.
 
 Therefore, \code{model.par} should be supplied as a named list of 6
-parameters for the first-order model (\code{fmax/fmax.cv}, \code{k1/k1.cv},
+parameters for the first-order model (\code{fmax/fmax.cv}, \code{k/k.cv},
 and \code{tlag/tlag.cv}), and 8 parameters for Weibull model
 (\code{fmax/fmax.cv}, \code{tlag/tlag.cv}, \code{beta/beta.cv}, and
 either \code{alpha/alpha.cv} or \code{mdt/mdt.cv}, depending on the
 mathematical formula used). For example:
 \itemize{
-\item \code{model.par = list(fmax = 100, fmax.cv = 5, k1 = 0.6, k1.cv = 25,
+\item \code{model.par = list(fmax = 100, fmax.cv = 5, k = 0.6, k.cv = 25,
     tlag = 0, tlag.cv = 0)} for the first-order model.
 \item \code{model.par = list(fmax = 100, fmax.cv = 5, tlag = 5, tlag.cv = 10,
     mdt = 15, mdt.cv = 20, beta = 1.5, beta.cv = 5)}, or

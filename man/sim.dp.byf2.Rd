@@ -4,7 +4,7 @@
 \alias{sim.dp.byf2}
 \title{Simulate Dissolution Profiles by f2 Values}
 \usage{
-sim.dp.byf2(tp, dp, sim.dp.out, target.f2, seed,
+sim.dp.byf2(tp, dp, sim.dp.out, target.f2, seed = NULL,
             regulation = c("EMA", "FDA", "WHO"),
             model = c("Weibull", "first-order"), digits = 2L,
             min.points = 3L, both.TR.85 = FALSE, max.disso = 105,
@@ -93,7 +93,7 @@ served as initial value for further model fitting.
 \item If the output of the function \code{sim.dp()} is available, no
 initial fitting is necessary as model parameters can be read directly
 from the output, unless multivariate normal distribution approach
-is used. In such case, initial model fiting will be done.
+is used. In such case, initial model fitting will be done.
 }
 \item Find a suitable model parameters and simulate a new data set, comparing
 the new data to the provided reference data by calculating f2. If the
@@ -109,7 +109,7 @@ numeric precision defined by the tolerance).
 \item If \code{target.f2} is vector of two numbers representing the
 lower and upper limit of target f2 value, such as \code{target.f2 =
         c(lower, upper)}, then dissolution will be obtained by random
-searching and the calculated f2 will be will within range of lower
+searching and the calculated f2 will be within the range of lower
 and upper. For example, set \code{target.f2 = c(54.95, 55.04)} to
 have target f2 of 55. Since f2 should be normally reported without
 decimal, in practice, the precision is enough. You might be able to

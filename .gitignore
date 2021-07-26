@@ -38,3 +38,8 @@ vignettes/*.pdf
 # R Environment Variables
 .Renviron
 inst/doc
+
+## added
+*.bak
+*.sav
+.note/*.*

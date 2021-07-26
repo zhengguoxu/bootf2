@@ -76,6 +76,24 @@
 #'   - \code{boot.t} and \code{boot.r}: Individual bootstrap samples if
 #'      \code{sim.data.out = TRUE}.
 #'
+#' @examples
+#' \dontrun{
+#' # time points
+#' tp <- c(5, 10, 15, 20, 30, 45, 60)
+#' # model.par for reference with low variability
+#' par.r <- list(fmax = 100, fmax.cv = 3, mdt = 15, mdt.cv = 14,
+#'               tlag = 0, tlag.cv = 0, beta = 1.5, beta.cv = 8)
+#' # simulate reference data
+#' dr <- sim.dp(tp, model.par = par.r, seed = 100, plot = FALSE)
+#' # model.par for test
+#' par.t <- list(fmax = 100, fmax.cv = 3, mdt = 12.29, mdt.cv = 12,
+#'               tlag = 0, tlag.cv = 0, beta = 1.727, beta.cv = 9)
+#' # simulate test data with low variability
+#' dt <- sim.dp(tp, model.par = par.t, seed = 100, plot = FALSE)
+#'
+#' # bootstrap
+#' bootf2(dt$sim.disso, dr$sim.disso, n.boots = 100)
+#' }
 #'
 #' @export
 bootf2 <- function(test, ref, path.in, file.in, path.out, file.out,
@@ -155,7 +173,7 @@ bootf2 <- function(test, ref, path.in, file.in, path.out, file.out,
   nt <- NCOL(data.t) - 1
   nr <- NCOL(data.r) - 1
 
-  if (missing(seed)) {
+  if (is.null(seed)) {
     seed <- sample(1:(.Machine$integer.max - 1), 1)
   }
   set.seed(seed)
@@ -948,6 +966,7 @@ bootf2 <- function(test, ref, path.in, file.in, path.out, file.out,
 
     rinfo   <- strsplit(sessionInfo()$R.version$version.string, " ")
     sysinfo <- Sys.info()
+    bootf2v <- as.character(packageVersion("bootf2"))
     cat("  - Operating System Name     :   ",
         sysinfo["sysname"], " ", sysinfo["release"], "\n", sep = "")
     cat("  - Operating System Version  :   ",
@@ -960,6 +979,7 @@ bootf2 <- function(test, ref, path.in, file.in, path.out, file.out,
         Sys.timezone(), "\n", sep = "")
     cat("  - R Version                 :   ",
         rinfo[[1]][3], " ", rinfo[[1]][4], "\n", sep = "")
+    cat("  - Package bootf2 Version    :   ", bootf2v, "\n", sep = "")
     cat("_____________________________________________________",
         "_________________\n\n", sep = "")
     cat("The current report was generated at ", format(Sys.time(), "%H:%M:%S"),

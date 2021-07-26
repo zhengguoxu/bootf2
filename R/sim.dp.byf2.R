@@ -8,7 +8,7 @@
 #' @importFrom stats lm coef nls.control optim
 #' @importFrom minpack.lm nlsLM
 #' @usage
-#' sim.dp.byf2(tp, dp, sim.dp.out, target.f2, seed,
+#' sim.dp.byf2(tp, dp, sim.dp.out, target.f2, seed = NULL,
 #'             regulation = c("EMA", "FDA", "WHO"),
 #'             model = c("Weibull", "first-order"), digits = 2L,
 #'             min.points = 3L, both.TR.85 = FALSE, max.disso = 105,
@@ -74,7 +74,7 @@
 #'       - If the output of the function \code{sim.dp()} is available, no
 #'         initial fitting is necessary as model parameters can be read directly
 #'         from the output, unless multivariate normal distribution approach
-#'         is used. In such case, initial model fiting will be done.
+#'         is used. In such case, initial model fitting will be done.
 #'   2. Find a suitable model parameters and simulate a new data set, comparing
 #'      the new data to the provided reference data by calculating f2. If the
 #'      f2 is equal to the \code{target.f2}, or within the lower and upper
@@ -88,7 +88,7 @@
 #'       - If \code{target.f2} is vector of two numbers representing the
 #'         lower and upper limit of target f2 value, such as \code{target.f2 =
 #'         c(lower, upper)}, then dissolution will be obtained by random
-#'         searching and the calculated f2 will be will within range of lower
+#'         searching and the calculated f2 will be within the range of lower
 #'         and upper. For example, set \code{target.f2 = c(54.95, 55.04)} to
 #'         have target f2 of 55. Since f2 should be normally reported without
 #'         decimal, in practice, the precision is enough. You might be able to
@@ -121,7 +121,7 @@
 #'                           target.f2 = c(59.99, 60.01), seed = 123)
 #'
 #' @export
-sim.dp.byf2 <- function(tp, dp, sim.dp.out, target.f2, seed,
+sim.dp.byf2 <- function(tp, dp, sim.dp.out, target.f2, seed = NULL,
                         regulation = c("EMA", "FDA", "WHO"),
                         model = c("Weibull", "first-order"), digits = 2L,
                         min.points = 3L, both.TR.85 = FALSE, max.disso = 105,
@@ -141,7 +141,7 @@ sim.dp.byf2 <- function(tp, dp, sim.dp.out, target.f2, seed,
   #   oldseed <- NULL
 
   # if no seed is provided, generate one
-  if (missing(seed)) {
+  if (is.null(seed)) {
     seed <- sample(1:(.Machine$integer.max - 1), 1)
   }
   set.seed(seed)
@@ -232,8 +232,8 @@ sim.dp.byf2 <- function(tp, dp, sim.dp.out, target.f2, seed,
                             fmax.cv   = sim.dp.out$sim.info$fmax.cv,
                             tlag      = sim.dp.out$sim.info$tlag,
                             tlag.cv   = sim.dp.out$sim.info$tlag.cv,
-                            k1        = sim.dp.out$sim.info$k1,
-                            k1.cv     = sim.dp.out$sim.info$k1.cv,
+                            k         = sim.dp.out$sim.info$k,
+                            k.cv      = sim.dp.out$sim.info$k.cv,
                             time.unit = sim.dp.out$sim.info$time.unit,
                             stringsAsFactors = FALSE)
     } else {# model == NA, simulated by multivariate normal distribution
@@ -350,12 +350,12 @@ sim.dp.byf2 <- function(tp, dp, sim.dp.out, target.f2, seed,
       }
     } else {# first-order optim
       mpar <- c(
-        k1 = mod.par$k1*exp(rnorm(1, 0, mod.par$k1.cv*random.factor/100)),
-        k1.cv = mod.par$k1.cv
+        k = mod.par$k*exp(rnorm(1, 0, mod.par$k.cv*random.factor/100)),
+        k.cv = mod.par$k.cv
       )
 
       opt.first.order <- function(mpar, target.f2, ...) {
-        tmp.t  <- fmax.t*(1 - exp(-mpar[["k1"]]*tadj.t))
+        tmp.t  <- fmax.t*(1 - exp(-mpar[["k"]]*tadj.t))
         data.t <- data.frame(tp = tp, dp = tmp.t, stringsAsFactors = FALSE)
         tmp.f2 <- calcf2(data.t, data.r, regulation = regulation,
                          cv.rule = FALSE, min.points = min.points,
@@ -367,7 +367,7 @@ sim.dp.byf2 <- function(tp, dp, sim.dp.out, target.f2, seed,
       res.f2 <- optim(mpar, opt.first.order, target.f2 = target.f2,
                       na.rm = TRUE)
 
-      dp.2 <- fmax.t*(1 - exp(-res.f2$par[["k1"]]*tadj.t))
+      dp.2 <- fmax.t*(1 - exp(-res.f2$par[["k"]]*tadj.t))
       dp.2[!is.finite(dp.2)] <- 0
       dp.2[dp.2 < 0] <- 0
 
@@ -379,7 +379,7 @@ sim.dp.byf2 <- function(tp, dp, sim.dp.out, target.f2, seed,
 
       model.par <- data.frame(model = "first-order", seed = seed,
                               fmax = fmax.t, tlag = tlag.t,
-                              k1 = res.f2$par[["k1"]],
+                              k = res.f2$par[["k"]],
                               f2 = f2.tmp[[1]], time.point = f2.tmp[[2]],
                               regulation = regulation,
                               stringsAsFactors = FALSE)
@@ -404,8 +404,8 @@ sim.dp.byf2 <- function(tp, dp, sim.dp.out, target.f2, seed,
           dp.2    <- fmax.2*(1 - exp(-(tp.adj2^beta.2)/alpha.2))
         }
       } else {# first-order
-        k1.2 <- mod.par$k1*exp(rnorm(1, 0, model.par.cv/100))
-        dp.2 <- fmax.2*(1 - exp(-k1.2*tp.adj2))
+        k.2 <- mod.par$k*exp(rnorm(1, 0, model.par.cv/100))
+        dp.2 <- fmax.2*(1 - exp(-k.2*tp.adj2))
       }
 
       dp.2[!is.finite(dp.2)] <- 0
@@ -437,7 +437,7 @@ sim.dp.byf2 <- function(tp, dp, sim.dp.out, target.f2, seed,
       }
     } else {# first-order
       model.par <- data.frame(model = "first-order", seed = seed, fmax = fmax.2,
-                              tlag = tlag.2, k1 = k1.2, f2 = f2.tmp[[1]],
+                              tlag = tlag.2, k = k.2, f2 = f2.tmp[[1]],
                               time.point = f2.tmp[[2]], regulation = regulation,
                               stringsAsFactors = FALSE)
     }

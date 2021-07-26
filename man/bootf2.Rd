@@ -98,3 +98,23 @@ such as the time points used for calculation of f2 and the number of
 Main function to estimate 90\% confidence intervals of f2 using bootstrap
 methodology.
 }
+\examples{
+\dontrun{
+# time points
+tp <- c(5, 10, 15, 20, 30, 45, 60)
+# model.par for reference with low variability
+par.r <- list(fmax = 100, fmax.cv = 3, mdt = 15, mdt.cv = 14,
+              tlag = 0, tlag.cv = 0, beta = 1.5, beta.cv = 8)
+# simulate reference data
+dr <- sim.dp(tp, model.par = par.r, seed = 100, plot = FALSE)
+# model.par for test
+par.t <- list(fmax = 100, fmax.cv = 3, mdt = 12.29, mdt.cv = 12,
+              tlag = 0, tlag.cv = 0, beta = 1.727, beta.cv = 9)
+# simulate test data with low variability
+dt <- sim.dp(tp, model.par = par.t, seed = 100, plot = FALSE)
+
+# bootstrap
+bootf2(dt$sim.disso, dr$sim.disso, n.boots = 100)
+}
+
+}

@@ -6,18 +6,17 @@ output:
     toc: yes
     toc_depth: 3
     number_sections: no
-    fig_width: 6.5
-    fig_height: 4
-    df_print: "paged"
-bibliography: ref.bib
+    fig_width: 7
+    fig_height: 4.5
+bibliography: vignettes/ref.bib
 notes-after-punctuation: false
 link-citations: yes
-csl: https://raw.githubusercontent.com/citation-style-language/styles/master/american-chemical-society.csl
+csl: vignettes/ref.csl
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-```{r, include = FALSE}
+```{r setup0, include=FALSE}
 knitr::opts_chunk$set(
   echo = TRUE,
   collapse = TRUE,
@@ -30,10 +29,7 @@ knitr::opts_chunk$set(
 
 ## Installation{-}
 
-This is the development version, so it is not available on CRAN yet. You
-can install it from [GitHub](https://github.com/) with package`devtools`.
-
-``` r
+```{r install, echo=TRUE, eval=FALSE}
 # install.packages("devtools") 
 devtools::install_github("zhengguoxu/bootf2")
 ```
@@ -43,29 +39,47 @@ devtools::install_github("zhengguoxu/bootf2")
 <!-- badges: start -->
 <!-- badges: end -->
 
-Initially, the package `bootf2` was developed to compare the dissolution
-profiles using bootstrap $f_2$ method, as recommended recently by several 
+The package `bootf2` was developed to compare the dissolution profiles
+using bootstrap $f_2$ method, as recommended recently by several 
 regulatory agencies [@EMA-2018-09-QA.MSD.DISSO;@Davit-2013-03-BA;
-@Lum-2019-05-WS;@Mandula-2019-05-WS]. Several additional functions were added
-later to simulate the dissolution profiles.
+@Lum-2019-05-WS;@Mandula-2019-05-WS]. Several additional functions were
+added later to simulate the dissolution profiles.
 
 There are 4 main functions:
 
-- `sim.dp()` to simulate dissolution profile.
-- `calcf2()` to calculate similarity factor $f_2$ according to different
-    regulatory rules.
-- `sim.dp.byf2()` to find a dissolution profile that, when compared to a 
-    given reference profile, has $f_2$ equal to the predefined target $f_2$.
-- `bootf2() ` for the estimation of confidence intervals of $f_2$.
+1. `sim.dp()` to simulate dissolution profile using mathematical models
+    or multivariate normal distribution. See vignette
+    [Simulation of Dissolution Profiles](vignettes/sim.dp.md).
+1. `calcf2()` to calculate similarity factor $f_2$ according to different
+    regulatory rules. See vignette
+    [Calculating Similarity Factor $f_2$](vignettes/calcf2.md).
+1. `sim.dp.byf2()` to find a dissolution profile that, when compared to 
+    a given reference profile, has $f_2$ value equal to the predefined 
+    target $f_2$. See vignette
+    [Simulation of Dissolution Profiles with Predefined Target
+    $f_2$](vignettes/sim.dp.byf2.md).
+1. `bootf2()` to estimate the confidence intervals of $f_2$s using 
+    bootstrap method. See vignette
+    [Confidence Intervals of $f_2$ Using Bootstrap Method](vignettes/bootf2.md).
 
-The basic usage is given below as brief demonstration. 
-The details of functions are explained in their corresponding vignettes, 
-while some common topics are included in the vignette 
+The basic usage is given below as a brief demonstration. 
+The details of functions are explained in their respective vignettes, 
+and some common topics are discussed in the vignette 
 [Introduction to bootf2](vignettes/introduction.md).
 
 ## Examples
 
 ### Function `sim.dp()`
+
+The complete list of arguments are shown below. Read package vignette
+with `vignette("sim.dp", package = "bootf2")` for more details.
+
+```{r simdp-code, eval = FALSE}
+dat <- sim.dp(tp, model = c("Weibull", "first-order"), model.par,
+              seed, product, dp, dp.cv, ascending = FALSE, n.units = 12L,
+              max.disso = 105, message = FALSE, plot = TRUE,
+              time.unit = c("min", "h"), plot.max.unit = 36L)
+```
 
 For the most basic use, the minimum required argument is `tp`, the vector of
 time points for the dissolution. To avoid changing the content of the README
@@ -90,48 +104,57 @@ The output of `sim.dp()` is a list of at least 3 components:
 ```{r simdp-sum}
 print(d.ref$sim.summary)
 ```
+
 2. `sim.disso`: a data frame of dissolution profiles that has the correct
   format to be used as the input for the function `calcf2()`.
+  
 ```{r simdp-disso}
 print(d.ref$sim.disso)
 ```
+
 3. `sim.info`: a data frame with information of the simulation.
+
 ```{r simdp-info}
 print(d.ref$sim.info)
 ```
+
 Depending on the argument settings, there might be additional 2 components:
 
 4. `model.par.ind`: a data frame of individual model parameters that are
   used to simulate the individual dissolution profiles if mathematical models
   are used for the simulation.
+  
 ```{r simdp-modpar}
 print(d.ref$model.par.ind)
 ```
 
 5. `sim.plot`: a plot if the argument `plot` is set to be `TRUE`.
+
 ```{r simdp-plot}
 print(d.ref$sim.plot)
-```
-
-The complete arguments are shown below. More details can be viewed in the 
-package vignette by `vignette("sim.dp", package = "bootf2")`.
-
-```{r simdp-code, eval = FALSE}
-dat <- sim.dp(tp, model = c("Weibull", "first-order"), model.par,
-              seed, product, dp, dp.cv, ascending = FALSE, n.units = 12L,
-              max.disso = 105, message = FALSE, plot = TRUE,
-              time.unit = c("min", "h"), plot.max.unit = 36L)
 ```
 
 
 ### Function `calcf2()`
 
-The minimum required arguments are dissolution profiles for test and reference,
-e.g., `calcf2(test, ref)`. Data can be read from an Excel file. For interactive
-use, the `test` and `ref` can be data frames with the time as the first column
-and individual units as the rest columns. 
-The `sim.disso` data frame in the output of `sim.dp()` comes with the 
-correct format, as shown above.
+The complete list of arguments are shown below. Read the package vignette
+with `vignette("calcf2", package = "bootf2")` for more details.
+
+```{r calcf2-code, eval = FALSE}
+dat <- calcf2(test, ref, regulation = c("EMA", "FDA", "WHO"),
+              path.in, file.in, path.out, file.out, digits = 2L,
+              cv.rule = TRUE, min.points = 3L, both.TR.85 = FALSE,
+              f2.type = c("est.f2", "exp.f2", "bc.f2", "vc.exp.f2",
+                          "vc.bc.f2", "all"), plot = TRUE,
+              message = TRUE, time.unit = c("min", "h"),
+              plot.start.time = 0, plot.max.unit = 24L)
+```
+
+The minimum required arguments are dissolution profiles for `test` and `ref`.
+Data can be read from an Excel file. For interactive use, the `test` and `ref`
+can be data frames with the time as the first column and individual units as
+the rest columns. The `sim.disso` data frame in the output of `sim.dp()` comes
+with the correct format, as shown above.
 
 ```{r calcf2-good}
 # simulate a test data
@@ -147,49 +170,15 @@ and show some messages.
 ```{r calcf2-bad, error=TRUE}
 # simulate reference with CV% not fulfil the criterion 
 d.r2 <- sim.dp(tp, seed = 456)
-d.r2$sim.summary
+
+# output with error message
 calcf2(d.test$sim.disso, d.r2$sim.disso)
 ```
 
-The complete arguments are show below. More details can be viewed in the 
-package vignette by `vignette("calcf2", package = "bootf2")`.
-
-```{r calcf2-code, eval = FALSE}
-dat <- calcf2(test, ref, regulation = c("EMA", "FDA", "WHO"),
-              path.in, file.in, path.out, file.out, digits = 2L,
-              cv.rule = TRUE, min.points = 3L, both.TR.85 = FALSE,
-              f2.type = c("est.f2", "exp.f2", "bc.f2", "vc.exp.f2",
-                          "vc.bc.f2", "all"), plot = TRUE,
-              message = TRUE, time.unit = c("min", "h"),
-              plot.start.time = 0, plot.max.unit = 24L)
-```
-
-
 ### Function `sim.dp.byf2()`
 
-Given any dissolution profile `dp` at time points `tp`, and target $f_2$ 
-value, this function will find another dissolution profile such that 
-when the newly simulated profile is compared to the `dp`, the calculated $f_2$ 
-will be equal to the target $f_2$.
-
-```{r simdpbyf2-dat}
-# mean dissolution profile fo tp
-dp <- c(51, 66, 75, 81, 88, 92, 95)
-
-# find another profile with target f2 = 60
-d.t2 <- sim.dp.byf2(tp, dp, target.f2 = 60, seed = 123)
-```
-If you don't like the shape of the profile, you can run the function many
-times with different `seed` number until you get the shape that you are 
-willing to accept. 
-
-The model parameters in the output are more useful in simulation studies 
-since they can be used as initial model parameter input to the function
-`sim.dp()` to simulate a large population of dissolution profiles that have
-known $f_2$ value when compared to target dissolution profile.
-
-The complete arguments are show below. More details can be viewed in the 
-package vignette by `vignette("sim.dp.byf2", package = "bootf2")`.
+The complete list of arguments are shown below. Read the package vignette
+with `vignette("sim.dp.byf2", package = "bootf2")` for more details.
 
 ```{r simdpbyf2-code, eval = FALSE}
 dat <- sim.dp.byf2(tp, dp, sim.dp.out, target.f2, seed,
@@ -201,28 +190,35 @@ dat <- sim.dp.byf2(tp, dp, sim.dp.out, target.f2, seed,
                    time.unit = c("min", "h"), message = TRUE, plot = TRUE)
 ```
 
+Given any dissolution profile `dp` at time points `tp`, and target $f_2$ 
+value, this function will find another dissolution profile such that 
+when the newly simulated profile is compared to the `dp`, the calculated $f_2$ 
+will be equal to the target $f_2$. If `target.f2` is specified as a range, 
+such as `target.f2 = c(52.05, 53.04)`, then the calculated $f_2$ with simulated
+profile will be within this range. 
+
+```{r simdpbyf2-dat}
+# mean dissolution profile fo tp
+dp <- c(51, 66, 75, 81, 88, 92, 95)
+
+# find another profile with target f2 = 60
+d.t2 <- sim.dp.byf2(tp, dp, target.f2 = 60, seed = 123)
+```
+
+If you don't like the shape of the simulated profile, you can run the function
+many times with different `seed` number until you get the shape that you are 
+willing to accept. 
+
+The model parameters in the output are more useful in simulation studies 
+since they can be used as initial model parameter input to the function
+`sim.dp()` to simulate a large population of dissolution profiles that have
+known $f_2$ value when compared to target dissolution profile.
+
 
 ### Function `bootf2()`
 
-The minimum required arguments are dissolution profiles of `test` and `ref`.
-The function can output many different 90% confidence intervals for several
-$f_2$ estimators.
-
-```{r bootf2-out}
-# get test and reference data set with correct format
-test <- d.test$sim.disso
-ref  <- d.ref$sim.disso
-
-# use most default settings (output all) but small number of bootstrap
-# to have shorter run time for the example. default n.boots = 10000L
-t_vs_r <- bootf2(test, ref, n.boots = 100L)
-```
-
-With default settings, the function prints all confidence intervals for all 
-$f_2$ estimators, and the result will be save in a text file. 
-
-The complete arguments are shown below. More details can be viewed in the 
-package vignette by `vignette("bootf2", package = "bootf2")`.
+The complete list of arguments are shown below. Read the package vignette
+with `vignette("bootf2", package = "bootf2")` for more details.
 
 ```{r bootf2-code, eval = FALSE}
 dat <- bootf2(test, ref, path.in, file.in, path.out, file.out,
@@ -240,6 +236,31 @@ dat <- bootf2(test, ref, path.in, file.in, path.out, file.out,
                    sim.data.out = FALSE)
 ```
 
+The minimum required arguments are dissolution profiles of `test` and `ref`.
+The function can output many different 90% confidence intervals for several
+$f_2$ estimators. 
+With default settings, the function prints all confidence intervals for all 
+$f_2$ estimators, and the result will be save in a text file. 
+
+
+```{r bootf2-out}
+# get test and reference data set with correct format
+test <- d.test$sim.disso
+ref  <- d.ref$sim.disso
+
+# use most default settings (output all) but small number of bootstrap
+# to have shorter run time for the example. default n.boots = 10000L
+t_vs_r <- bootf2(test, ref, n.boots = 100L)
+```
+
+## Disclaimer
+
+_**Despite the best efforts the author has put into, the package is offered
+without any guarantee of accuracy and absolutely no warranty. 
+Validation of the package, especially when it is used in regulatory field, 
+is the responsibility of the users. The author accept absolutely no liability
+for any financial loss or risk to public health resulting from the use of
+this package.**_
 
 ## References
 

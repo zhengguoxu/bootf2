@@ -1,0 +1,316 @@
+---
+title: "Introduction to bootf2"
+author: "Zhengguo XU"
+date: "2021-07-26"
+output: 
+  rmarkdown::html_vignette:
+    keep_md: true
+    toc: false
+    toc_depth: 3
+    fig_width: 6.5
+    fig_height: 4
+  highlight: "tango"
+bibliography: ref.bib
+notes-after-punctuation: false
+link-citations: yes
+csl: ref.csl
+vignette: >
+  %\VignetteIndexEntry{Introduction to bootf2}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+
+
+
+
+
+## Introduction
+
+Because of the prominent roles dissolution profiles played in the
+pharmaceutical industry, it is important to have a reliable method 
+to compare dissolution profiles. Over the years, many model-dependent 
+and -independent methods were developed; but owing to its simplicity, 
+similarity factor $f_2$ is the most widely used one, and it is 
+recommended in many regulatory guidelines [@EMA-2010-INV.BE;
+@USFDA-1997-08-DISSO.IR.SOLID.ORAL; @HealthCanada-2017; @WHO-2017;
+@MHLW2012; @ANVISA2010; @CDENMPA-2016].
+
+However, to apply the $f_2$ method, several conditions have to be
+fulfilled due to certain drawbacks associated with it. When $f_2$ 
+method is not applicable for the failure of fulfilling regulatory
+conditions, other methods should be used. 
+
+The package `bootf2` was developed to compare the dissolution profiles
+using confidence interval of $f_2$ by bootstrap method as recommended 
+recently by several regulatory agencies [@EMA-2018-09-QA.MSD.DISSO;
+@Davit-2013-03-BA; @Lum-2019-05-WS; @Mandula-2019-05-WS].
+
+There are 4 main functions in the package:
+
+1. `sim.dp()` to simulate dissolution profile using mathematical models
+    or multivariate normal distribution.
+1. `calcf2()` to calculate similarity factor $f_2$ according to different
+    regulatory rules.
+1. `sim.dp.byf2()` to find a dissolution profile that, when compared to 
+    a given reference profile, has $f_2$ value equal to the predefined 
+    target $f_2$.
+1. `bootf2()` to estimate the confidence intervals of $f_2$s using 
+    bootstrap method.  
+
+The details of functions are explained in their respective vignettes.
+Some common topics are discussed in this document. 
+
+
+## Regulatory rules for $f_2$
+
+To apply the traditional $f_2$ method, several conditions have to be
+fulfilled. Unfortunately, different regulatory agencies described those 
+conditions differently. Some of the conditions are same across different
+guidelines, such as 1.) *same dissolution condition* 
+and *same time points* for both test and reference, 2.) use *12 units*, 
+and 3.) use *at least 3 time points* for the calculation of $f_2$, 
+while others are either slightly different, or are actually the same 
+but different interpretation exist due to the ambiguous wording in
+the guideline.
+
+The last two scenarios are detailed below with direct quotes 
+from guidelines (with hyper links) as they affect the implementation
+of the functions `calcf2()`.
+
+4. *20%/10% CV Rule*
+
+    - *EMA* [@EMA-2010-INV.BE]: 
+    
+    > ["The relative standard deviation or coefficient of variation
+      of any product should be less than 20% for the first point and
+      less than 10% from second to last time point."](https://www.ema.europa.eu/en/documents/scientific-guideline/guideline-investigation-bioequivalence-rev1_en.pdf#page=21)
+      
+      If the the time points in the dissolution is 5 min, 10 min, 
+      15 min, ..., strict interpretation is that the 20% CV is for the
+      first time point 5 min only. From time point 10 min onward, 
+      the CV% criteria is 10%. From an unofficial communication with an
+      EU regulator, the practical use is 20% CV for all time points till 
+      10 min, 10% for the rest points. It seems that, due to high 
+      variability asociated to the early point, many companies deleted 
+      5 min time points from their dissolution profile, even though 
+      this point should be presented according to their method.
+      Obviously this is a kind of bad practice, so the relaxed criterion
+      of 20% CV up to 10 min can be considered as encouragement for 
+      the company not to delete any data points.
+      
+    - *US FDA* [@USFDA-1997-08-DISSO.IR.SOLID.ORAL]: 
+    
+    > ["To allow use of mean data, the percent coefficient of variation
+      at the earlier time points (e.g., 15 minutes) should not be more
+      than 20%, and at other time points should not be more than 
+      10%."](https://www.fda.gov/media/70936/download#page=12)
+      
+      While the guidance indicating 15 min as an example for cutting
+      points of earlier points (20% CV), FDA seems take more liberal
+      approach. In an unofficial communication, an example of dissolution 
+      profiles having 5, 10, 20, 30 min, ..., time points was given where
+      the first 2 *or 3 points* (that's 20 min!) having CV% within 10% 
+      and 20%. In such cases, FDA will review thew data for test and
+      reference, but it is likely that the traditional $f_2$ method could
+      still be used.
+      
+    - *Healthh Canada*: 
+      
+      The older guidance [@HealthCanada-2017] states that:
+    
+    > ["To use mean data, the % coefficient of variation at the first 
+      time point should not be more than 20% and at other time points 
+      should not be more than 10%."](https://www.canada.ca/en/health-canada/services/drugs-health-products/drug-products/applications-submissions/guidance-documents/canadian-reference-product-guidance.html#app2)
+      
+      So that would be the same as the MEA's guideline when interpreted 
+      strictly. However, the newer guidance [@HealthCanada-2019-07-Quality]
+      has the following statement:
+      
+    > ["To use mean data, the % coefficient of variation at the earlier
+      point should be not more than 20% and at other time points should 
+      be not more than 10%."](https://www.canada.ca/en/health-canada/services/drugs-health-products/drug-products/applications-submissions/guidance-documents/post-notice-compliance-changes/quality-document/guidance.html#a5)
+      
+      So it is not clear right now which time points could be considered 
+      as *earlier points*. 
+      
+    - *WHO* [@WHO-2017]:
+    
+    > ["To use mean data the percentage coefficient of variation at
+      time-points up to 10 minutes should be not more than 20% and at
+      other time-points should be not more than 10%;"](https://apps.who.int/iris/bitstream/handle/10665/258720/9789241210034-eng.pdf?sequence=1&isAllowed=y#page=244)
+      
+      This is the same as the "*new*" interpretaion of the EMA's guideline.
+      
+    - *Brazil* [@ANVISA2010]:
+    
+    > ["para permitir o uso de médias, os coeficientes de variação para
+      os primeiros pontos de coleta não podem exceder 20%. Para os demais
+      pontos considera-se o máximo de 10%. São considerados como primeiros
+      pontos de coleta o correspondente a 40% do total de pontos coletados.
+      Por exemplo, para um perfil de dissolução com cinco tempos de coleta,
+      consideram-se primeiros pontos os dois primeiros tempos de 
+      coleta."](https://bvsms.saude.gov.br/bvs/saudelegis/anvisa/2010/res0031_11_08_2010.html)
+      (Translation: to allow the use of averages, the coefficients of 
+      variation for the first collection points cannot exceed 20%. 
+      For the other points, a maximum of 10% is considered. The first
+      collection points correspond to 40% of the total collected points.
+      For example, for a dissolution profile with five collection times,
+      the first two collection times are considered first points.)
+      
+The next condition caused different interpretations among many. 
+
+5. *More than 85% dissolution time points*
+
+    - *EMA* [@EMA-2010-INV.BE]: 
+    
+    > ["Not more than one mean value of > 85% dissolved for any of the
+      formulations."](https://www.ema.europa.eu/en/documents/scientific-guideline/guideline-investigation-bioequivalence-rev1_en.pdf#page=21)
+      
+    - *US FDA* [@USFDA-1997-08-DISSO.IR.SOLID.ORAL]: 
+    
+    > ["Only one measurement should be considered after 85% dissolution
+      of both the products."](https://www.fda.gov/media/70936/download#page=12)
+      
+      There is no ambiguity associated with EMA's rule. But because of
+      the phrase "*both the products*" in FDA's guidance, many 
+      interpretated that all time points should be included until both 
+      test and reference dissoved more than 85%. For example, 
+      with the following dissolution profiles, many would interpretaed 
+      that while time points 5, 10, 15, and 20 min should be included 
+      according to EMA's rule, *all time points* should be included 
+      according to FDA's rule because both test and reference dissolve 
+      more than 85% only at 60 min, not at earlier points. 
+      
+      
+      
+      | Time| Test| Ref|
+      |----:|----:|---:|
+      |    5|    7|  10|
+      |   10|   15|  20|
+      |   15|   50|  55|
+      |   20|   69|  86|
+      |   30|   82|  90|
+      |   45|   84|  95|
+      |   60|   86|  97|
+
+      However, this is a misinterpretation. Because if this is true, 
+      then there will be 4 time points included in the reference profile
+      where dissolution is more than 85%, which is in direct
+      contradiction to the same sentence that "*Only one measurement 
+      should be considered after ...*". 
+      
+      In an unofficial communication using this example, an FDA staff
+      confirmed that only the first 4 time points would be used. In
+      other words, the same as EMA's rule.
+      
+    - *Healthh Canada* [@HealthCanada-2019-07-Quality]: 
+      
+    > ["Because f2 values are sensitive to the number of dissolution time
+      points, only one measurement should be considered after 85% 
+      dissolution of the product."](https://www.canada.ca/en/health-canada/services/drugs-health-products/drug-products/applications-submissions/guidance-documents/post-notice-compliance-changes/quality-document/guidance.html#a5)
+      
+      
+    - *WHO* [@WHO-2017]:
+    
+    > ["a maximum of one time point should be considered after 85%
+      dissolution of the reference (comparator) product has been 
+      reached;"](https://apps.who.int/iris/bitstream/handle/10665/258720/9789241210034-eng.pdf?sequence=1&isAllowed=y#page=244)
+      
+      If reference disolves faster than test does, WHO's rule would 
+      be the same as the EMA/FDA rule; if not, then there might be
+      several time points with more than 85% disolved for test product. 
+      This would be different from EMA/FDA approach, but at least the 
+      guideline is very clear and leaves no room for ambiguity.
+      
+    - *Brazil* [@ANVISA2010]:
+    
+    > ["para fins de cálculo F2, incluir apenas um ponto da curva 
+      após ambos os medicamentos atingirem a média de 85% de 
+      dissolução;"](https://bvsms.saude.gov.br/bvs/saudelegis/anvisa/2010/res0031_11_08_2010.html)
+      (Translation: for F2 calculation purposes, include only one 
+      point on the curve after both drugs average 85% dissolution;)
+
+    The phrasing is very similar to FDA's so it could also open to be 
+    misinterpretated. However, with the same logic as discussed above, 
+    ANVISA's rule should also be the same as EMA's.
+    
+    To summarize, EMA, US FDA, Canada, and Brazil should have the same 
+    rule in this regard; only WHO has slightly different rule. 
+
+There is another regulatory scenario regarding the use of $f_2$, or rather,
+the *not use* of it.
+
+6. *When $f_2$ is unnecessary* 
+
+    For immediate-release formulation, sometimes it is *unnecessary 
+    to calculate $f_2$* and the profiles can still be declared similar
+    if the products disolve quick enough, typically more than 85% at
+    15 min. 
+
+    - *EMA* [@EMA-2010-INV.BE]: 
+    
+    > ["For immediate release formulations, ..., Where more than 85% of 
+      the drug is dissolved within 15 minutes, dissolution profiles may
+      be accepted as similar without further mathematical
+      evaluation. "](https://www.ema.europa.eu/en/documents/scientific-guideline/guideline-investigation-bioequivalence-rev1_en.pdf#page=21)
+      
+    - *US FDA* [@USFDA-2017-12-WAIVER.BABE.IR.BCS]: 
+    
+    > ["In addition, when both test and reference products dissolve 
+      85 percent or more of the label amount of the drug in 15 minutes
+      using all three dissolution media recommended above, the profile
+      comparison with an f2 test is unnecessary."](https://www.gmp-compliance.org/files/guidemgr/UCM070246.pdf#page=12)
+      
+      
+    - *Healthh Canada* [@HealthCanada-2019-07-Quality]: 
+      
+    > ["If the individual data for both the test and reference 
+      products show more than 85% dissolution within 15 minutes, 
+      the profiles are considered similar (no calculations are 
+      necessary)."](https://www.canada.ca/en/health-canada/services/drugs-health-products/drug-products/applications-submissions/guidance-documents/post-notice-compliance-changes/quality-document/guidance.html#a5)
+      
+      Canadian rule is stricter than EMA's and FDA's since the latter 
+      two use mean value while the former use individual data.
+      
+      
+    - *WHO* [@WHO-2017]:
+    
+    > ["If both the test and reference (comparator) products show 
+      more than 85% dissolution in 15 minutes the profiles are
+      considered similar (no calculations required)."](https://apps.who.int/iris/bitstream/handle/10665/258720/9789241210034-eng.pdf?sequence=1&isAllowed=y#page=244)
+      
+      
+    - *Brazil* [@ANVISA2010]:
+    
+    > ["Quando a substância ativa apresentar alta solubilidade e a 
+      formulação for de liberação imediata, apresentando dissolução 
+      muito rápida para ambos os medicamentos, o fator F2 perde o seu
+      poder discriminativo e, portanto, não é necessário calculá- lo.
+      Nesses casos deve-se comprovar a dissolução muito rápida dos
+      produtos, por meio do gráfico da curva, realizando coletas em,
+      por exemplo: 5, 10, 15, 20 e 30 minutos. O coeficiente de variação
+      no ponto de 15 minutos que não pode exceder 10%."](https://bvsms.saude.gov.br/bvs/saudelegis/anvisa/2010/res0031_11_08_2010.html)
+      (Translation: When the active substance presents high solubility
+      and the formulation is immediate release, presenting very fast
+      dissolution for both drugs, the F2 factor loses its discriminative 
+      power and, therefore, it is not necessary to calculate it. 
+      In these cases, the very fast dissolution of the products must be 
+      proved by means of the dissolution curve, carrying out collections
+      in, for example: 5, 10, 15, 20 and 30 minutes. The coefficient of 
+      variation at the 15-minute point that cannot exceed 10%.)
+
+Another point worth mentioning, even though it is not related to the 
+calculation of $f_2$, is a scenario described in US FDA's SUPAC-MR
+guidance [@USFDA-1997-09-SUPAC.MR.CMC.DISSO.BE]:
+
+> ["Also, the average difference at any dissolution sampling time point
+  should not be greater than 15% between the changed drug product and 
+  the biobatch or marketed batch (unchanged drug product) dissolution
+  profiles."](https://www.fda.gov/media/70956/download#page=37)
+
+This rule has not been implemented in the function `calcf2()`. 
+
+
+## References

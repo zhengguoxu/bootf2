@@ -1,3 +1,8 @@
+# bootf2 0.3.0.9001
+
+* Cosmetic changes of source files
+* Changes in documentation.
+
 # bootf2 0.3.0
 
 * Change stop to warning for FDA CV rule in `calcf2()`.

@@ -13,25 +13,25 @@ sim.dp(tp, model = c("Weibull", "first-order"), model.par,
 \arguments{
 \item{tp}{Numeric vector of time points for the dissolution profiles.}
 
-\item{model}{Character strings of model names. Currently only 'Weibull' and
-'first-order' models are supported.}
+\item{model}{Character strings of model names. Currently only
+'Weibull' and 'first-order' models are supported.}
 
-\item{model.par}{A list with model parameters. If missing, a list of random
-\code{model.par} will be generated. See Details.}
+\item{model.par}{A list with model parameters. If missing, a list of
+random \code{model.par} will be generated. See Details.}
 
-\item{seed}{Numeric seed value for reproducibility. If missing, a random
-seed will be generated for reproducibility purpose.}
+\item{seed}{Numeric seed value for reproducibility. If missing,
+a random seed will be generated for reproducibility purpose.}
 
 \item{product}{Character strings indicating the product name of the
-simulated profiles. If missing, a random name with 3 letters and 4 digits
-will be generated.}
+simulated profiles. If missing, a random name with 3 letters and
+4 digits will be generated.}
 
-\item{dp, dp.cv}{Numeric vectors of mean dissolution profile (\code{dp}) and
-its corresponding CV\% (\code{dp.cv}). See Details.}
+\item{dp, dp.cv}{Numeric vectors of mean dissolution profile (\code{dp})
+and its corresponding CV\% (\code{dp.cv}). See Details.}
 
-\item{ascending}{Logical. If \code{TRUE}, simulated profiles will always
-increase with time. Only applicable when multivariate normal distribution
-approach is used. See Details.}
+\item{ascending}{Logical. If \code{TRUE}, simulated profiles will
+always increase with time. Only applicable when multivariate normal
+distribution approach is used. See Details.}
 
 \item{n.units}{An integer indicating the number of individual profiles
 to be simulated.}
@@ -43,17 +43,19 @@ it is not uncommon to see higher values, such as 105\%.}
 \item{message}{Logical. If \code{TRUE}, basic information of the
 simulation will be printed on screen.}
 
-\item{plot}{Logical If \code{TRUE}, a plot will be included in the output.}
+\item{plot}{Logical If \code{TRUE}, a plot will be included in the
+output.}
 
 \item{time.unit}{Character strings indicating the unit of time.
 It should be either \code{"min"} for minute or \code{"h"} for hour.
 It is mainly used for generating \code{model.par} and \code{dp.cv}
 when they are missing, and making plot. @seealso \code{\link[=calcf2]{calcf2()}}.}
 
-\item{plot.max.unit}{Integer. If the number of individual units is no more
-than this value, mean and all individual profiles will be plotted;
-otherwise, individual profiles will represented by boxplots.
-Therefore, to avoid overplotting, this value should not be too big.}
+\item{plot.max.unit}{Integer. If the number of individual units is
+no more than this value, the mean and all individual profiles will
+be plotted; otherwise, individual profiles will represented by
+boxplots. Therefore, to avoid overplotting, this value should not
+be too large. @seealso \code{\link[=calcf2]{calcf2()}}.}
 }
 \value{
 A list of 3 to 5 components:
@@ -61,72 +63,76 @@ A list of 3 to 5 components:
 \item \code{sim.summary}: A data frame with summary statistics of all
 individual profiles.
 \item \code{sim.disso}: A data frame with all individual profiles.
-\item \code{sim.info}: A data frame with information of simulations such as
-the seed number. If modelling approach is used, the data frame contains
-model parameters; if multivariate normal distribution approach is used,
-the data frame contains \code{dp/dp.cv}.
-\item \code{model.par.ind}: A data frame of all individual model parameters
-that were used for the simulation of individual dissolution profiles.
-Available only if the modelling approach is used, i.e., when \code{dp}
-is not missing.
+\item \code{sim.info}: A data frame with information of simulations
+such as the seed number. If modelling approach is used, the data
+frame contains model parameters; if multivariate normal
+distribution approach is used, it contains \code{dp/dp.cv}.
+\item \code{model.par.ind}: A data frame of all individual model
+parameters that were used for the simulation of individual
+dissolution profiles. Available only if the modelling approach
+is used, i.e., when \code{dp} is not missing.
 \item \code{sim.dp}: A plot. Available only if \code{plot = TRUE}.
 }
 }
 \description{
-Function to simulate dissolution profiles based on mathematical models or
-multivariate normal distribution.
+Function to simulate dissolution profiles based on mathematical
+models or multivariate normal distribution.
 }
 \details{
-The approach used to simulate individual dissolution profiles depends on
-if the mean dissolution profile \code{dp} is provided by user or not.
-If it is not provided, \code{dp} and individual profiles will be simulated
-using mathematical models, otherwise it will be simulated using multivariate
-normal distribution. For the latter, the CV at time points \code{dp.cv}
-should be supplier by user; if not, it will be generated automatically.
-\subsection{Use models (Recommended Approach)}{
+The approach used to simulate individual dissolution profiles
+depends on if the mean dissolution profile \code{dp} is provided
+by user or not. If it is not provided, \code{dp} and individual
+profiles will be simulated using mathematical models, otherwise,
+it will be simulated using multivariate normal distribution.
+For the latter, the CV at time points \code{dp.cv} should be
+supplier by user; if not, it will be generated automatically.
+\subsection{Use mathematical models (Recommended Approach)}{
 
-The first-order model is expressed as \deqn{f_t = f_\mathrm{max}%
-  \left(1 - e^{-k\(t - t_\mathrm{lag}\right)}\right).}{f(t) = fmax%
+The first-order model is expressed as
+\deqn{f_t = f_\mathrm{max} \left(1 - %
+  e^{-k\left(t - t_\mathrm{lag}\right)}\right),}{f(t) = fmax%
   (1 - exp(-k(t - tlag))),}
-and the Weibull model was expressed either as \deqn{f_t = f_\mathrm{max}%
-  \left(1 - e^{-\left(\frac{t - t_\mathrm{lag}}{\mathrm{MDT}}%
-  \right)^\beta}\right)}{f(t) = fmax (1 - exp(-((t - tlag)/MDT)^\beta))} or
-\deqn{f_t = f_\mathrm{max}\left(1 - e^{-\frac{(t - t_\mathrm{lag})^\beta}%
-  {\alpha}}\right)}{f(t) = fmax (1 - exp(-(((t - tlag)^\beta)/\alpha))),}
-where \eqn{f_\mathrm{max}}{fmax} is the maximum dissolution, MDT is
-the mean dissolution time, \eqn{t_\mathrm{lag}}{tlag} is the lag time,
-\eqn{\alpha}{\alpha} and \eqn{\beta}{\beta} are the scale and shape factor
-in Weibull function, and \eqn{k}{k} is the rate constant in the
-first-order model. Obviously, The two Weibull models are mathematically
-equivalent by letting \eqn{\alpha = \mathrm{MDT}^\beta}{\alpha = MDT^\beta}.
-The second expression of Weibull model was included to be compatible to
-\code{DDSolver} program.
+and the Weibull model was expressed either as
+\deqn{f_t = f_\mathrm{max} \left(1 - %
+  e^{-\left(\frac{t - t_\mathrm{lag}}{\mathrm{MDT}}%
+  \right)^\beta}\right)}{f(t) = fmax(1 - exp(-((t - tlag)/MDT)^\beta))}
+or
+\deqn{f_t = f_\mathrm{max} \left(1 - %
+  e^{-\frac{(t - t_\mathrm{lag})^\beta}{\alpha}}\right)}{f(t) = fmax%
+  (1 - exp(-(((t - tlag)^\beta)/\alpha))),}
+where \eqn{f_\mathrm{max}}{fmax} is the maximum dissolution,
+\eqn{\mathrm{MDT}}{MDT} is the mean dissolution time,
+\eqn{t_\mathrm{lag}}{tlag} is the lag time, \eqn{\alpha}{\alpha} and
+\eqn{\beta}{\beta} are the scale and shape factor in Weibull function,
+and \eqn{k}{k} is the rate constant in the first-order model.
+Obviously, The two Weibull models are mathematically equivalent by
+letting \eqn{\alpha = \mathrm{MDT}^\beta}{\alpha = MDT^\beta}.
 
 Individual model parameter were simulated according to the exponential
-error model \deqn{P_i = P_\mu e^{N\left(0, \sigma^2\right)}}{P(i) = P(\mu)%
+error model
+\deqn{P_i = P_\mu e^{N\left(0, \sigma^2\right)}}{P(i) = P(\mu)%
   exp(N(0, \sigma^2)),}
 where \eqn{N\left(0, \sigma^2\right)}{N(0, \sigma^2)} represents the
-normal distribution with mean zero and variance \eqn{\sigma^2} (σ = CV/100);
+normal distribution with mean zero and variance \eqn{\sigma^2}
+(\eqn{\sigma = \mathrm{CV}/100}{\sigma = CV/100});
 \eqn{P_i}{P(i)} and \eqn{P_\mu}{P(\mu)} denote the individual and
 population model parameters.
 
 Therefore, \code{model.par} should be supplied as a named list of 6
-parameters for the first-order model (\code{fmax/fmax.cv}, \code{k/k.cv},
-and \code{tlag/tlag.cv}), and 8 parameters for Weibull model
-(\code{fmax/fmax.cv}, \code{tlag/tlag.cv}, \code{beta/beta.cv}, and
-either \code{alpha/alpha.cv} or \code{mdt/mdt.cv}, depending on the
-mathematical formula used). For example:
+parameters for the first-order model (\code{fmax/fmax.cv},
+\code{k/k.cv}, and \code{tlag/tlag.cv}), and 8 parameters for Weibull
+model (\code{fmax/fmax.cv}, \code{tlag/tlag.cv}, \code{beta/beta.cv},
+and either \code{alpha/alpha.cv} or \code{mdt/mdt.cv}, depending on
+the mathematical formula used). For example:
 \itemize{
-\item \code{model.par = list(fmax = 100, fmax.cv = 5, k = 0.6, k.cv = 25,
-    tlag = 0, tlag.cv = 0)} for the first-order model.
-\item \code{model.par = list(fmax = 100, fmax.cv = 5, tlag = 5, tlag.cv = 10,
-    mdt = 15, mdt.cv = 20, beta = 1.5, beta.cv = 5)}, or
-\item \code{model.par = list(fmax = 100, fmax.cv = 5, tlag = 5, tlag.cv = 10,
-    alpha = 60, alpha.cv = 20, beta = 1.5, beta.cv = 5)} for the Weibull
-model.
+\item \code{model.par = list(fmax = 100, fmax.cv = 5, k = 0.6,
+    k.cv = 25, tlag = 0, tlag.cv = 0)} for the first-order model.
+\item \code{model.par = list(fmax = 100, fmax.cv = 5, tlag = 5,
+    tlag.cv = 10, mdt = 15, mdt.cv = 20, beta = 1.5, beta.cv = 5)}, or
+\item \code{model.par = list(fmax = 100, fmax.cv = 5, tlag = 5,
+    tlag.cv = 10, alpha = 60, alpha.cv = 20, beta = 1.5, beta.cv = 5)}
+for the Weibull model.
 }
-
-See vignette for more details.
 }
 
 \subsection{Use multivariate normal distribution}{
@@ -134,17 +140,17 @@ See vignette for more details.
 If \code{dp} is supplied by user, simulation will be done based on
 multivariate normal distribution, and \code{n.units} of individual
 profiles will be simulated with mean dissolution profile equals to
-\code{dp}. IF CV at time points (\code{dp.cv}) is supplier, the CV\% of
-simulated profiles will equal to \code{dp.cv}. If \code{dp.cv} is missing,
-it will be simulated such that the CV is 20\% for time points up to 10 min,
-5\% for time points where dissolution is greater than 90\% (more realistic),
-and 10\% for the rest time points. The length of \code{dp} and \code{dp.cv}
-should be the same.
+\code{dp}. IF CV at time points (\code{dp.cv}) is supplier, the CV\%
+of simulated profiles will equal to \code{dp.cv}. If \code{dp.cv} is
+missing, it will be simulated such that the CV is 20\% for time points
+up to 10 min, 5\% for time points where dissolution is greater than
+90\% (more realistic), and 10\% for the rest time points.
+The length of \code{dp} and \code{dp.cv} should be the same.
 
 When this method is used, depending on \code{dp/dp.cv}, there is no
-guarantee that all individual profiles increase with time; near the end
-of the time points, some profiles may decrease. This is realistic for
-those drug substances that are unstable in the dissolution medium.
+guarantee that all individual profiles increase with time; near the
+end of the time points, some profiles may decrease. This is realistic
+for those drug substances that are unstable in the dissolution medium.
 To avoid this, set \code{ascending = TRUE}.
 }
 }
@@ -166,17 +172,11 @@ d1$sim.info
 #individual model parameters
 d1$mod.par.ind
 
-# plot with individual and mean profiles
-# d1$sim.plot
-
 # using Weibull model to simulate 24 profiles without lag time
 mod.par <- list(fmax = 100, fmax.cv = 2, tlag = 0, tlag.cv = 0,
                 mdt = 20, mdt.cv = 5, beta = 2.2, beta.cv = 5)
 d2 <- sim.dp(tp, model.par = mod.par, seed = 100, n.units = 100L,
              plot = FALSE)
-
-# mean plot and boxplot
-# d2$sim.plot
 
 # using multivariate normal distribution approach
 # mean profile same length as tp

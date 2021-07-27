@@ -66,6 +66,7 @@
 #'   report will be printed to screen.
 #' @param sim.data.out Logical. If \code{TRUE}, all individual bootstrap data
 #'   sets will be included in the output.
+#'
 #' @returns A list of 3 or 5 components.
 #'
 #'   - \code{boot.ci}: A data frame of bootstrap f2 confidence intervals.

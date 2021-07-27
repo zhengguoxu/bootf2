@@ -14,46 +14,52 @@
 #'        message = TRUE, time.unit = c("min", "h"),
 #'        plot.start.time = 0, plot.max.unit = 24L)
 #'
-#' @param test,ref Data frames of dissolution profiles of test and reference
-#'   product if \code{path.in} and \code{file.in} are not specified; otherwise,
-#'   they should be character strings indicating the worksheet names of the
-#'   Excel file where the dissolution data is saved. Required format:
-#'   the first column should be time and the rest columns are dissolution
-#'   data of each unit. See Input/Output in Details.
+#' @param test,ref Data frames of dissolution profiles of test and
+#'   reference product if \code{path.in} and \code{file.in} are not
+#'   specified; otherwise, they should be character strings indicating
+#'   the worksheet names of the Excel file where the dissolution data
+#'   is saved. Required format: the first column should be time and the
+#'   rest columns are dissolution data of each unit. See Input/Output
+#'   in Details.
 #' @param regulation Character strings indicating regulatory guidelines.
 #'   See Regulation in Details.
-#' @param path.in,file.in,path.out,file.out Character strings of input and
-#'   output directories and file names. See Input/Output in Details.
+#' @param path.in,file.in,path.out,file.out Character strings of input
+#'   and output directories and file names. See Input/Output in Details.
 #' @param digits An integer indicating the decimal points for the output.
 #' @param cv.rule Logical. If \code{TRUE}, CV rule will be checked
 #'   according to regulatory guidelines. See Regulation in Details.
-#' @param min.points An integer indicating the minimum time points to be used
-#'   to calculate f2. Do not change the default value (3) for conventional f2
-#'   calculation. This parameter is mainly used for bootstrap f2 method.
-#'   See Regulation in Details.
+#' @param min.points An integer indicating the minimum time points to
+#'   be used to calculate f2. Do not change the default value (3) for
+#'   conventional f2 calculation. This parameter is mainly used for
+#'   bootstrap f2 method. See Regulation in Details.
 #' @param both.TR.85 Logical. If \code{TRUE}, the old (incorrect)
-#'   interpretation (that both the test and reference should release more than
-#'   85%) will be used for f2 calculation when \code{regulation = 'FDA'}.
-#'   See Regulation in Details.
-#' @param message Logical. If \code{TRUE}, the results and messages will be
-#'   printed on screen.
-#' @param f2.type Character strings indicating which f2 estimators should be
-#'   calculated. For conventional f2 calculation, the default 'est.f2'
-#'   should be used. Other estimators are mainly for the bootstrap method.
-#' @param plot Logical. If \code{TRUE}, a dissolution versus time plot will
-#'   be printed.
+#'   interpretation (that both the test and reference should release
+#'   more than 85%) will be used for f2 calculation when
+#'   \code{regulation = 'FDA'}. See Regulation in Details.
+#' @param message Logical. If \code{TRUE}, the results and messages
+#'   will be printed on screen.
+#' @param f2.type Character strings indicating which f2 estimators
+#'   should be calculated. For conventional f2 calculation, the default
+#'   'est.f2' should be used. Other estimators are mainly for the
+#'   bootstrap method.
+#' @param plot Logical. If \code{TRUE}, a dissolution versus time
+#'   plot will be printed.
 #' @param time.unit Character strings indicating the unit of time.
 #'   It should be either \code{"min"} for minute or \code{"h"} for hour.
 #'   It is mainly used for checking CV rules and making plot.
 #'   See Regulation in Details.
-#' @param plot.start.time Numeric value indicating the start time for the plot.
-#' @param plot.max.unit Integer. If the number of individual units is no more
-#'   than this value, mean and all individual profiles will be plotted,
-#'   otherwise, individual profiles will represented by boxplots.
-#'   Therefore, the value should not be too big.
+#' @param plot.start.time Numeric value indicating the start time
+#'   for the plot.
+#' @param plot.max.unit Integer. If the number of individual units
+#'   is no more than this value, mean and all individual profiles
+#'   will be plotted, otherwise, individual profiles will represented
+#'   by boxplots. Therefore, the value should not be too large.
+#'
 #' @return A vector of f2 and number of time points used for the calculation.
 #'
-#' @details ## Input/Output
+#' @details
+#'
+#' ## Input/Output
 #'
 #' - \code{path.in} is the directory where the input file is, and
 #'   \code{file.in} is the input data file. If they are both missing,
@@ -67,32 +73,33 @@
 #'   the version of the Excel. In that case, the argument \code{test} and
 #'   \code{ref} should be the names of the work sheets in the Excel,
 #'   given within the quotation marks.
-#' - \code{path.out} and \code{file.out} are the names of the output directory
-#'   and file. It is an overkill to output such simple calculations;
+#' - \code{path.out} and \code{file.out} are the names of the output
+#'   directory and file. It is an overkill to output such simple calculations;
 #'   therefore, unless these two arguments are specified by the user,
 #'   results are printed on screen by default.
 #'
 #' ## Regulation
 #'
-#' To use f2 method, different regulatory guidelines have slightly different
-#' requirements. Some requirements are almost universal, such as
-#' same time points for the test and reference product, minimum 3 time points
-#' (excluding time zero), and twelve individual values for every time point for
-#' for each formulation. Other requirements are different among different
-#' regulatory guidelines, or at least interpreted differently. Two main issues
-#' are the rules for the variability (CV Rule) and time points where
-#' dissolution is more than 85% (85% Rule).
+#' To use f2 method, different regulatory guidelines have slightly
+#' different requirements. Some requirements are almost universal,
+#' such as same time points for the test and reference product,
+#' minimum 3 time points (excluding time zero), and twelve individual
+#' profiles for each formulation. Other requirements are slightly
+#' different among different regulatory guidelines, or at least
+#' interpreted differently. Two main issues are the rules for the
+#' variability (CV Rule) and time points where dissolution is more
+#' than 85% (85% Rule).
 #'
 #' ### CV rule
 #'
-#' - EMA: The CV of the first time point should not be greater than 20%, and
-#'   the CV of the rest time points should not be greater than 10%. The phrase
-#'   'the first time point' was later interpreted as all time points up to
-#'   10 min. For example, if there are 5 min and 10 min time points in the
-#'   dissolution profiles, the CV for 5 min and 10 min should not be great
-#'   than 20%.
-#' - WHO: Same as EMA rule, i.e., CV not greater than 20% for time points up to
-#'   10 min, and not greater than 10% for the rest time points.
+#' - EMA: The CV of the first time point should not be greater than 20%,
+#'   and the CV of the rest time points should not be greater than 10%.
+#'   The phrase 'the first time point' was later interpreted as all time
+#'   points up to 10 min. For example, if there are 5 min and 10 min time
+#'   points in the dissolution profiles, the CV for 5 min and 10 min should
+#'   not be greater than 20%.
+#' - WHO: Same as EMA rule, i.e., CV not greater than 20% for time points
+#'   up to 10 min, and not greater than 10% for the rest time points.
 #' - US FDA: More flexible. The CV for the early time points should not be
 #'   greater than 20%, and for the rest time points, not greater than 10%.
 #'   The phrase 'early time points' is typically interpreted as those points
@@ -101,18 +108,19 @@
 #'
 #' ### 85% Rule
 #'
-#' - EMA: Dissolution profiles should be 'cut' at the time point where either
-#'   the test or reference release more than 85%.
-#' - WHO: Dissolution profiles should be 'cut' at the time point where the
-#'   reference release more than 85%.
-#' - US FDA: Only one measurement should be considered after 85% dissolution
-#'   of both the products.
+#' - EMA: Dissolution profiles should be 'cut' at the time point where
+#'   either the test or reference release more than 85%.
+#' - WHO: Dissolution profiles should be 'cut' at the time point where
+#'   the reference release more than 85%.
+#' - US FDA: Only one measurement should be considered after 85%
+#'   dissolution of both the products.
 #'   Many interpreted that the dissolution profiles should be 'cut'
-#'   at the time point where both the test and reference release more than 85%.
-#'   However, this is a misunderstanding. Otherwise, when the slower profile
-#'   releases more than 85%, there might be many measurements that are more than
-#'   85% in the faster profile, which directly contradict to the statement that
-#'   only one measurement should be used after 85% dissolution.
+#'   at the time point where both the test and reference release more
+#'   than 85%. However, this is a misunderstanding. Otherwise, when
+#'   the slower profile releases more than 85%, there might be many
+#'   measurements that are more than 85% in the faster profile,
+#'   which directly contradict to the statement that only one measurement
+#'   should be used after 85% dissolution.
 #'
 #' @examples
 #' tp <- c(5, 10, 15, 20, 30, 45, 60)
@@ -180,8 +188,10 @@ calcf2 <- function(test, ref, regulation = c("EMA", "FDA", "WHO"),
                       path.in, paste0(path.in, "/"))
     file.in <- paste0(path.in, file.in)
     if (!file.exists(file.in)) {
-      stop(paste0("\nThe file you specified does not exist. Don't forget to include",
-                  "\nthe extension 'xlsx' or 'xls' in the file name."))
+      stop(
+        paste0("\nThe file you specified does not exist. Don't forget to ",
+               "include\nthe extension 'xlsx' or 'xls' in the file name.")
+      )
     }
 
     # package readxl::read_excel
@@ -433,7 +443,8 @@ calcf2 <- function(test, ref, regulation = c("EMA", "FDA", "WHO"),
         cat("CV criteria not fulfilled; therefore, f2 method cannot",
             "be applied.\n\n")
         if (regulation != "FDA") {
-          stop("\nYou should consider alternative methods such as bootstrap f2.\n\n")
+          stop(paste0("\n\nYou should consider alternative methods such as ",
+                      "bootstrap f2.\n\n"))
         } else {
           warning("CV criteria not strictly fulfilled; you might want to ",
                   "consider \nalternative method such as bootstrap f2.\n\n" )

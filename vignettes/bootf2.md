@@ -1,14 +1,14 @@
 ---
 title: "Confidence Intervals of $f_2$ Using Bootstrap Method"
 author: "Zhengguo XU"
-date: "2021-07-26"
+date: "2021-08-09"
 output: 
   rmarkdown::html_vignette:
     keep_md: true
-    toc: true
+    toc: false
     toc_depth: 3
-    fig_width: 6.5
-    fig_height: 4
+    fig_width: 7
+    fig_height: 4.5
   highlight: "tango"
 bibliography: ref.bib
 notes-after-punctuation: false
@@ -36,22 +36,15 @@ Nevertheless, there are several prerequisites for the use of f2 method according
 to the regulatory guidelines, such as no more than one time point above 85%
 dissolved should be used and the variability, expressed as coefficient of
 variation (CV), should be no more than 20% and 10% for early and later time
-points, respectively. See vignette [Introduction to bootf2](introduction.md)
-for details. 
+points, respectively. See vignette *Introduction to bootf2* for details. 
 
-Recently, several guidelines recommended the use of confidence interval 
-of $f_2$ approach using bootstrap when the traditional $f_2$ method 
-cannot be applied [@EMA-2018-09-QA.MSD.DISSO; @Davit-2013-03-BA;
-@Lum-2019-05-WS; @Mandula-2019-05-WS]. However, none of the guidelines
-specified in details which estimators or types of confidence
-intervals should be used. Therefore, the function `bootf2()` will
-output various confidence intervals by default for several $f_2$ estimators. 
-
-The following descriptions of the type of $f_2$ and intervals were modified
-based on the manuscript *Estimators and Confidence Intervals of $f_2$ Using
-Bootstrap Methodology for the Comparison of Dissolution Profiles*,
-submitted to the journal *Computer Methods and Programs in Biomedicine*
-[@Xu-2021-CMPB].
+Recently, several guidelines recommended the use of confidence interval of 
+$f_2$ approach using bootstrap when the traditional $f_2$ method cannot be
+applied [@EMA-2018-09-QA.MSD.DISSO; @Davit-2013-03-BA; @Lum-2019-05-WS;
+@Mandula-2019-05-WS]. However, none of the guidelines specified in details 
+which estimators or types of confidence intervals should be used. Therefore, 
+the function `bootf2()` will output various confidence intervals by default
+for several $f_2$ estimators. 
 
 ### Types of $f_2$
 
@@ -333,66 +326,68 @@ bootf2(test, ref, path.in, file.in, path.out, file.out,
 ### Notes on function arguments
 
 1. Data input: `test`, `ref`, `path.in`, `file.in`
-    - In the typical interactive use, `test` and `ref` are data frames with
+    - In the typical interactive use, `test` and `ref` are *data frames* with
       the time as the first column, and individual units for the rest of 
       columns. In such cases, arguments `path.in` and `file.in` should not 
-      be used. 
-    - Data can be read directly from an Excel file with extension `.xlsx` 
-      or `.xls`. In this case, data of test and reference should be 
-      stored in separate worksheets. The first column should be time, 
-      the rest columns are individual units. *The first row* is the 
-      column head indicating the names, such as 'time', 'unit 01', 
-      unit 02', .... It doesn't matter what the names are as columns 
-      will be renamed internally by the function. The important point 
-      is that *the first row will not be read, so do not put dissolution 
-      data on the first row*. 
+      be used.
+    - Data can be read directly from an Excel file with extension `.xlsx` or
+      `.xls`. In this case, data of test and reference should be stored in
+      separate worksheets. The first column should be time, the rest columns 
+      are individual units. *The first row* is the column head indicating the
+      names, such as 'time', 'unit 01', unit 02', .... It doesn't matter what
+      the names are as columns will be renamed internally by the function. The
+      important point is that *the first row will not be read, so do not put
+      dissolution data on the first row*. 
     - When `path.in` and `file.in` are provided, the argument `test` and
-      `ref` should be the worksheet names inside quotation mark, e.g., 
+      `ref` should be the *worksheet names inside quotation mark*, e.g., 
       `"lot ABCD1234 pH 6.8"`. 
     - `path.in` can be an absolute path such as`"/home/myname/my.project/dat/"`,
-      or a relative path such as `"../dat/"` if the working directory is 
-      in the folder `"/home/myname/my.project/analysis/"` and the data file
-      is in the folder `"/home/myname/my.project/dat/"`. 
+      or a relative path such as `"../dat/"` if the working directory is in the
+      folder `"/home/myname/my.project/analysis/"` and the data file is in the
+      folder `"/home/myname/my.project/dat/"`. 
     - One more note for Windows user: As Windows use "\" instead of "/" to
       separate path, you have to either escape it by an additional "\", 
       e.g., `"C:\user\myname\my.project\dat\"` *cannot* be the `path.in`, 
       you have to changed it to `"C:\\user\\myname\\my.project\\dat\\"`, or
       to `"C:/user/myname/my.project/dat/"`, the same format as used in Linux
       system.
-1. For such simple calculation, argument `path.out` and `file.out` are
-   really overkill. By default the result will be printed to screen. But if 
-   somehow you feel that you need it, the same principle for `path.in` and 
-   `file.in` applies here.
+1. Output: `path.out` and `file.out`, `output.to.screen`:
+    - If argument `path.out` and `file.out` are not provided, but argument
+      `print.report` is `TRUE`, then a plain text report will be generated
+      automatically in the current working directory with file name
+      `test_vs_ref_TZ_YYYY-MM-DD_HHMMSS.txt`, where `test` and `ref` are data
+      set names of test and reference, `TZ` is the time zone such as CEST, 
+      `YYYY-MM-DD` is the numeric date format and `HHMMSS` is the numeric time
+      format for hour, minute, and second.
+    - For a quick check, set argument `output.to.screen = TRUE`, a summary
+      report very similar to concise style report will be printed on screen.
 1. Argument `jackknife.type`
-
-    - For any sample with size $n$, the jackknife estimator is obtained 
-      by estimating the parameter for each subsample omitting the $i$th
-      observation. However, when two samples (e.g., test and reference) 
-      are involved, there are several possible ways to do it. Assuming 
-      sample size of test and reference are $n_\mathrm{T}$ and $n_\mathrm{R}$,
-      the following three possibility are considered:
-      - Estimated by removing one observation from both test and 
-        reference samples. In this case, the prerequisite is 
+    - For any sample with size $n$, the jackknife estimator is obtained by
+      estimating the parameter for each subsample omitting the $i$th 
+      observation. However, when two samples (e.g., test and reference) are
+      involved, there are several possible ways to do it. Assuming sample size
+      of test and reference are $n_\mathrm{T}$ and $n_\mathrm{R}$, the
+      following three possibility are considered:
+      - Estimated by removing one observation from both test and reference
+        samples. In this case, the prerequisite is 
         $n_\mathrm{T} = n_\mathrm{R}$, denoted by `nt=nr` in the function.
         So if there are 12 units in test and reference data sets, there will
         be 12 jackknife estimators.
-      - Estimate the jackknife for test sample while keeping the reference  
-        data unchanged; and then estimate jackknife for reference sample 
-        while keeping the test sample unchanged. This is denoted by 
-        `nt+nr` in the function. This is the default method.
-        So if there are 12 units in test and reference data sets, there will
-        be $12 + 12 = 24$ jackknife estimators.
-      - For each observation deleted from test sample, estimate jackknife
-        for reference sample. This is denoted by `nt*nr` in the function.
-        So if there are 12 units in test and reference data sets, there will
-        be $12 \times 12 = 144$ jackknife estimators.
+      - Estimate the jackknife for test sample while keeping the reference data
+        unchanged; and then estimate jackknife for reference sample while
+        keeping the test sample unchanged. This is denoted by `nt+nr` in the
+        function. This is the default method. So if there are 12 units in test
+        and reference data sets, there will be $12 + 12 = 24$ jackknife
+        estimators.
+      - For each observation deleted from test sample, estimate jackknife for
+        reference sample. This is denoted by `nt*nr` in the function. So if
+        there are 12 units in test and reference data sets, there will be 
+        $12 \times 12 = 144$ jackknife estimators.
 1. Arguments `f2.type` and `ci.type` are explained in the previous section.
-1. By default, the individual bootstrapped data set are not included in
-   the output as those data sets are only useful for validation purpose. 
-   To include the individual data sets, set the argument 
-   `sim.data.out = TRUE`. 
-1. Read the function manual `help("bootf2")` and refer to [Calculating
-   Similarity Factor $f_2$](calcf2.md) for more details of each argument.
+1. By default, the individual bootstrapped data set are not included in the
+   output as those data sets are only useful for validation purpose. To include
+   the individual data sets, set the argument `sim.data.out = TRUE`. 
+1. Read the function manual `help("bootf2")` for more details of each argument.
 
 ## Examples
 
@@ -425,246 +420,7 @@ bootstrap number is set to 100 only.
 
 ```r
 # output file will be generated automatically
-bootf2(dt$sim.disso, dr$sim.disso, n.boots = 100)
-# =================================================================
-# |                                                               |
-# |  Comparison of Dissolution Profiles by Bootstrap f2 Method.   |
-# |_______________________________________________________________|
-# |                                                               |
-# | Smimilarity Criterion:                                        |
-# | ----------------------                                        |
-# |     To conclude similarity, the lower limit of 90% confidence |
-# | interval should be greater than or equal to 50.               |
-# |                                                               |
-# =================================================================
-# 
-# ============================================
-# |              Main Results:               |
-# |  f2 and Its Confidence Intervals (CI)s   |
-# ============================================
-# 
-# ----------------------
-# * Estimated f2 Values
-# ----------------------
-#   - with original data                :   51.06
-#   - with original data (by Jackknife) :   51.07
-#   - with bootstrapped data (Mean)     :   51.09
-#   - with bootstrapped data (Median)   :   50.7
-# 
-# -----------------------
-# * Confidence Intervals
-# -----------------------
-#          Types of         Lower   Upper
-#    Confidence Intervals   <----------->
-#                  Normal   44.57   57.47
-#                   Basic   44.02   57.61
-#     Percentile (Type 1)   44.50   57.16
-#     Percentile (Type 2)   44.59   57.65
-#     Percentile (Type 3)   44.50   57.16
-#     Percentile (Type 4)   44.50   57.16
-#     Percentile (Type 5)   44.59   57.65
-#     Percentile (Type 6)   44.51   58.10
-#     Percentile (Type 7)   44.68   57.21
-#     Percentile (Type 8)   44.56   57.80
-#     Percentile (Type 9)   44.57   57.77
-#     Percentile (boot)     44.51   58.10
-#         BCa (Jackknife)   44.83   59.84
-#              BCa (boot)   44.87   59.88
-#   ----------------------------------------------------
-#   Out of 100 bootstrapped data sets,
-#   - Number of f2 calculated with 1 time point :   0
-#   - Number of f2 calculated with 2 time point :   0
-#   - Number of f2 cannot be calculated (NA)    :   0
-#   ----------------------------------------------------
-# ______________________________________________________________________
-# 
-# ---------------------
-# * Expected f2 Values
-# ---------------------
-#   - with original data                :   50.59
-#   - with original data (by Jackknife) :   50.58
-#   - with bootstrapped data (Mean)     :   50.68
-#   - with bootstrapped data (Median)   :   50.35
-# 
-# -----------------------
-# * Confidence Intervals
-# -----------------------
-#          Types of         Lower   Upper
-#    Confidence Intervals   <----------->
-#                  Normal   44.20   56.81
-#                   Basic   43.55   56.89
-#     Percentile (Type 1)   44.29   56.69
-#     Percentile (Type 2)   44.33   57.19
-#     Percentile (Type 3)   44.29   56.69
-#     Percentile (Type 4)   44.29   56.69
-#     Percentile (Type 5)   44.33   57.19
-#     Percentile (Type 6)   44.30   57.63
-#     Percentile (Type 7)   44.35   56.74
-#     Percentile (Type 8)   44.32   57.34
-#     Percentile (Type 9)   44.32   57.30
-#     Percentile (boot)     44.30   57.63
-#         BCa (Jackknife)   44.30   57.66
-#              BCa (boot)   44.32   57.95
-#   ----------------------------------------------------
-#   Out of 100 bootstrapped data sets,
-#   - Number of f2 calculated with 1 time point :   0
-#   - Number of f2 calculated with 2 time point :   0
-#   - Number of f2 cannot be calculated (NA)    :   0
-#   ----------------------------------------------------
-# ______________________________________________________________________
-# 
-# ---------------------------
-# * Bias-Corrected f2 Values
-# ---------------------------
-#   - with original data                :   51.54
-#   - with original data (by Jackknife) :   51.58
-#   - with bootstrapped data (Mean)     :   51.53
-#   - with bootstrapped data (Median)   :   51.17
-# 
-# -----------------------
-# * Confidence Intervals
-# -----------------------
-#          Types of         Lower   Upper
-#    Confidence Intervals   <----------->
-#                  Normal   44.92   58.18
-#                   Basic   44.50   58.43
-#     Percentile (Type 1)   44.64   57.78
-#     Percentile (Type 2)   44.83   58.21
-#     Percentile (Type 3)   44.64   57.78
-#     Percentile (Type 4)   44.64   57.78
-#     Percentile (Type 5)   44.83   58.21
-#     Percentile (Type 6)   44.66   58.59
-#     Percentile (Type 7)   45.01   57.83
-#     Percentile (Type 8)   44.78   58.34
-#     Percentile (Type 9)   44.79   58.31
-#     Percentile (boot)     44.66   58.59
-#         BCa (Jackknife)   45.38   60.91
-#              BCa (boot)   45.45   60.91
-#   ----------------------------------------------------
-#   Out of 100 bootstrapped data sets,
-#   - Number of f2 calculated with 1 time point :   0
-#   - Number of f2 calculated with 2 time point :   0
-#   - Number of f2 cannot be calculated (NA)    :   0
-#   ----------------------------------------------------
-# ______________________________________________________________________
-# 
-# ----------------------------------------
-# * Variance-corrected Expected f2 Values
-# ----------------------------------------
-#   - with original data                :   50.58
-#   - with original data (by Jackknife) :   50.57
-#   - with bootstrapped data (Mean)     :   50.63
-#   - with bootstrapped data (Median)   :   50.33
-# 
-# -----------------------
-# * Confidence Intervals
-# -----------------------
-#          Types of         Lower   Upper
-#    Confidence Intervals   <----------->
-#                  Normal   44.24   56.82
-#                   Basic   43.61   56.89
-#     Percentile (Type 1)   44.27   56.65
-#     Percentile (Type 2)   44.30   57.12
-#     Percentile (Type 3)   44.27   56.65
-#     Percentile (Type 4)   44.27   56.65
-#     Percentile (Type 5)   44.30   57.12
-#     Percentile (Type 6)   44.27   57.55
-#     Percentile (Type 7)   44.33   56.70
-#     Percentile (Type 8)   44.29   57.27
-#     Percentile (Type 9)   44.29   57.23
-#     Percentile (boot)     44.27   57.55
-#         BCa (Jackknife)   44.28   57.62
-#              BCa (boot)   44.30   57.81
-#   ----------------------------------------------------
-#   Out of 100 bootstrapped data sets,
-#   - Number of f2 calculated with 1 time point :   0
-#   - Number of f2 calculated with 2 time point :   0
-#   - Number of f2 cannot be calculated (NA)    :   0
-#   ----------------------------------------------------
-# ______________________________________________________________________
-# 
-# -----------------------------------------
-# * Variance- and Bias-Corrected f2 Values
-# -----------------------------------------
-#   - with original data                :   51.56
-#   - with original data (by Jackknife) :   51.6
-#   - with bootstrapped data (Mean)     :   51.58
-#   - with bootstrapped data (Median)   :   51.18
-# 
-# -----------------------
-# * Confidence Intervals
-# -----------------------
-#          Types of         Lower   Upper
-#    Confidence Intervals   <----------->
-#                  Normal   44.88   58.18
-#                   Basic   44.43   58.42
-#     Percentile (Type 1)   44.67   57.93
-#     Percentile (Type 2)   44.87   58.33
-#     Percentile (Type 3)   44.67   57.93
-#     Percentile (Type 4)   44.67   57.93
-#     Percentile (Type 5)   44.87   58.33
-#     Percentile (Type 6)   44.69   58.69
-#     Percentile (Type 7)   45.05   57.97
-#     Percentile (Type 8)   44.81   58.45
-#     Percentile (Type 9)   44.82   58.42
-#     Percentile (boot)     44.69   58.68
-#         BCa (Jackknife)   45.22   61.07
-#              BCa (boot)   45.27   61.12
-#   ----------------------------------------------------
-#   Out of 100 bootstrapped data sets,
-#   - Number of f2 calculated with 1 time point :   0
-#   - Number of f2 calculated with 2 time point :   0
-#   - Number of f2 cannot be calculated (NA)    :   0
-#   ----------------------------------------------------
-# ______________________________________________________________________
-# 
-# ============================================
-# | Function Settings and System Information |
-# ============================================
-# 
-# ---------------------
-# * Function Settings
-# ---------------------
-#   - test              :   dt$sim.disso
-#   - ref               :   dr$sim.disso
-#   - n.boots           :   100
-#   - seed              :   306
-#   - digits            :   2
-#   - alpha             :   0.05 (90% CI)
-#   - regulation        :   EMA
-#   - min.points        :   1
-#   - both.TR.85        :   FALSE
-#   - print.report      :   TRUE
-#   - report.style      :   concise
-#   - f2.type           :   all
-#   - ci.type           :   all
-#   - quantile.type     :   all
-#   - jackknife.type    :   nt+nr
-#   - time.unit         :   min
-#   - output.to.screen  :   TRUE
-#   - sim.data.out      :   FALSE
-#   - path.in           :   NA
-#   - file.in           :   NA
-#   - path.out          :   /home/zhengguo/github/bootf2/vignettes/
-#   - file.out          :   dt$sim.disso_vs_dr$sim.disso_CEST_2021-07-26_215511.txt
-# 
-# ---------------------
-# * System Information
-# ---------------------
-#   - Operating System Name     :   Linux 5.4.0-80-generic
-#   - Operating System Version  :   #90-Ubuntu SMP Fri Jul 9 22:49:44 UTC 2021
-#   - Machine Node Name         :   MyHomeLinuxPC
-#   - User Name                 :   zhengguo
-#   - Time Zone                 :   Europe/Madrid
-#   - R Version                 :   4.1.0 (2021-05-18)
-#   - Package bootf2 Version    :   0.3.0
-# ______________________________________________________________________
-# 
-# The current report was generated at 21:55:11 on 2021-07-26 CEST by
-# user 'zhengguo' on machine 'MyHomeLinuxPC', and saved as text file
-# 'dt$sim.disso_vs_dr$sim.disso_CEST_2021-07-26_215511.txt' at the location:
-# '/home/zhengguo/github/bootf2/vignettes/'.
-# ======================================================================
+bootf2(dt$sim.disso, dr$sim.disso, n.boots = 100, print.report = FALSE)
 ```
 
 

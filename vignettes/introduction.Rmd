@@ -7,8 +7,8 @@ output:
     keep_md: true
     toc: false
     toc_depth: 3
-    fig_width: 6.5
-    fig_height: 4
+    fig_width: 7
+    fig_height: 4.5
   highlight: "tango"
 bibliography: ref.bib
 notes-after-punctuation: false
@@ -55,56 +55,52 @@ anvisa2 <- paste0(anvisa1, "res0031_11_08_2010.html")
 
 ## Introduction
 
-Because of the prominent roles dissolution profiles played in the
-pharmaceutical industry, it is important to have a reliable method 
-to compare dissolution profiles. Over the years, many model-dependent 
-and -independent methods were developed; but owing to its simplicity, 
-similarity factor $f_2$ is the most widely used one, and it is 
-recommended in many regulatory guidelines [@EMA-2010-INV.BE;
-@USFDA-1997-08-DISSO.IR.SOLID.ORAL; @HealthCanada-2017; @WHO-2017;
-@MHLW2012; @ANVISA2010; @CDENMPA-2016].
+Because of the prominent roles dissolution profiles played in the pharmaceutical
+industry, it is important to have a reliable method to compare dissolution 
+profiles. Over the years, many model-dependent and -independent methods were
+developed; but owing to its simplicity, similarity factor $f_2$ is the most
+widely used one, and it is recommended in many regulatory guidelines
+[@EMA-2010-INV.BE; @USFDA-1997-08-DISSO.IR.SOLID.ORAL; @HealthCanada-2017;
+@WHO-2017; @MHLW2012; @ANVISA2010; @CDENMPA-2016].
 
-However, to apply the $f_2$ method, several conditions have to be
-fulfilled due to certain drawbacks associated with it. When $f_2$ 
-method is not applicable for the failure of fulfilling regulatory
-conditions, other methods should be used. 
+However, to apply the $f_2$ method, several conditions have to be fulfilled due
+to certain drawbacks associated with it. When $f_2$ method is not applicable for
+the failure of fulfilling regulatory conditions, other methods should be used. 
 
-The package `bootf2` was developed to compare the dissolution profiles
-using confidence interval of $f_2$ by bootstrap method as recommended 
-recently by several regulatory agencies [@EMA-2018-09-QA.MSD.DISSO;
-@Davit-2013-03-BA; @Lum-2019-05-WS; @Mandula-2019-05-WS].
+The package `bootf2` was developed to compare the dissolution profiles using
+confidence interval of $f_2$ by bootstrap method as recommended recently by 
+several regulatory agencies [@EMA-2018-09-QA.MSD.DISSO; @Davit-2013-03-BA;
+@Lum-2019-05-WS; @Mandula-2019-05-WS].
 
 There are 4 main functions in the package:
 
-1. `sim.dp()` to simulate dissolution profile using mathematical models
-    or multivariate normal distribution.
+1. `sim.dp()` to simulate dissolution profile using mathematical models or
+    multivariate normal distribution.
 1. `calcf2()` to calculate similarity factor $f_2$ according to different
     regulatory rules.
-1. `sim.dp.byf2()` to find a dissolution profile that, when compared to 
-    a given reference profile, has $f_2$ value equal to the predefined 
-    target $f_2$.
-1. `bootf2()` to estimate the confidence intervals of $f_2$s using 
-    bootstrap method.  
+1. `sim.dp.byf2()` to find a dissolution profile that, when compared to a given
+    reference profile, has $f_2$ value equal to the predefined target $f_2$.
+1. `bootf2()` to estimate the confidence intervals of $f_2$s using bootstrap 
+    method.  
 
-The details of functions are explained in their respective vignettes.
+The details of functions are explained in their respective manual and vignettes.
 Some common topics are discussed in this document. 
 
 
 ## Regulatory rules for $f_2$
 
-To apply the traditional $f_2$ method, several conditions have to be
-fulfilled. Unfortunately, different regulatory agencies described those 
-conditions differently. Some of the conditions are same across different
-guidelines, such as 1.) *same dissolution condition* 
-and *same time points* for both test and reference, 2.) use *12 units*, 
-and 3.) use *at least 3 time points* for the calculation of $f_2$, 
-while others are either slightly different, or are actually the same 
-but different interpretation exist due to the ambiguous wording in
-the guideline.
+To apply the traditional $f_2$ method, several conditions have to be fulfilled.
+Unfortunately, different regulatory agencies described those conditions 
+differently. Some of the conditions are same across different guidelines, such
+as 1.) *same dissolution condition* and *same time points* for both test and
+reference, 2.) use *12 units*, and 3.) use *at least 3 time points* for the
+calculation of $f_2$, while others are either slightly different, or are 
+actually the same but different interpretation exist due to the ambiguous
+wording in the guideline.
 
-The last two scenarios are detailed below with direct quotes 
-from guidelines (with hyper links) as they affect the implementation
-of the functions `calcf2()`.
+The last two scenarios are detailed below with direct quotes from guidelines 
+(with hyper links) as they affect the implementation of the functions 
+`calcf2()`.
 
 4. *20%/10% CV Rule*
 
@@ -160,7 +156,8 @@ of the functions `calcf2()`.
       be not more than 10%."](`r canada4`)
       
       So it is not clear right now which time points could be considered 
-      as *earlier points*. 
+      as *earlier points*. In the function `calcf2()`, the same rule as 
+      EMA's was implemented. 
       
     - *WHO* [@WHO-2017]:
     

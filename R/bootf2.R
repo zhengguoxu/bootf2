@@ -1,81 +1,330 @@
-#' Estimate 90% Confidence Intervals of f2 Using Bootstrap Methodology
+#' Estimate 90% Confidence Intervals of \eqn{f_2}{f2} with Bootstrap Methodology
 #'
-#' Main function to estimate 90% confidence intervals of f2 using bootstrap
-#' methodology.
+#' Main function to estimate 90% confidence intervals of \eqn{f_2}{f2} using
+#' bootstrap methodology.
 #'
 #' @importFrom stats qnorm pnorm glm
 #' @importFrom utils packageVersion sessionInfo
 #' @usage
 #' bootf2(test, ref, path.in, file.in, path.out, file.out,
-#'        n.boots = 10000L, seed = 306, digits = 2L, alpha = 0.05,
-#'        regulation = c("EMA", "FDA", "WHO"), min.points = 1L,
-#'        both.TR.85 = FALSE, print.report = TRUE,
+#'        n.boots = 10000L, seed = 306L, digits = 2L, alpha = 0.05,
+#'        regulation = c("EMA", "FDA", "WHO","Canada", "ANVISA"),
+#'        min.points = 1L, both.TR.85 = FALSE, print.report = TRUE,
 #'        report.style = c("concise", "intermediate", "detailed"),
 #'        f2.type = c("all", "est.f2", "exp.f2", "bc.f2",
 #'                    "vc.exp.f2", "vc.bc.f2"),
 #'        ci.type = c("all", "normal", "basic", "percentile",
 #'                    "bca.jackknife", "bca.boot"),
-#'        quantile.type = c("all", 1:9, "boot"),
-#'        jackknife.type = c("nt+nr", "nt*nr", "nt=nr"),
+#'        quantile.type = c("all", as.character(1:9), "boot"),
+#'        jackknife.type = c("all", "nt+nr", "nt*nr", "nt=nr"),
 #'        time.unit = c("min", "h"), output.to.screen = TRUE,
 #'        sim.data.out = FALSE)
 #'
-#' @param test,ref Data frames of dissolution profiles of test and reference
-#'   product if \code{path.in} and \code{file.in} are not specified; otherwise,
-#'   they should be character strings indicating the worksheet names of the
-#'   Excel file where the dissolution data is saved. Required format:
-#'   the first column should be time and the rest columns are dissolution
-#'   data of each unit. See Input/Output in Details.
-#' @param path.in,file.in,path.out,file.out Character strings of input and
+#' @param test,ref *Data frames* of dissolution profiles of test and reference
+#'   product if `path.in` and `file.in` are not specified; otherwise, they
+#'   should be *character* strings indicating the worksheet names of the Excel
+#'   file where the dissolution data is saved. See Input/Output in Details.
+#' @param path.in,file.in,path.out,file.out *Character* strings of input and
 #'   output directories and file names. See Input/Output in Details.
-#' @param n.boots An integer indicating the number of bootstrap samples.
-#' @param seed Numeric seed value for reproducibility. If missing, a random
+#' @param n.boots An *integer* indicating the number of bootstrap samples.
+#' @param seed *Integer* seed value for reproducibility. If missing, a random
 #'   seed will be generated for reproducibility purpose.
-#' @param digits An integer indicating the decimal points for the output.
-#' @param alpha A numeric value between 0 and 1.
-#'   \eqn{(1-2\times \alpha)\times 100}{(1 - 2*alpha)*100}
-#'   confidence interval will be estimated.
-#' @param regulation Character strings indicating regulatory guidelines.
-#'   See Regulation in Details.
-#' @param min.points An integer indicating the minimum time points to be used
-#'   to calculate f2. See Regulation in Details.
-#' @param digits An integer indicating the decimal points for the output.
-#' @param both.TR.85 Logical. If \code{TRUE}, the old (incorrect)
-#'   interpretation (that both the test and reference should release more than
-#'   85%) will be used for f2 calculation when \code{regulation = 'FDA'}.
-#'   See Regulation in Details.
-#' @param print.report Logical. If \code{TRUE}, a plain text report will be
-#'   produced.
-#' @param report.style \code{'concise'} style will produce the confidence
-#'   intervals for the f2 estimators; \code{'intermediate'} style will add
-#'   a list of individual f2s for all bootstrap samples; \code{detailed}
-#'   style will further add individual bootstrap samples along with their f2.
-#'   See Input/Output in Details.
-#' @param f2.type Character strings indicating which f2 estimators should be
-#'   calculated.
-#' @param ci.type Character strings indicating which type of  confidence
-#'   intervals should be estimated.
-#' @param quantile.type Character strings indicating the type of percentile.
-#' @param jackknife.type Character strings indicating the type for jackknife
-#'   method.
-#' @param time.unit Character strings indicating the unit of time.
-#'   It should be either \code{"min"} for minute or \code{"h"} for hour.
-#'   It is mainly used for checking CV rules and making plot.
-#'   See Regulation in Details.
-#' @param output.to.screen Logical. If \code{TRUE}, a concise style summary
-#'   report will be printed to screen.
-#' @param sim.data.out Logical. If \code{TRUE}, all individual bootstrap data
+#' @param digits An *integer* indicating the decimal points for the output.
+#' @param alpha A *numeric* value between 0 and 1 to estimate
+#'   \eqn{(1-2\times \alpha)\times 100}{(1 - 2*alpha)*100} confidence interval.
+#' @param regulation *Character* strings indicating regulatory guidelines.
+#'   @seealso [calcf2()] for details on regulation rules.
+#' @param min.points An *integer* indicating the minimum time points to be used
+#'   to calculate \eqn{f_2}{f2}. For conventional \eqn{f_2}{f2} calculation, the
+#'   default is 3, however, for bootstrap \eqn{f_2}{f2}, the value should be
+#'   lower as there might be less time points available in certain bootstrap
+#'   samples. The default is 1. @seealso [calcf2()].
+#' @param both.TR.85 *Logical*. If `TRUE`, and if `regulation = "FDA"`, all
+#'   measurements up to the time points at which both test and reference
+#'   products dissolve more than 85% will be used to calculate \eqn{f_2}{f2}.
+#'   This is the conventional, but incorrect, interpretation of the US FDA rule.
+#'   Therefore, the argument should only be set to `TRUE` for validation purpose
+#'   such as comparing the results from old literatures that use the wrong
+#'   interpretation to calculate \eqn{f_2}{f2}. @seealso [calcf2()] for details
+#'   on regulation rules.
+#' @param print.report *Logical*. If `TRUE`, a plain text report will be
+#'   produced. See Input/Output in Details.
+#' @param report.style `"concise"` style produces the estimators and their
+#'   confidence intervals; `"intermediate"` style adds a list of individual
+#'   \eqn{f_2}{f2}s for all bootstrap samples in the end of `"concise"` report;
+#'   `"detailed"` style further adds individual bootstrap samples along with
+#'   their \eqn{f_2}{f2}s in the end of `"intermediate"` report. See
+#'   Input/Output in Details.
+#' @param f2.type *Character* strings indicating which type of \eqn{f_2}{f2}
+#'   estimator should be calculated. See Types of estimators in Details.
+#' @param ci.type *Character* strings indicating which type of confidence
+#'   interval should be estimated. See Types of confidence intervals in
+#'   Details.
+#' @param quantile.type *Character* strings indicating the type of percentile.
+#' @param jackknife.type *Character* strings indicating the type of jackknife
+#'   method. See Details.
+#' @param time.unit *Character* strings indicating the unit of time. It should
+#'   be either `"min"` for minute or `"h"` for hour. It is mainly used for
+#'   checking CV rules and making plot. @seealso [calcf2()].
+#' @param output.to.screen *Logical*. If `TRUE`, a `"concise"` style summary
+#'   report will be printed on screen. See Input/Output in Details.
+#' @param sim.data.out *Logical*. If `TRUE`, all individual bootstrap data
 #'   sets will be included in the output.
 #'
 #' @returns A list of 3 or 5 components.
+#' - `boot.ci`: A *data frame* of bootstrap \eqn{f_2}{f2} confidence intervals.
+#' - `boot.f2`: A *data frame* of all individual \eqn{f_2}{f2} values for all
+#'   bootstrap data set.
+#' - `boot.info`: A *data frame* with detailed information of bootstrap for
+#'   reproducibility purpose, such as all arguments used in the function, time
+#'   points used for calculation of \eqn{f_2}{f2}, and the number of `NA`s.
+#' - `boot.summary`: A *data frame* with descriptive statistics of the
+#'    bootstrap \eqn{f_2}{f2}.
+#' - `boot.t` and `boot.r`: *Lists* of individual bootstrap samples for test
+#'   and reference product if `sim.data.out = TRUE`.
 #'
-#'   - \code{boot.ci}: A data frame of bootstrap f2 confidence intervals.
-#'   - \code{boot.f2}: A data frame of all individual f2 values.
-#'   - \code{boot.info}: A data frame with detailed information of bootstrap,
-#'       such as the time points used for calculation of f2 and the number of
-#'       \code{NA}s.
-#'   - \code{boot.t} and \code{boot.r}: Individual bootstrap samples if
-#'      \code{sim.data.out = TRUE}.
+#' @details
+#' ## Minimum required arguments that must be provided by the user
+#' Arguments `test` and `ref` must be provided by the user. They should be `R`
+#' `data frames`, with *time as the first column*, and all individual profiles
+#' profiles as the rest columns. The actual names of the columns do not matter
+#' since they will be renamed internally.
+#'
+#' ## Input/Output
+#' The dissolution data of test and reference product can either be provided as
+#' *data frames* for `test` and `ref`, as explained above, or be read from an
+#' *Excel file* with data of test and reference stored in *separate worksheets*.
+#' In the latter case, the argument `path.in`, the directory where the Excel
+#' file is, and `file.in`, the name of the Excel file *including the file
+#' extension `.xls` or `.xlsx`*, must be provided. In such case, the argument
+#' `test` and `ref` must be *the names of the worksheets in quotation marks*.
+#' The first column of each Excel worksheet must be time, and the rest columns
+#' are individual dissolution profiles. The first row should be column names,
+#' such as time, unit01, unit02, ... The actual names of the columns do not
+#' matter as they will be renamed internally.
+#'
+#' Arguments `path.out` and `file.out` are the names of the output directory
+#' and file. If they are not provided, but argument `print.report` is `TRUE`,
+#' then a plain text report will be generated automatically in the current
+#' working directory with file name `test_vs_ref_TZ_YYYY-MM-DD_HHMMSS.txt`,
+#' where `test` and `ref` are data set names of test and reference, `TZ` is the
+#' time zone such as `CEST`, `YYYY-MM-DD` is the numeric date format and
+#' `HHMMSS` is the numeric time format for hour, minute, and second.
+#'
+#' For a quick check, set argument `output.to.screen = TRUE`, a summary report
+#' very similar to `concise` style report will be printed on screen.
+#'
+#' ## Types of Estimators
+#' According to Shah et al, the population \eqn{f_2}{f2} for the inference is
+#' \deqn{f_2 = 100-25\log\left(1 + \frac{1}{P}\sum_{i=1}^P%
+#'   \left(\mu_{\mathrm{T},i} - \mu_{\mathrm{R},i}\right)^2 \right)\,,}{%
+#'   f2 = 100 - 25 log(1 + 1/P(\sum(\mu(Ti) - \mu(Ri))^2)),}
+#' where \eqn{P} is the number of time points; \eqn{\mu_{\mathrm{T},i}}{\mu(Ti)}
+#' and \eqn{\mu_{\mathrm{R},i}}{\mu(Ri)} are *population mean* of test and
+#' reference product at time point \eqn{i}, respectively; \eqn{\sum_{i=1}^P}{%
+#' \sum} is the summation from \eqn{i = 1} to \eqn{P}.
+#'
+#' Five estimators for \eqn{f_2}{f2} are included in the function:
+#' 1. The estimated \eqn{f_2}{f2}, denoted by \eqn{\hat{f}_2}{est.f2}, is the
+#'    one written in various regulatory guidelines. It is expressed differently,
+#'    but mathematically equivalently, as
+#'    \deqn{\hat{f}_2 = 100-25\log\left(1 + \frac{1}{P}\sum_{i=1}^P\left(%
+#'      \bar{X}_{\mathrm{T},i} - \bar{X}_{\mathrm{R},i}\right)^2 \right)\:,}{%
+#'      est.f2 = 100 - 25 log(1 + 1/P(\sum(X(Ti) - X(Ri))^2)),}
+#'    where \eqn{P} is the number of time points;
+#'    \eqn{\bar{X}_{\mathrm{T},i}}{X(Ti)} and
+#'    \eqn{\bar{X}_{\mathrm{R},i}}{X(Ri)} are mean dissolution data at the
+#'    \eqn{i}th time point of *random samples* chosen from the test and the
+#'    reference population, respectively. Compared to the equation of population
+#'    \eqn{f_2}{f2} above, the only difference is that in the equation of
+#'    \eqn{\hat{f}_2}{est.f2} the *sample means* of dissolution profiles replace
+#'    the *population means* for the approximation. *In other words, a point
+#'    estimate is used for the statistical inference in practice*.
+#' 2. The Bias-corrected \eqn{f_2}{f2}, denoted by
+#'    \eqn{\hat{f}_{2,\mathrm{bc}}}{bc.f2}, was described in the article of
+#'    Shah et al, as
+#'    \deqn{\hat{f}_{2,\mathrm{bc}} = 100-25\log\left(1 + \frac{1}{P}%
+#'      \left(\sum_{i=1}^P\left(\bar{X}_{\mathrm{T},i} - %
+#'      \bar{X}_{\mathrm{R},i}\right)^2 - \frac{1}{n}\sum_{i=1}^P%
+#'      \left(S_{\mathrm{T},i}^2 + S_{\mathrm{R},i}^2\right)\right)\right)\,,}{%
+#'      bc.f2 = 100 - 25 log(1 + 1/P(\sum(X(Ti) - X(Ri))^2 - 1/n\sum(S(Ti)^2 + %
+#'      S(Ri)^2))),}
+#'    where \eqn{S_{\mathrm{T},i}^2}{S(Ti)^2} and
+#'    \eqn{S_{\mathrm{R},i}^2}{S(Ri)^2} are unbiased estimates of variance at
+#'    the \eqn{i}th time points of random samples chosen from test and reference
+#'    population, respectively; and \eqn{n} is the sample size.
+#' 3. The variance- and bias-corrected \eqn{f_2}{f2}, denoted by
+#'    \eqn{\hat{f}_{2,\mathrm{vcbc}}}{vc.bc.f2}, does not assume equal weight of
+#'    variance as \eqn{\hat{f}_{2,\mathrm{bc}}}{bc.f2} does.
+#'    \deqn{\hat{f}_{2, \mathrm{vcbc}} = 100-25\log\left(1 +%
+#'      \frac{1}{P}\left(\sum_{i=1}^P \left(\bar{X}_{\mathrm{T},i} -%
+#'        \bar{X}_{\mathrm{R},i}\right)^2 - \frac{1}{n}\sum_{i=1}^P%
+#'        \left(w_{\mathrm{T},i}\cdot S_{\mathrm{T},i}^2 +%
+#'        w_{\mathrm{R},i}\cdot S_{\mathrm{R},i}^2\right)\right)\right)\,,}{%
+#'        vc.bc.f2 = 100 -25 log(1 + 1/P(\sum(X(Ti) - X(Ri))^2 - 1/n\sum(w(Ti)%
+#'        S(Ti)^2 + w(Ri)S(Ri)^2))),}
+#'    where \eqn{w_{\mathrm{T},i}}{w(Ti)} and \eqn{w_{\mathrm{R},i}}{w(Ri)} are
+#'    weighting factors for variance of test and reference products,
+#'    respectively, which can be calculated as follows:
+#'    \deqn{w_{\mathrm{T},i} = 0.5 + \frac{S_{\mathrm{T},i}^2}%
+#'      {S_{\mathrm{T},i}^2 + S_{\mathrm{R},i}^2}\,,}{w(Ti) = 0.5 + %
+#'     S(Ti)^2/(S(Ti)^2 + S(Ri)^2),} and
+#'    \deqn{w_{\mathrm{R},i} = 0.5 + \frac{S_{\mathrm{R},i}^2}%
+#'      {S_{\mathrm{T},i}^2 + S_{\mathrm{R},i}^2}\,.}{w(Ri) = 0.5 + %
+#'      S(Ri)^2/(S(Ti)^2 + S(Ri)^2).}
+#' 4. The expected \eqn{f_2}{f2}, denoted by \eqn{\hat{f}_{2, \mathrm{exp}}}{%
+#'    exp.f2}, is calculated based on the mathematical expectation of estimated
+#'    \eqn{f_2}{f2},
+#'    \deqn{\hat{f}_{2, \mathrm{exp}} = 100-25\log\left(1 + \frac{1}{P}%
+#'      \left(\sum_{i=1}^P\left(\bar{X}_{\mathrm{T},i} - %
+#'      \bar{X}_{\mathrm{R},i}\right)^2 + \frac{1}{n}\sum_{i=1}^P%
+#'      \left(S_{\mathrm{T},i}^2 + S_{\mathrm{R},i}^2\right)\right)\right)\,,}{%
+#'      exp.f2 = 100 - 25 log(1 + 1/P(\sum(X(Ti) - X(Ri))^2 + 1/n\sum(%
+#'      S(Ti)^2 + S(Ri)^2))),}
+#'    using mean dissolution profiles and variance from samples for the
+#'    approximation of population values.
+#' 5. The variance-corrected expected \eqn{f_2}{f2}, denoted by
+#'    \eqn{\hat{f}_{2, \mathrm{vcexp}}}{vc.exp.f2}, is calculated as
+#'    \deqn{\hat{f}_{2, \mathrm{vcexp}} = 100-25\log\left(1 +%
+#'      \frac{1}{P}\left(\sum_{i=1}^P \left(\bar{X}_{\mathrm{T},i} -%
+#'        \bar{X}_{\mathrm{R},i}\right)^2 + \frac{1}{n}\sum_{i=1}^P%
+#'        \left(w_{\mathrm{T},i}\cdot S_{\mathrm{T},i}^2 +%
+#'        w_{\mathrm{R},i}\cdot S_{\mathrm{R},i}^2\right)\right)\right)\,.}{%
+#'       vc.exp.f2 = 100 - 25 log(1 + 1/P(\sum(X(Ti) - X(Ri))^2 + 1/n\sum(w(Ti)%
+#'        S(Ti)^2 + w(Ri)S(Ri)^2))).}
+#'
+#' ## Types of Confidence Interval
+#' The following confidence intervals are included:
+#' 1. The Normal interval with bias correction, denoted by `normal` in the
+#'    function, is estimated according to Davison and Hinkley,
+#'    \deqn{\hat{f}_{2, \mathrm{L,U}} = \hat{f}_{2, \mathrm{S}} - E_B \mp %
+#'      \sqrt{V_B}\cdot Z_{1-\alpha}\,,}{f2(L,U) = f2(S) - E(B) -/+ %
+#'      sqrt(V(B))Z(1-\alpha)),}
+#'    where \eqn{\hat{f}_{2, \mathrm{L,U}}}{f2(L,U)} are the lower and upper
+#'    limit of the confidence interval estimated from bootstrap samples;
+#'    \eqn{\hat{f}_{2, \mathrm{S}}}{f2(S)} denotes the estimators described
+#'    above; \eqn{Z_{1-\alpha}}{Z(1-\alpha)} represents the inverse of standard
+#'    normal cumulative distribution function with type I error \eqn{\alpha};
+#'    \eqn{E_B}{E(B)} and \eqn{V_B}{V(B)} are the *resampling estimates* of bias
+#'    and variance calculated as
+#'    \deqn{E_B = \frac{1}{B}\sum_{b=1}^{B}\hat{f}_{2,b}^\star - %
+#'      \hat{f}_{2, \mathrm{S}} = \bar{f}_2^\star - \hat{f}_{2,\mathrm{S}}\,,}{%
+#'      E(B) = 1/B\sum(f2(b)) - f2(S) = f2(b,m) - f2(S),}
+#'    and
+#'    \deqn{V_B = \frac{1}{B-1}\sum_{b=1}^{B} \left(\hat{f}_{2,b}^\star
+#'      -\bar{f}_2^\star\right)^2\,,}{V(B) = 1/(B-1)\sum(f2(b) - f2(b,m))^2,}
+#'    where \eqn{B} is the number of bootstrap samples;
+#'    \eqn{\hat{f}_{2,b}^\star}{f2(b)} is the \eqn{f_2}{f2} estimate with
+#'    \eqn{b}th bootstrap sample, and \eqn{\bar{f}_2^\star}{f2(b,m)} is the
+#'    mean value.
+#' 2. The basic interval, denoted by `basic` in the function, is estimated
+#'    according to Davison and Hinkley,
+#'    \deqn{\hat{f}_{2, \mathrm{L}} = 2\hat{f}_{2, \mathrm{S}} -%
+#'      \hat{f}_{2,(B+1)(1-\alpha)}^\star\,,}{f2(L) = 2*f2(S) - %
+#'      f2((B+1)(1-\alpha)),}
+#'    and
+#'    \deqn{\hat{f}_{2, \mathrm{U}} = 2\hat{f}_{2, \mathrm{S}} -%
+#'      \hat{f}_{2,(B+1)\alpha}^\star\,,}{f2(U) = 2*f2(S) - f2((B+1)\alpha),}
+#'    where \eqn{\hat{f}_{2,(B+1)\alpha}^\star}{f2((B+1)\alpha)} and
+#'    \eqn{\hat{f}_{2,(B+1)(1-\alpha)}^\star}{f2((B+1)(1-\alpha))} are the
+#'    \eqn{(B+1)\alpha}th and \eqn{(B+1)(1-\alpha)}th *ordered resampling
+#'    estimates* of \eqn{f_2}{f2}, respectively. When \eqn{(B+1)\alpha} is not
+#'    an integer, the following equation is used for interpolation,
+#'    \deqn{\hat{f}_{2,(B+1)\alpha}^\star = \hat{f}_{2,k}^\star + %
+#'      \frac{\Phi^{-1}\left(\alpha\right)-\Phi^{-1}\left(\frac{k}{B+1}\right)}%
+#'      {\Phi^{-1}\left(\frac{k+1}{B+1}\right)-\Phi^{-1}%
+#'      \left(\frac{k}{B+1}\right)}\left(\hat{f}_{2,k+1}^\star-%
+#'      \hat{f}_{2,k}^\star\right),}{f2((B+1)\alpha) = f2(k) + %
+#'      (\Phi^(-1)(\alpha) - \Phi^(-1)(k/(B+1)))/(\Phi^(-1)((k+1)/(B+1)) - %
+#'      \Phi^(-1)(k/(B+1)))*(f2(k+1) - f2(k)),}
+#'    where \eqn{k} is the *integer part* of \eqn{(B+1)\alpha},
+#'    \eqn{\hat{f}_{2,k+1}^\star}{f2(k+1)} and \eqn{\hat{f}_{2,k}^\star}{%
+#'    f2(k)} are the \eqn{(k+1)}th and the \eqn{k}th ordered resampling
+#'    estimates of \eqn{f_2}{f2}, respectively.
+#' 3. The percentile intervals, denoted by `percentile` in the function, are
+#'    estimated using nine different types of quantiles, Type 1 to Type 9, as
+#'    summarized in Hyndman and Fan's article and implemented in `R`'s
+#'    `quantile` function. Using `R`'s `boot` package, program `bootf2BCA`
+#'    outputs a percentile interval using the equation above for interpolation.
+#'    To be able to compare the results among different programs, the same
+#'    interval, denoted by `Percentile (boot)` in the function, is also
+#'    included in the function.
+#' 4. The bias-corrected and accelerated (BCa) intervals are estimated according
+#'    to Efron and Tibshirani,
+#'    \deqn{\hat{f}_{2, \mathrm{L}} = \hat{f}_{2, \alpha_1}^\star\,,}{%
+#'    f2(L) = f2(\alpha1),}
+#'    \deqn{\hat{f}_{2, \mathrm{U}} = \hat{f}_{2, \alpha_2}^\star\,,}{%
+#'    f2(L) = f2(\alpha2),}
+#'    where \eqn{\hat{f}_{2, \alpha_1}^\star}{f2(\alpha1)} and
+#'    \eqn{\hat{f}_{2, \alpha_2}^\star}{f2(\alpha2)} are the \eqn{100\alpha_1}{%
+#'    100\alpha1}th and the \eqn{100\alpha_2}{100\alpha2}th percentile of the
+#'    resampling estimates of \eqn{f_2}{f2}, respectively. Type I errors
+#'    \eqn{\alpha_1}{\alpha1} and \eqn{\alpha_2}{\alpha2} are obtained as
+#'    \deqn{\alpha_1 = \Phi\left(\hat{z}_0 + \frac{\hat{z}_0 + \hat{z}_\alpha}%
+#'      {1-\hat{a}\left(\hat{z}_0 + \hat{z}_\alpha\right)}\right),}{\alpha1 = %
+#'      \Phi(z0 + (z0 + za)/(1 - a(z0 + za))),}
+#'    and
+#'    \deqn{\alpha_2 = \Phi\left(\hat{z}_0 + \frac{\hat{z}_0 + %
+#'      \hat{z}_{1-\alpha}}{1-\hat{a}\left(\hat{z}_0 + %
+#'      \hat{z}_{1-\alpha}\right)}\right),}{\alpha2 = \Phi(z0 +
+#'      (z0 + z(1-\alpha))/(1 - a(z0 + z(1 - \alpha)))),}
+#'    where \eqn{\hat{z}_0}{z0} and \eqn{\hat{a}}{a} are called
+#'    *bias-correction* and *acceleration*, respectively.
+#'
+#'    There are different methods to estimate \eqn{\hat{z}_0}{z0} and
+#'    \eqn{\hat{a}}{a}. Shah et al. used jackknife technique, denoted by
+#'    `bca.jackknife` in the function,
+#'    \deqn{\hat{z}_0 = \Phi^{-1}\left(\frac{N\left\{\hat{f}_{2,b}^\star <%
+#'      \hat{f}_{2,\mathrm{S}} \right\}}{B}\right),}{z0 = %
+#'      \Phi^(-1)(N(f2(b) < f2(S))/B)}
+#'    and
+#'    \deqn{\hat{a} = \frac{\sum_{i=1}^{n}\left(\hat{f}_{2,\mathrm{m}} -%
+#'      \hat{f}_{2, i}\right)^3}{6\left(\sum_{i=1}^{n}\left(%
+#'      \hat{f}_{2,\mathrm{m}} - \hat{f}_{2, i}\right)^2\right)^{3/2}}\,,}{%
+#'      a = (\sum(f2(m) - f2(i)))^3/(6(\sum(f2(m) - f2(i))^2)^(3/2)),}
+#'    where \eqn{N\left\{\cdot\right\}}{N(f2(b) < f2(S))} denotes the number of
+#'    element in the set, \eqn{\hat{f}_{2, i}}{f2(i)} is the \eqn{i}th
+#'    jackknife statistic, \eqn{\hat{f}_{2,\mathrm{m}}}{f2(m)} is the mean of
+#'    the jackknife statistics, and \eqn{\sum} is the summation from 1 to
+#'    sample size \eqn{n}.
+#'
+#'    Program `bootf2BCA` gives a slightly different BCa interval with `R`'s
+#'    `boot` package. This approach, denoted by `bca.boot` in the function, is
+#'    also implemented in the function for estimating the interval.
+#'
+#' ## Notes on the argument `jackknife.type`
+#' For any sample with size $n$, the jackknife estimator is obtained by
+#' estimating the parameter for each subsample omitting the \eqn{i}th
+#' observation. However, when two samples (e.g., test and reference) are
+#' involved, there are several possible ways to do it. Assuming sample size
+#' of test and reference are \eqn{n_\mathrm{T}}{nt} and \eqn{n_\mathrm{R}}{nr},
+#' the following three possibility are considered:
+#' - Estimated by removing one observation from both test and reference samples.
+#'   In this case, the prerequisite is \eqn{n_\mathrm{T} = n_\mathrm{R}}{nt=nr},
+#'   denoted by `nt=nr` in the function. So if there are 12 units in test and
+#'   reference data sets, there will be 12 jackknife estimators.
+#' - Estimate the jackknife for test sample while keeping the reference data
+#'   unchanged; and then estimate jackknife for reference sample while keeping
+#'   the test sample unchanged. This is denoted by `nt+nr` in the function.
+#'   This is the default method. So if there are 12 units in test and reference
+#'   data sets, there will be \eqn{12 + 12 = 24} jackknife estimators.
+#' - For each observation deleted from test sample, estimate jackknife for
+#'   reference sample. This is denoted by `nt*nr` in the function. So if there
+#'   are 12 units in test and reference data sets, there will be \eqn{12 \times
+#'   12 = 144}{12*12 = 144} jackknife estimators.
+#'
+#'
+#' @references Shah, V. P.; Tsong, Y.; Sathe, P.; Liu, J.-P. In Vitro
+#'   Dissolution Profile Comparison---Statistics and Analysis of the
+#'   Similarity Factor, \eqn{f_2}{f2}. *Pharmaceutical Research* 1998,
+#'   **15** (6), 889--896. DOI: 10.1023/A:1011976615750.
+#' @references Davison, A. C.; Hinkley, D. V. Bootstrap Methods and Their
+#'   Application. Cambridge University Press, 1997.
+#' @references Hyndman, R. J.; Fan, Y. Sample Quantiles in Statistical Packages.
+#'   *The American Statistician* 1996, **50** (4), 361--365. DOI:
+#'   /10.1080/00031305.1996.10473566.
+#' @references Efron, B.; Tibshirani, R. An Introduction to the Bootstrap.
+#'   Chapman & Hall, 1993.
 #'
 #' @examples
 #' \dontrun{
@@ -93,21 +342,21 @@
 #' dt <- sim.dp(tp, model.par = par.t, seed = 100, plot = FALSE)
 #'
 #' # bootstrap
-#' bootf2(dt$sim.disso, dr$sim.disso, n.boots = 100)
+#' bootf2(dt$sim.disso, dr$sim.disso, n.boots = 100, print.report = FALSE)
 #' }
 #'
 #' @export
 bootf2 <- function(test, ref, path.in, file.in, path.out, file.out,
                    n.boots = 10000L, seed = 306L, digits = 2L, alpha = 0.05,
-                   regulation = c("EMA", "FDA", "WHO"), min.points = 1L,
-                   both.TR.85 = FALSE, print.report = TRUE,
-                   report.style = c("concise", "intermediate", "detailed"),
+                   regulation = c("EMA", "FDA", "WHO", "Canada", "ANVISA"),
+                   min.points = 1L, both.TR.85 = FALSE, print.report = TRUE,
+                   report.style = c("concise",  "intermediate", "detailed"),
                    f2.type = c("all", "est.f2", "exp.f2", "bc.f2",
                                "vc.exp.f2", "vc.bc.f2"),
                    ci.type = c("all", "normal", "basic", "percentile",
                                "bca.jackknife", "bca.boot"),
-                   quantile.type = c("all", 1:9, "boot"),
-                   jackknife.type = c("nt+nr", "nt*nr", "nt=nr"),
+                   quantile.type = c("all", as.character(1:9), "boot"),
+                   jackknife.type = c("all", "nt+nr", "nt*nr", "nt=nr"),
                    time.unit = c("min", "h"), output.to.screen = TRUE,
                    sim.data.out = FALSE) {
   # for output info.
@@ -123,12 +372,12 @@ bootf2 <- function(test, ref, path.in, file.in, path.out, file.out,
   jackknife.type <- match.arg(jackknife.type)
   time.unit      <- match.arg(time.unit)
 
-  if (all(isTRUE(both.TR.85), regulation != "FDA")) {
-    stop("'both.TR.85 = TRUE' is only valid when 'regulation = FDA'.")
-  }
-
   if (any(missing(test), missing(ref))) {
     stop("Both 'test' and 'ref' have to be specified.")
+  }
+
+  if (all(isTRUE(both.TR.85), regulation != "FDA")) {
+    stop("'both.TR.85 = TRUE' is only applicable when 'regulation = FDA'.")
   }
 
   if (quantile.type == "all") {
@@ -166,6 +415,15 @@ bootf2 <- function(test, ref, path.in, file.in, path.out, file.out,
                   "include\nthe extension 'xlsx' or 'xls' in the file name."))
     }
 
+    sheet.names <- excel_sheets(file.in)
+    if (!(test %in% sheet.names)) (
+      stop("The name of the work sheet 'test' is wrong. Check your spelling.")
+    )
+
+    if (!(ref %in% sheet.names)) (
+      stop("The name of the work sheet 'ref' is wrong. Check your spelling.")
+    )
+
     # package readxl::read_excel
     data.t <- as.matrix(read_excel(file.in, test, col_types = "numeric"))
     data.r <- as.matrix(read_excel(file.in, ref, col_types = "numeric"))
@@ -179,21 +437,18 @@ bootf2 <- function(test, ref, path.in, file.in, path.out, file.out,
   }
   set.seed(seed)
 
+  # f2 original ------------------------------------------------------
+  # calculate f2s with original data without regard to variability
+  tmp.f2o <- calcf2(test = data.t, ref = data.r, regulation = regulation,
+                    digits = digits, cv.rule = FALSE, min.points = min.points,
+                    both.TR.85 = both.TR.85, message = FALSE, f2.type = f2.type,
+                    plot = FALSE, time.unit = time.unit)
+  f2o <- c(tmp.f2o$f2.value, unique(tmp.f2o$f2.tp),
+           unique(ifelse(tmp.f2o$d85at15 == "yes", 1, 0)))
+  names(f2o) <- c(tmp.f2o$f2.type, "f2.tp", "d85at15")
+
   # bootstrap data -------------------------------------------------------------
-  # initialize result ------------------------------------------------
-  boot.t <- boot.r  <- vector(mode = "list", length = n.boots)
-
-  if (f2.type == "all") { # est.f2, exp.f2, bc.f2, vc.exp.f2, vc.bc.f2, tp
-    boot.f2 <- matrix(0, nrow = n.boots, ncol = 6, byrow = TRUE,
-                      dimnames = list(rep("", n.boots),
-                                      c("est.f2", "exp.f2", "bc.f2",
-                                        "vc.exp.f2", "vc.bc.f2", "tp")))
-  } else { # f2, tp
-    boot.f2 <- matrix(0, nrow = n.boots, ncol = 2, byrow = TRUE,
-                      dimnames = list(rep("", n.boots), c(f2.type, "tp")))
-  }
-
-  # bootstrap index ------------------------------------------------------------
+  # bootstrap index --------------------------------------------------
   # implement the same bootstrap algorithm as boot package to compare results
   # use safer version according to manual ?sample
   resample <- function(x, ...) x[sample.int(length(x), replace = TRUE, ...)]
@@ -208,23 +463,23 @@ bootf2 <- function(test, ref, path.in, file.in, path.out, file.out,
     bt.array[, index] <- resample(index, n.boots*length(index))
   }
 
+  # initialize result ------------------------------------------------
+  boot.t <- boot.r  <- vector(mode = "list", length = n.boots)
+  boot.f2 <- matrix(NA, nrow = n.boots, ncol = length(f2o), byrow = TRUE,
+                    dimnames = list(rep("", n.boots), names(f2o)))
+
   for (i in 1:n.boots) {
     boot.t[[i]]  <- data.t[, c(1, bt.array[i, 1:nt] + 1)]
     boot.r[[i]]  <- data.r[, c(1, bt.array[i, (nt + 1):(nt + nr)] - nt + 1)]
-    boot.f2[i, ] <- calcf2(test = boot.t[[i]], ref = boot.r[[i]],
+    tmp.f2       <- calcf2(test = boot.t[[i]], ref = boot.r[[i]],
                            regulation = regulation, digits = digits,
                            cv.rule = FALSE, min.points = min.points,
                            both.TR.85 = both.TR.85, message = FALSE,
                            f2.type = f2.type, plot = FALSE,
                            time.unit = time.unit)
+    boot.f2[i, ] <- c(tmp.f2$f2.value, unique(tmp.f2$f2.tp),
+                      unique(ifelse(tmp.f2$d85at15 == "yes", 1, 0)))
   }
-
-  # f2 original ------------------------------------------------------
-  # calculate f2s with original data without regard to variability
-  f2o <- calcf2(test = data.t, ref = data.r, regulation = regulation,
-                digits = digits, cv.rule = FALSE, min.points = min.points,
-                both.TR.85 = both.TR.85, message = FALSE, f2.type = f2.type,
-                plot = FALSE, time.unit = time.unit)
 
   # interpolation function -------------------------------------------
   # function for interpolation of quantile. Davison, Ch5, Eq. 5.8.
@@ -258,7 +513,7 @@ bootf2 <- function(test, ref, path.in, file.in, path.out, file.out,
   # normal interval --------------------------------------------------
   # normal approximation: L,U = f2o - bias -/+ mean.err*z(1-alpha)
   # Davison, Bootstrap Methods and Their Application, CUP, 1997. Ch5,
-  if (any(ci.type == "all", ci.type == "normal")) {
+  if (ci.type %in% c("all", "normal")) {
     normal.ci <- function(boot.f2, f2o, alpha) {
       btf2  <- as.vector(boot.f2)
       btf2  <- btf2[is.finite(btf2)]
@@ -270,7 +525,7 @@ bootf2 <- function(test, ref, path.in, file.in, path.out, file.out,
     ci.normal <- data.frame(f2.type = NA, ci.type = NA,
                             ci.lower = NA, ci.upper = NA)
 
-    for (i in seq_along(1:(NCOL(boot.f2) - 1))) {
+    for (i in seq_len(NCOL(boot.f2) - 2)) {
       ci.normal[i, 1]   <- dimnames(boot.f2)[[2]][i]
       ci.normal[i, 2]   <- "Normal"
       ci.normal[i, 3:4] <- normal.ci(boot.f2 = boot.f2[, i], f2o = f2o[[i]],
@@ -280,7 +535,7 @@ bootf2 <- function(test, ref, path.in, file.in, path.out, file.out,
 
   # basic interval ---------------------------------------------------
   # Basic CI. Davidson, Ch5, Eq 5.6
-  if (any(ci.type == "all", ci.type == "basic")) {
+  if (ci.type %in% c("all", "basic")) {
     basic.ci <- function(boot.f2, f2o, alpha) {
       btf2  <- as.vector(boot.f2)
       btf2  <- btf2[is.finite(btf2)]
@@ -290,7 +545,7 @@ bootf2 <- function(test, ref, path.in, file.in, path.out, file.out,
     ci.basic <- data.frame(f2.type = NA, ci.type = NA,
                            ci.lower = NA, ci.upper = NA)
 
-    for (i in seq_along(1:(NCOL(boot.f2) - 1))) {
+    for (i in seq_len(NCOL(boot.f2) - 2)) {
       ci.basic[i, 1]   <- dimnames(boot.f2)[[2]][i]
       ci.basic[i, 2]   <- "Basic"
       ci.basic[i, 3:4] <- basic.ci(boot.f2 = boot.f2[, i], f2o = f2o[i],
@@ -299,27 +554,27 @@ bootf2 <- function(test, ref, path.in, file.in, path.out, file.out,
   } # end basic interval
 
   # percentile interval ----------------------------------------------
-  if (any(ci.type == "all", ci.type == "percentile")) {
+  if (ci.type %in% c("all", "percentile")) {
     ci.percentile <- data.frame(f2.type = NA, ci.type = NA,
                                 ci.lower = NA, ci.upper = NA)
 
     if (quantile.type == "boot") {# same as boot package
-      for (i in seq_along(1:(NCOL(boot.f2) - 1))) {
+      for (i in seq_len(NCOL(boot.f2) - 2)) {
         ci.percentile[i, 1]   <- dimnames(boot.f2)[[2]][[i]]
-        ci.percentile[i, 2]   <- "Percentile (boot)  "
+        ci.percentile[i, 2]   <- "Percentile (boot)"
         ci.percentile[i, 3:4] <- normal.inter(boot.f2 = boot.f2[, i],
                                               alpha = c(alpha, 1 - alpha))
       }
     } else if (quantile.type == "all") {
       k <- 0
-      for (i in seq_along(1:(NCOL(boot.f2) - 1))) {
+      for (i in seq_len(NCOL(boot.f2) - 2)) {
         for (j in seq_along(q.type)) {
           k <- k + 1
           ci.percentile[k, 1]   <- dimnames(boot.f2)[[2]][[i]]
-          ci.percentile[k, 2]   <-
-            ifelse(quantile.type == "all",
-                   paste0("Percentile (Type ", j, ")"),
-                   paste0("Percentile (Type ", q.type, ")"))
+          ci.percentile[k, 2]   <- paste0("Percentile (Type ", j, ")")
+            # ifelse(quantile.type == "all",
+            #        paste0("Percentile (Type ", j, ")"),
+            #        paste0("Percentile (Type ", q.type, ")"))
 
           ci.percentile[k, 3:4] <- quantile(boot.f2[, i],
                                             probs = c(alpha, 1 - alpha),
@@ -330,12 +585,12 @@ bootf2 <- function(test, ref, path.in, file.in, path.out, file.out,
         # Davison, Ch5, same as boot package percentile ci
         k <- k + 1
         ci.percentile[k, 1]   <- dimnames(boot.f2)[[2]][[i]]
-        ci.percentile[k, 2]   <- "Percentile (boot)  "
+        ci.percentile[k, 2]   <- "Percentile (boot)"
         ci.percentile[k, 3:4] <- normal.inter(boot.f2 = boot.f2[, i],
                                               alpha = c(alpha, 1 - alpha))
       } # end f2 type loop i
     } else {# type = 1, 2, ..., 9
-      for (i in seq_along(1:(NCOL(boot.f2) - 1))) {
+      for (i in seq_len(NCOL(boot.f2) - 2)) {
         ci.percentile[i, 1]   <- dimnames(boot.f2)[[2]][[i]]
         ci.percentile[i, 2]   <- paste0("Percentile (Type ", q.type, ")")
         ci.percentile[i, 3:4] <- quantile(boot.f2[, i],
@@ -349,100 +604,128 @@ bootf2 <- function(test, ref, path.in, file.in, path.out, file.out,
   # BCa, jackknife ---------------------------------------------------
   # bca CI, acceleration a by jackknife.
   # An introduction to the Bootstrap, by Efron B. and Tibshirani, R., 1993
-  if (any(ci.type == "all", ci.type == "bca.jackknife")) {
+  if (ci.type %in% c("all", "bca.jackknife")) {
     # function to obtain acceleration a by jackkinfe
     jackf2 <- function(data.t, data.r) {
       # remove time 0 point if any
       data.t <- data.t[data.t[, 1] != 0, ]
       data.r <- data.r[data.r[, 1] != 0, ]
 
-      # initialize result
-      # est.f2.jk <- exp.f2.jk <- bc.f2.jk <- rep(0, nt + nr)
-      # f2.jk <- data.frame(est.f2.jk = NA, exp.f2.jk = NA,
-      #                     bc.f2.jk = NA, tp.jk = NA)
-      if (f2.type == "all") {
-        n.col <- 6
-        jk.f2.name <- c("est.f2", "exp.f2", "bc.f2",
-                        "vc.exp.f2", "vc.bc.f2", "tp")
-      } else {
-        n.col <- 2
-        jk.f2.name <- c(f2.type, "tp")
-      }
-
-      if (jackknife.type == "nt+nr") {
-        jk.f2 <- matrix(NA, nrow = nt + nr, ncol = n.col,
-                        dimnames = list(rep("", nt + nr), jk.f2.name))
+      if (jackknife.type %in% c("all", "nt+nr")) {
+        jk1.f2 <- matrix(NA, nrow = nt + nr, ncol = length(f2o) - 2,
+                         dimnames = list(rep("", nt + nr),
+                                         names(f2o)[1:(length(f2o) - 2)]))
         # jackknife with test data
         for (i in 1:nt) {
-          jk.f2[i, 1:n.col] <-
-            calcf2(test = data.t[, -(i + 1)], ref = data.r,
-                   regulation = regulation, digits = digits, cv.rule = FALSE,
-                   min.points = min.points, both.TR.85 = both.TR.85,
-                   message = FALSE, f2.type = f2.type, plot = FALSE,
-                   time.unit = time.unit)
+          jk1.f2[i, ] <- calcf2(test = data.t[, -(i + 1)], ref = data.r,
+                                regulation = regulation, digits = digits,
+                                cv.rule = FALSE, min.points = min.points,
+                                both.TR.85 = both.TR.85, message = FALSE,
+                                f2.type = f2.type, plot = FALSE,
+                                time.unit = time.unit)$f2.value
         }
         # jackknife with reference data
         for (j in 1:nr) {
-          jk.f2[i + j, 1:n.col] <-
-            calcf2(test = data.t, ref = data.r[, -(j + 1)],
-                   regulation = regulation, digits = digits, cv.rule = FALSE,
-                   min.points = min.points, both.TR.85 = both.TR.85,
-                   message = FALSE, f2.type = f2.type, plot = FALSE,
-                   time.unit = time.unit)
+          jk1.f2[i + j, ] <- calcf2(test = data.t, ref = data.r[, -(j + 1)],
+                                   regulation = regulation, digits = digits,
+                                   cv.rule = FALSE, min.points = min.points,
+                                   both.TR.85 = both.TR.85, message = FALSE,
+                                   f2.type = f2.type, plot = FALSE,
+                                   time.unit = time.unit)$f2.value
         }
-      } else if (jackknife.type == "nt*nr") {
-        jk.f2 <- matrix(NA, nrow = nt*nr, ncol = n.col,
-                        dimnames = list(rep("", nt*nr), jk.f2.name))
+        jk1.f2.mean <- as.data.frame(t(colMeans(jk1.f2)),
+                                     stringsAsFactors = FALSE)
+        jk1.f2.mean$type <- "nt+nr"
+      }
 
+      if (jackknife.type %in% c("all", "nt*nr")) {
+        jk2.f2 <- matrix(NA, nrow = nt*nr, ncol = length(f2o) - 2,
+                         dimnames = list(rep("", nt*nr),
+                                         names(f2o)[1:(length(f2o) - 2)]))
         k <- 0
         for (i in 1:nt) {
           for (j in 1:nr) {
             k <- k + 1
-            jk.f2[k, 1:n.col] <-
-              calcf2(test = data.t[, -(i + 1)], ref = data.r[, -(j + 1)],
-                     regulation = regulation, digits = digits, cv.rule = FALSE,
-                     min.points = min.points, both.TR.85 = both.TR.85,
-                     message = FALSE, f2.type = f2.type, plot = FALSE,
-                     time.unit = time.unit)
+            jk2.f2[k, ] <- calcf2(test = data.t[, -(i + 1)],
+                                  ref = data.r[, -(j + 1)],
+                                  regulation = regulation, digits = digits,
+                                  cv.rule = FALSE, min.points = min.points,
+                                  both.TR.85 = both.TR.85, message = FALSE,
+                                  f2.type = f2.type, plot = FALSE,
+                                  time.unit = time.unit)$f2.value
           }
         }
-      } else {# in this case, need nt = nr
+        jk2.f2.mean <- as.data.frame(t(colMeans(jk2.f2)),
+                                     stringsAsFactors = FALSE)
+        jk2.f2.mean$type <- "nt*nr"
+      }
+
+      if (jackknife.type %in% c("all", "nt=nr")) {# need nt = nr
         if (!all.equal(nt, nr)) {# usu. nt = nr = 12, not a problem
           stop("To use this type of jackknife, the number of test and ",
-               "reference data should be equal.")
+               "reference\ndata should be equal.")
         } else {
-          jk.f2 <- matrix(NA, nrow = nt, ncol = n.col,
-                          dimnames = list(rep("", nt), jk.f2.name))
+          jk3.f2 <- matrix(NA, nrow = nt, ncol = length(f2o) - 2,
+                           dimnames = list(rep("", nt),
+                                           names(f2o)[1:(length(f2o) - 2)]))
           for (i in 1:nt) {
-            jk.f2[i, 1:n.col] <-
-              calcf2(test = data.t[, -(i + 1)], ref = data.r[, -(i + 1)],
-                     regulation = regulation, digits = digits, cv.rule = FALSE,
-                     min.points = min.points, both.TR.85 = both.TR.85,
-                     message = FALSE, f2.type = f2.type, plot = FALSE,
-                     time.unit = time.unit)
+            jk3.f2[i, ] <- calcf2(test = data.t[, -(i + 1)],
+                                  ref = data.r[, -(i + 1)],
+                                  regulation = regulation, digits = digits,
+                                  cv.rule = FALSE, min.points = min.points,
+                                  both.TR.85 = both.TR.85, message = FALSE,
+                                  f2.type = f2.type, plot = FALSE,
+                                  time.unit = time.unit)$f2.value
           }
         }
-      }# end jackknife.type
-
-      jk.f2.mean <- colMeans(jk.f2, na.rm = TRUE)[-n.col]
+        jk3.f2.mean <- as.data.frame(t(colMeans(jk3.f2)),
+                                     stringsAsFactors = FALSE)
+        jk3.f2.mean$type <- "nt=nr"
+      }
 
       # accelerated alpha and jackknife mean
-      if (f2.type == "all") {
-        a <- c(est.f2.a = NA, exp.f2.a = NA, bc.f2.a = NA,
-               vc.exp.f2.a = NA, vc.bc.f2.a = NA)
+      if (jackknife.type == "all") {
+        jk.f2.mean <- rbind(jk1.f2.mean, jk2.f2.mean, jk3.f2.mean)
+        jk.f2 <- list(jk1.f2, jk2.f2, jk3.f2)
+        a <- matrix(NA, nrow = NROW(jk.f2.mean), ncol = NCOL(jk.f2.mean) - 1,
+                    dimnames = list(
+                      rep("", NROW(jk.f2.mean)),
+                      paste0(names(jk.f2.mean)[1:(NCOL(jk.f2.mean) - 1)], ".a"))
+        )
+
+        for (i in 1:NROW(a)) {
+          for (j in 1:NCOL(a)) {
+            a[i, j] <- sum((jk.f2.mean[i, j] - jk.f2[[i]][, j])^3, na.rm=TRUE)/
+              (6*(sum((jk.f2.mean[i, j] - jk.f2[[i]][, j])^2, na.rm=TRUE))^1.5)
+          }
+        }
       } else {
-        aname <- paste0(f2.type, ".a")
-        a <- c(NA)
-        names(a) <- aname
+        if (jackknife.type == "nt+nr") {
+          jk.f2 <- jk1.f2
+          jk.f2.mean <- jk1.f2.mean
+        } else if (jackknife.type == "nt*nr") {
+          jk.f2 <- jk2.f2
+          jk.f2.mean <- jk2.f2.mean
+        } else {
+          jk.f2 <- jk3.f2
+          jk.f2.mean <- jk3.f2.mean
+        }
+        a <- matrix(NA, nrow = NROW(jk.f2.mean), ncol = NCOL(jk.f2.mean) - 1,
+                    dimnames = list(
+                      rep("", NROW(jk.f2.mean)),
+                      paste0(names(jk.f2.mean)[1:(NCOL(jk.f2.mean) - 1)], ".a"))
+        )
+
+        for (i in 1:NCOL(a)) {
+          a[, i] <- sum((jk.f2.mean[, i] - jk.f2[, i])^3, na.rm = TRUE)/
+            (6*(sum((jk.f2.mean[, i] - jk.f2[, i])^2, na.rm = TRUE))^1.5)
+        }
       }
 
-      for (i in 1:length(a)) {
-        a[i] <- sum((jk.f2.mean[[i]] - jk.f2[, i])^3, na.rm = TRUE)/
-          (6*(sum((jk.f2.mean[[i]] - jk.f2[, i])^2, na.rm = TRUE))^1.5)
-      }
-      jk.f2.mean <- jk.f2.mean[is.finite(a)]
-      a <- a[is.finite(a)]
-      return(c(a, jk.f2.mean))
+      a <- as.data.frame(a)
+      # jk.f2.mean <- jk.f2.mean[is.finite(a)]
+      # a <- a[is.finite(a)]
+      return(cbind(a, jk.f2.mean))
     }# end fun jackf2
 
     # now get value a
@@ -456,32 +739,34 @@ bootf2 <- function(test, ref, path.in, file.in, path.out, file.out,
       if (is.finite(z0)) {
         a1 <- pnorm(z0 + (z0 + qnorm(alpha))/(1 - a*(z0 + qnorm(alpha))))
         a2 <- pnorm(z0 + (z0 + qnorm(1 - alpha))/(1 - a*(z0 + qnorm(1-alpha))))
-        return(normal.inter(boot.f2 = btf2, alpha = c(a1, a2)))
-      } else return(NA)
+        if (all(is.finite(a1), is.finite(a2))) {
+          return(normal.inter(boot.f2 = btf2, alpha = c(a1, a2)))
+        } else return(c(NA, NA))
+      } else return(c(NA, NA))
     }
 
     ci.bca.jackknife <- data.frame(f2.type = NA, ci.type = NA,
                                    ci.lower = NA, ci.upper = NA)
 
-
-    for (i in seq_along(1:(NCOL(boot.f2) - 1))) {
-      ci.bca.jackknife[i, 1]   <- dimnames(boot.f2)[[2]][i]
-      ci.bca.jackknife[i, 2]   <- "BCa (Jackknife)"
-      if (all(dimnames(boot.f2)[[2]][i] %in% names(a.jack),
-              !is.na(f2o[[i]]))) {
-        ci.bca.jackknife[i, 3:4] <-
-          bca.ci.jack(boot.f2 = boot.f2[, i], f2o = f2o[[i]],
-                      a = a.jack[[i]], alpha = alpha)
-      } else {
-        ci.bca.jackknife[i, 3:4] <- rep(NA, 2)
+    k <- 0
+    for (i in 1:NROW(a.jack)) {
+      for (j in seq_len(NCOL(boot.f2) - 2)) {
+        k <- k + 1
+        ci.bca.jackknife[k, 1]   <- dimnames(boot.f2)[[2]][j]
+        ci.bca.jackknife[k, 2]   <- paste0("BCa (jackknife, ",
+                                           a.jack[i, "type"], ")")
+        ci.bca.jackknife[k, 3:4] <- bca.ci.jack(boot.f2 = boot.f2[, j],
+                                                f2o = f2o[[j]],
+                                                a = a.jack[i, j],
+                                                alpha = alpha)
       }
-    } # end f2 type loop i
+    }
   } # end BCa CI by jackknife
 
   # BCa, boot --------------------------------------------------------
   # BCa, by empirical regression, Davison, Sec 2.7.4
   # also, ref boot package, empinf.reg function. same as Mendyk's bootf2BCA
-  if (any(ci.type == "all", ci.type == "bca.boot")) {
+  if (ci.type %in% c("all", "bca.boot")) {
     bca.ci.boot <- function(boot.f2, bt.array, f2o, nt, nr, alpha) {
       btf2 <- as.vector(boot.f2)
       inds <- is.finite(boot.f2)
@@ -517,14 +802,16 @@ bootf2 <- function(test, ref, path.in, file.in, path.out, file.out,
       if (is.finite(z0)) {
         a1 <- pnorm(z0 + (z0 + qnorm(alpha))/(1 - a*(z0 + qnorm(alpha))))
         a2 <- pnorm(z0 + (z0 + qnorm(1 - alpha))/(1 - a*(z0 + qnorm(1-alpha))))
-        return(normal.inter(boot.f2 = btf2, c(a1, a2)))
-      } else return(NA)
+        if (all(is.finite(a1), is.finite(a2))) {
+          return(normal.inter(boot.f2 = btf2, c(a1, a2)))
+        } else return(c(NA, NA))
+      } else return(c(NA, NA))
     } # end function bca.ci.boot
 
     ci.bca.boot <- data.frame(f2.type = NA, ci.type = NA,
                               ci.lower = NA, ci.upper = NA)
 
-    for (i in seq_along(1:(NCOL(boot.f2) - 1))) {
+    for (i in seq_len(NCOL(boot.f2) - 2)) {
       ci.bca.boot[i, 1] <- dimnames(boot.f2)[[2]][i]
       ci.bca.boot[i, 2] <- "BCa (boot)"
       if (is.na(f2o[[i]])) {
@@ -576,14 +863,14 @@ bootf2 <- function(test, ref, path.in, file.in, path.out, file.out,
                           format(Sys.time(), "%Z"), "_",
                           format(Sys.Date(), "%F"), "_",
                           format(Sys.time(), "%H%M%S"), ".txt")
-    } else {# if file.out provided with wrong extension
+    } else {# if file.out provided with non-txt wrong extension
       file.out1 <-
         ifelse(regmatches(file.out, regexpr(".{3}$", file.out)) == "txt",
                           file.out, paste0(file.out, ".txt"))
     }
     file.out <- paste0(path.out, file.out1)
   } else {# no report
-    path.out <- file.out <- NA
+    path.out <- file.out <- file.out1 <- NA
   }
 
   # output additional information for transparency -------------------
@@ -595,574 +882,77 @@ bootf2 <- function(test, ref, path.in, file.in, path.out, file.out,
     regulation          = regulation,
     min.points          = min.points,
     alpha               = alpha,
-    digits              = digits,
     both.TR.85          = both.TR.85,
     f2.type             = f2.type,
     ci.type             = ci.type,
     quantile.type       = ifelse(ci.type %in% c("all", "percentile"),
-                                 quantile.type, NA),
+                                 quantile.type,
+                                 paste0(quantile.type, " (not used)")),
     jackknife.type      = ifelse(ci.type %in% c("all", "bca.jackknife"),
-                                 jackknife.type, NA),
+                                 jackknife.type,
+                                 paste0(jackknife.type, " (not used)")),
     time.unit           = time.unit,
+    digits              = digits,
     print.report        = print.report,
-    report.style        = ifelse(isTRUE(print.report), report.style, NA),
+    report.style        = ifelse(isTRUE(print.report), report.style,
+                                 paste0(report.style, " (not used)")),
+    output.to.screen    = output.to.screen,
     sim.data.out        = sim.data.out,
-    tp1                 = sum(boot.f2[, "tp"] == 1),
-    tp2                 = sum(boot.f2[, "tp"] == 2),
-    t(f2o),
-    path.in             = path.in,
-    file.in             = file.in1,
-    path.out            = path.out,
-    file.out            = file.out1,
+    path.in             = ifelse(is.na(path.in), "Not provided", path.in),
+    file.in             = ifelse(is.na(file.in1), "Not provided", file.in1),
+    path.out            = ifelse(is.na(path.out), "Not provided", path.out),
+    file.out            = ifelse(is.na(file.out1), "Not provided", file.out1),
     stringsAsFactors = FALSE
   )
 
-  if (f2.type == "all") {
-    boot.info[["est.f2.na"]]    <- sum(is.na(boot.f2[, "est.f2"]))
-    boot.info[["exp.f2.na"]]    <- sum(is.na(boot.f2[, "exp.f2"]))
-    boot.info[["bc.f2.na"]]     <- sum(is.na(boot.f2[, "bc.f2"]))
-    boot.info[["vc.exp.f2.na"]] <- sum(is.na(boot.f2[, "vc.exp.f2"]))
-    boot.info[["vc.bc.f2.na"]]  <- sum(is.na(boot.f2[, "vc.bc.f2"]))
-  } else if (f2.type == "est.f2") {
-    boot.info[["est.f2.na"]] <- sum(is.na(boot.f2[, "est.f2"]))
-  } else if (f2.type == "exp.f2") {
-    boot.info[["exp.f2.na"]] <- sum(is.na(boot.f2[, "exp.f2"]))
-  } else if (f2.type == "bc.f2") {
-    boot.info[["bc.f2.na"]]  <- sum(is.na(boot.f2[, "bc.f2"]))
-  } else if (f2.type == "vc.exp.f2") {
-    boot.info[["vc.exp.f2.na"]] <- sum(is.na(boot.f2[, "vc.exp.f2"]))
-  } else {
-    boot.info[["vc.bc.f2.na"]] <- sum(is.na(boot.f2[, "vc.bc.f2"]))
-  }
+  btf2.type <- dimnames(boot.f2)[[2]][1:(NCOL(boot.f2) - 2)]
+  bt.mean <- apply(boot.f2[, 1:(NCOL(boot.f2) - 2), drop = FALSE], 2, mean,
+                   na.rm = TRUE)
+  bt.median <- apply(boot.f2[, 1:(NCOL(boot.f2) - 2), drop = FALSE], 2, median,
+                     na.rm = TRUE)
+  bt.na <- apply(boot.f2[, 1:(NCOL(boot.f2) - 2), drop = FALSE], 2,
+                 function(x) sum(is.na(x)))
+  f2.tp1 <- sum(boot.f2[, "f2.tp"] == 1)
+  f2.tp2 <- sum(boot.f2[, "f2.tp"] == 2)
+  d85at15 <- sum(boot.f2[, "d85at15"])
+
+  btsum <- data.frame(f2.type = btf2.type, boot.mean = bt.mean,
+                      boot.median = bt.median, boot.na = bt.na,
+                      f2.tp1 = f2.tp1, f2.tp2 = f2.tp2, d85at15 = d85at15,
+                      f2o = f2o[1:(length(f2o) - 2)],
+                      row.names = 1:length(btf2.type),
+                      stringsAsFactors = FALSE)
 
   # write report ---------------------------------------------------------------
+  if (isTRUE(output.to.screen))
+    rpt.screen(boot.f2.ci, boot.info, f2o, a.jack, btsum)
+
   if (isTRUE(print.report)) {
-    if (report.style == "concise") {
-      sink(file.out, split = output.to.screen)
-    } else {
-      sink(file.out, split = FALSE)
+    sink(file.out, split = FALSE)
+
+    if (report.style %in% c("concise", "intermediate", "detailed")) {
+      rpt.concise(boot.f2.ci, boot.info, f2o, a.jack, btsum)
     }
-
-    # header information. for all styles -----------------------------
-    cat("=================================================================\n")
-    cat("|                                                               |\n")
-    cat("|  Comparison of Dissolution Profiles by Bootstrap f2 Method.   |\n")
-    cat("|_______________________________________________________________|\n")
-    cat("|                                                               |\n")
-    cat("| Smimilarity Criterion:                                        |\n")
-    cat("| ----------------------                                        |\n")
-    cat("|     To conclude similarity, the lower limit of 90% confidence |\n")
-    cat("| interval should be greater than or equal to 50.               |\n")
-    cat("|                                                               |\n")
-    cat("=================================================================\n\n")
-    # width for numeric values of ci
-    cilo <- if (digits <= 2) {
-      paste0("%-5", ".", digits, "f")
-    } else {
-      paste0("%-", digits + 3, ".", digits, "f")
-    }
-
-    ciup <- if (digits <= 2) {
-      paste0("%5", ".", digits, "f")
-    } else {
-      paste0("%", digits + 3, ".", digits, "f")
-    }
-
-    # f2 and confidence intervals ------------------------------------
-    # for all styles
-    cat("============================================\n")
-    cat("|              Main Results:               |\n")
-    cat("|  f2 and Its Confidence Intervals (CI)s   |\n")
-    cat("============================================\n\n")
-    # for estimated f2 ----
-    if (f2.type %in% c("all", "est.f2")) {
-      ci.estf2   <- boot.f2.ci[boot.f2.ci[["f2.type"]] == "est.f2", ]
-      ci.estf2.n <- NROW(ci.estf2)
-      cat("----------------------\n")
-      cat("* Estimated f2 Values\n")
-      cat("----------------------\n")
-      cat("  - with original data                :   ",
-          round(f2o[["est.f2"]], digits), "\n", sep = "")
-      if (ci.type %in% c("all", "bca.jackknife")) {
-        cat("  - with original data (by Jackknife) :   ",
-            round(a.jack[["est.f2"]], digits), "\n", sep = "")
-      }
-      cat("  - with bootstrapped data (Mean)     :   ",
-          round(mean(boot.f2[, "est.f2"], na.rm = TRUE), digits),
-          "\n", sep = "")
-      cat("  - with bootstrapped data (Median)   :   ",
-          round(median(boot.f2[, "est.f2"], na.rm = TRUE), digits),
-          "\n\n", sep = "")
-
-      cat("-----------------------\n")
-      cat("* Confidence Intervals\n")
-      cat("-----------------------\n")
-
-      ci.header(digits = digits)
-
-      for (i in 1:ci.estf2.n) {
-        cat(sprintf(paste0("%23s", "%3s", cilo, "%3s", ciup),
-                    ci.estf2[i, 2], "", ci.estf2[i, 3], "", ci.estf2[i, 4]),
-            "\n", sep = "")
-      }
-      cat("  ----------------------------------------------------\n")
-      cat("  Out of", n.boots, "bootstrapped data sets,\n")
-      cat("  - Number of f2 calculated with 1 time point :   ",
-          boot.info[["tp1"]], "\n", sep = "")
-      cat("  - Number of f2 calculated with 2 time point :   ",
-          boot.info[["tp2"]], "\n", sep = "")
-      cat("  - Number of f2 cannot be calculated (NA)    :   ",
-          boot.info[["est.f2.na"]], "\n", sep = "")
-      cat("  ----------------------------------------------------\n")
-      if (f2.type == "all") {
-        cat("_____________________________________________________",
-            "_________________\n\n", sep = "")
-      } else {
-        cat("\n\n")
-      }
-    } # end est.f2
-
-    # for expected f2 ------------------------------------------------
-    if (f2.type %in% c("all", "exp.f2")) {
-      ci.expf2   <- boot.f2.ci[boot.f2.ci[["f2.type"]] == "exp.f2", ]
-      ci.expf2.n <- NROW(ci.expf2)
-      cat("---------------------\n")
-      cat("* Expected f2 Values\n")
-      cat("---------------------\n")
-      cat("  - with original data                :   ",
-          round(f2o[["exp.f2"]], digits), "\n", sep = "")
-
-      if (ci.type %in% c("all", "bca.jackknife")) {
-        cat("  - with original data (by Jackknife) :   ",
-            round(a.jack[["exp.f2"]], digits), "\n", sep = "")
-      }
-
-      cat("  - with bootstrapped data (Mean)     :   ",
-          round(mean(boot.f2[, "exp.f2"], na.rm = TRUE), digits),
-          "\n", sep = "")
-      cat("  - with bootstrapped data (Median)   :   ",
-          round(median(boot.f2[, "exp.f2"], na.rm = TRUE), digits),
-          "\n\n", sep = "")
-
-      cat("-----------------------\n")
-      cat("* Confidence Intervals\n")
-      cat("-----------------------\n")
-
-      ci.header(digits = digits)
-
-      for (i in 1:ci.expf2.n) {
-        cat(sprintf(paste0("%23s", "%3s", cilo, "%3s", ciup),
-                    ci.expf2[i, 2], "", ci.expf2[i, 3], "", ci.expf2[i, 4]),
-            "\n", sep = "")
-      }
-
-      cat("  ----------------------------------------------------\n")
-      cat("  Out of", n.boots, "bootstrapped data sets,\n")
-      cat("  - Number of f2 calculated with 1 time point :   ",
-          boot.info[["tp1"]], "\n", sep = "")
-      cat("  - Number of f2 calculated with 2 time point :   ",
-          boot.info[["tp2"]], "\n", sep = "")
-      cat("  - Number of f2 cannot be calculated (NA)    :   ",
-          boot.info[["exp.f2.na"]], "\n", sep = "")
-      cat("  ----------------------------------------------------\n")
-      if (f2.type == "all") {
-        cat("_____________________________________________________",
-            "_________________\n\n", sep = "")
-      } else {
-        cat("\n\n")
-      }
-    } # end exp.f2
-
-    # for bias-corrected f2 ------------------------------------------
-    if (f2.type %in% c("all", "bc.f2")) {
-      ci.bcf2   <- boot.f2.ci[boot.f2.ci[["f2.type"]] == "bc.f2", ]
-      ci.bcf2.n <- NROW(ci.bcf2)
-
-      cat("---------------------------\n")
-      cat("* Bias-Corrected f2 Values\n")
-      cat("---------------------------\n")
-      cat("  - with original data                :   ",
-          round(f2o[["bc.f2"]], digits), "\n", sep = "")
-
-      if (ci.type %in% c("all", "bca.jackknife")) {
-        cat("  - with original data (by Jackknife) :   ",
-            ifelse ("bc.f2" %in% names(a.jack),
-                    round(a.jack[["bc.f2"]], digits), NA), "\n", sep = "")
-      }
-
-      cat("  - with bootstrapped data (Mean)     :   ",
-          round(mean(boot.f2[, "bc.f2"], na.rm = TRUE), digits),
-          "\n", sep = "")
-      cat("  - with bootstrapped data (Median)   :   ",
-          round(median(boot.f2[, "bc.f2"], na.rm = TRUE), digits),
-          "\n\n", sep = "")
-
-      cat("-----------------------\n")
-      cat("* Confidence Intervals\n")
-      cat("-----------------------\n")
-
-      ci.header(digits = digits)
-
-      for (i in 1:ci.bcf2.n) {
-        cat(sprintf(paste0("%23s", "%3s", cilo, "%3s", ciup),
-                    ci.bcf2[i, 2], "", ci.bcf2[i, 3], "", ci.bcf2[i, 4]),
-            "\n", sep = "")
-      }
-      cat("  ----------------------------------------------------\n")
-      cat("  Out of", n.boots, "bootstrapped data sets,\n")
-      cat("  - Number of f2 calculated with 1 time point :   ",
-          boot.info[["tp1"]], "\n", sep = "")
-      cat("  - Number of f2 calculated with 2 time point :   ",
-          boot.info[["tp2"]], "\n", sep = "")
-      cat("  - Number of f2 cannot be calculated (NA)    :   ",
-          boot.info[["bc.f2.na"]], "\n", sep = "")
-      cat("  ----------------------------------------------------\n")
-      if (f2.type == "all") {
-        cat("_____________________________________________________",
-            "_________________\n\n", sep = "")
-      } else {
-        cat("\n\n")
-      }
-    } # end bc.f2
-
-    # for variance corrected expected f2 ----
-    if (f2.type %in% c("all", "vc.exp.f2")) {
-      ci.vcexpf2   <- boot.f2.ci[boot.f2.ci[["f2.type"]] == "vc.exp.f2", ]
-      ci.vcexpf2.n <- NROW(ci.vcexpf2)
-      cat("----------------------------------------\n")
-      cat("* Variance-corrected Expected f2 Values\n")
-      cat("----------------------------------------\n")
-      cat("  - with original data                :   ",
-          round(f2o[["vc.exp.f2"]], digits), "\n", sep = "")
-
-      if (ci.type %in% c("all", "bca.jackknife")) {
-        cat("  - with original data (by Jackknife) :   ",
-            round(a.jack[["vc.exp.f2"]], digits), "\n", sep = "")
-      }
-
-
-      cat("  - with bootstrapped data (Mean)     :   ",
-          round(mean(boot.f2[, "vc.exp.f2"], na.rm = TRUE), digits),
-          "\n", sep = "")
-      cat("  - with bootstrapped data (Median)   :   ",
-          round(median(boot.f2[, "vc.exp.f2"], na.rm = TRUE), digits),
-          "\n\n", sep = "")
-
-      cat("-----------------------\n")
-      cat("* Confidence Intervals\n")
-      cat("-----------------------\n")
-
-      ci.header(digits = digits)
-
-      for (i in 1:ci.vcexpf2.n) {
-        cat(sprintf(paste0("%23s", "%3s", cilo, "%3s", ciup), ci.vcexpf2[i, 2],
-                    "", ci.vcexpf2[i, 3], "", ci.vcexpf2[i, 4]),
-            "\n", sep = "")
-      }
-
-      cat("  ----------------------------------------------------\n")
-      cat("  Out of", n.boots, "bootstrapped data sets,\n")
-      cat("  - Number of f2 calculated with 1 time point :   ",
-          boot.info[["tp1"]], "\n", sep = "")
-      cat("  - Number of f2 calculated with 2 time point :   ",
-          boot.info[["tp2"]], "\n", sep = "")
-      cat("  - Number of f2 cannot be calculated (NA)    :   ",
-          boot.info[["vc.exp.f2.na"]], "\n", sep = "")
-      cat("  ----------------------------------------------------\n")
-      if (f2.type == "all") {
-        cat("_____________________________________________________",
-            "_________________\n\n", sep = "")
-      } else {
-        cat("\n\n")
-      }
-    } # end vc.exp.f2
-
-    # for variance- and bias-corrected f2 ----
-    if (f2.type %in% c("all", "vc.bc.f2")) {
-      ci.vcbcf2   <- boot.f2.ci[boot.f2.ci[["f2.type"]] == "vc.bc.f2", ]
-      ci.vcbcf2.n <- NROW(ci.vcbcf2)
-
-      cat("-----------------------------------------\n")
-      cat("* Variance- and Bias-Corrected f2 Values\n")
-      cat("-----------------------------------------\n")
-      cat("  - with original data                :   ",
-          round(f2o[["vc.bc.f2"]], digits), "\n", sep = "")
-
-      if (ci.type %in% c("all", "bca.jackknife")) {
-        cat("  - with original data (by Jackknife) :   ",
-            ifelse ("vc.bc.f2" %in% names(a.jack),
-                    round(a.jack[["vc.bc.f2"]], digits), NA), "\n", sep = "")
-      }
-
-      cat("  - with bootstrapped data (Mean)     :   ",
-          round(mean(boot.f2[, "vc.bc.f2"], na.rm = TRUE), digits),
-          "\n", sep = "")
-      cat("  - with bootstrapped data (Median)   :   ",
-          round(median(boot.f2[, "vc.bc.f2"], na.rm = TRUE), digits),
-          "\n\n", sep = "")
-
-      cat("-----------------------\n")
-      cat("* Confidence Intervals\n")
-      cat("-----------------------\n")
-
-      ci.header(digits = digits)
-
-      for (i in 1:ci.vcbcf2.n) {
-        cat(sprintf(paste0("%23s", "%3s", cilo, "%3s", ciup),
-                    ci.vcbcf2[i, 2], "", ci.vcbcf2[i, 3], "", ci.vcbcf2[i, 4]),
-            "\n", sep = "")
-      }
-      cat("  ----------------------------------------------------\n")
-      cat("  Out of", n.boots, "bootstrapped data sets,\n")
-      cat("  - Number of f2 calculated with 1 time point :   ",
-          boot.info[["tp1"]], "\n", sep = "")
-      cat("  - Number of f2 calculated with 2 time point :   ",
-          boot.info[["tp2"]], "\n", sep = "")
-      cat("  - Number of f2 cannot be calculated (NA)    :   ",
-          boot.info[["vc.bc.f2.na"]], "\n", sep = "")
-      cat("  ----------------------------------------------------\n")
-      if (f2.type == "all") {
-        cat("_____________________________________________________",
-            "_________________\n\n", sep = "")
-      } else {
-        cat("\n\n")
-      }
-    } # end vc.bc.f2
-
-    # system and program info ----------------------------------------
-    # output function settings so anyone who read the results can reproduce it
-    cat("============================================\n")
-    cat("| Function Settings and System Information |\n")
-    cat("============================================\n\n")
-    cat("---------------------\n")
-    cat("* Function Settings\n")
-    cat("---------------------\n")
-    cat("  - test              :   ", dt.name, "\n", sep = "")
-    cat("  - ref               :   ", dr.name, "\n", sep = "")
-    cat("  - n.boots           :   ", n.boots, "\n", sep = "")
-    cat("  - seed              :   ", seed, "\n", sep = "")
-    cat("  - digits            :   ", digits, "\n", sep = "")
-    cat("  - alpha             :   ", alpha, " (", (1 - 2*alpha)*100, "% CI)\n",
-        sep = "")
-    cat("  - regulation        :   ", regulation, "\n", sep = "")
-    cat("  - min.points        :   ", min.points, "\n", sep = "")
-    cat("  - both.TR.85        :   ", both.TR.85, "\n", sep = "")
-    cat("  - print.report      :   ", print.report, "\n", sep = "")
-    cat("  - report.style      :   ", report.style, "\n", sep = "")
-    cat("  - f2.type           :   ", f2.type, "\n", sep = "")
-    cat("  - ci.type           :   ", ci.type, "\n", sep = "")
-    cat("  - quantile.type     :   ", quantile.type, "\n", sep = "")
-    cat("  - jackknife.type    :   ", jackknife.type, "\n", sep = "")
-    cat("  - time.unit         :   ", time.unit, "\n", sep = "")
-    cat("  - output.to.screen  :   ", output.to.screen, "\n", sep = "")
-    cat("  - sim.data.out      :   ", sim.data.out, "\n", sep = "")
-    cat("  - path.in           :   ", path.in, "\n", sep = "")
-    cat("  - file.in           :   ", file.in1, "\n", sep = "")
-    cat("  - path.out          :   ", path.out, "\n", sep = "")
-    cat("  - file.out          :   ", file.out1, "\n\n", sep = "")
-
-    cat("---------------------\n")
-    cat("* System Information\n")
-    cat("---------------------\n")
-
-    rinfo   <- strsplit(sessionInfo()$R.version$version.string, " ")
-    sysinfo <- Sys.info()
-    bootf2v <- as.character(packageVersion("bootf2"))
-    cat("  - Operating System Name     :   ",
-        sysinfo["sysname"], " ", sysinfo["release"], "\n", sep = "")
-    cat("  - Operating System Version  :   ",
-        sysinfo["version"], "\n", sep = "")
-    cat("  - Machine Node Name         :   ",
-        sysinfo["nodename"], "\n", sep = "")
-    cat("  - User Name                 :   ",
-        sysinfo["user"], "\n", sep = "")
-    cat("  - Time Zone                 :   ",
-        Sys.timezone(), "\n", sep = "")
-    cat("  - R Version                 :   ",
-        rinfo[[1]][3], " ", rinfo[[1]][4], "\n", sep = "")
-    cat("  - Package bootf2 Version    :   ", bootf2v, "\n", sep = "")
-    cat("_____________________________________________________",
-        "_________________\n\n", sep = "")
-    cat("The current report was generated at ", format(Sys.time(), "%H:%M:%S"),
-        " on ", format(Sys.time(), "%F"), " ", format(Sys.time(), "%Z"), " by",
-        "\nuser '", sysinfo["user"], "' on machine '", sysinfo["nodename"],
-        "', and saved as text file\n'", file.out1, "' at the location:\n'",
-        path.out, "'.\n", sep = "")
-    cat("=============================================================",
-        "=========\n\n", sep = "")
-    # end concise report style.
 
     if (report.style %in%  c("intermediate", "detailed")) {
-      cat("Individual f2 for each bootstrapped data set\n")
-      cat("___________________________________________________________",
-          "___________\n\n", sep = "")
-      if (f2.type == "all") {
-        if (digits <= 2) {
-          cat("Bootstrap  est.f2  exp.f2  bc.f2   vc.exp.f2  vc.bc.f2  ",
-              "Time Points\n", sep = "")
-          for (i in 1:n.boots) {
-            cat(sprintf(paste0("%2s", "%-7s", "%2s",
-                               paste0("%-6", ".", digits, "f"), "%2s",
-                               paste0("%-6", ".", digits, "f"), "%2s",
-                               paste0("%-6", ".", digits, "f"), "%2s",
-                               paste0("%-9", ".", digits, "f"), "%2s",
-                               paste0("%-8", ".", digits, "f"), "%7s", "%-s"),
-                        "", i, "", boot.f2[i, 1], "", boot.f2[i, 2], "",
-                        boot.f2[i, 3], "", boot.f2[i, 4], "", boot.f2[i, 5],
-                        "", boot.f2[i, 6]),
-                "\n", sep = "")
-          }
-        } else { # digits > 2
-          cat("Bootstrap  est.f2", rep(" ", digits - 1), "exp.f2",
-              rep(" ", digits - 1), "bc.f2 ", rep(" ", digits - 1),
-              "vc.exp.f2", rep(" ", digits - 1), "vc.bc.f2",
-              rep(" ", digits - 1), "Time Points\n", sep = "")
-          for (i in 1:n.boots) {
-            cat(sprintf(paste0("%2s", "%-7s", "%2s",
-                               paste0("%-", digits+3, ".", digits, "f"), "%2s",
-                               paste0("%-", digits+3, ".", digits, "f"), "%2s",
-                               paste0("%-", digits+3, ".", digits, "f"), "%2s",
-                               paste0("%-", digits+6, ".", digits, "f"), "%2s",
-                               paste0("%-", digits+5, ".", digits, "f"), "%7s",
-                               "%-s"), "", i, "", boot.f2[i, 1], "",
-                        boot.f2[i, 2], "", boot.f2[i, 3], "", boot.f2[i, 4], "",
-                        boot.f2[i, 5], "", boot.f2[i, 6]), "\n", sep = "")
-          }
-        } # end digits > 2
-      } else { # f2.type individual
-        if (digits <= 2) {
-          cat("Bootstrap No.   ", f2.type, "   No. Time Points\n", sep = "")
-          for (i in 1:n.boots) {
-            cat(sprintf(paste0("%4s", "%-9s", "%3s",
-                               paste0("%-6", ".", digits, "f"), "%3s", "%-s"),
-                        "", i, "", boot.f2[i, 1], "", boot.f2[i, 2]),
-                "\n", sep = "")
-          }
-        } else { # digits > 2
-          cat("Bootstrap No.   ", f2.type, rep(" ", digits + 1),
-              "No. Time Points\n", sep = "")
-          for (i in 1:n.boots) {
-            cat(sprintf(paste0("%4s", "%-9s", "%3s",
-                               paste0("%-", digits + 4, ".", digits, "f"),
-                               "%7s", "%-s"), "", i, "", boot.f2[i, 1], "",
-                        boot.f2[i, 4]),
-                "\n", sep = "")
-          }
-        } # end digits > 2
-      } # end f2.type
-      cat("___________________________________________________________",
-          "___________\n\n", sep = "")
+      rpt.intermediate(boot.info, boot.f2)
     } # end intermediate
 
     # this part only for detailed report. long process time. not recommended
     if (report.style == "detailed") {
-
-      cat("\n=====================================================",
-          "===========================\n\n", sep = "")
-      cat("Individual bootstrapped data set and its f2s\n")
-      cat("_______________________________________________________",
-          "_________________________\n\n", sep = "")
-      cat("Original data set for test\n--------------------------\n")
-      print(as.data.frame(data.t), row.names = FALSE)
-      cat("\nOriginal data set for reference\n")
-      cat("-------------------------------\n")
-      print(as.data.frame(data.r), row.names = FALSE)
-
-      tpo <- data.r[, 1][data.r[, 1] > 0][1:f2o[["tp"]]]
-
-      if (f2.type %in% c("all", "est.f2")) {
-        cat("\n\nEstimated f2                    :   ", f2o[["est.f2"]],
-            "\n", sep = "")
-      }
-
-      if (f2.type %in% c("all", "exp.f2")) {
-        cat("Expected f2                     :   ", f2o[["exp.f2"]],
-            "\n", sep = "")
-      }
-
-      if (f2.type %in% c("all", "bc.f2")) {
-        cat("Bias-corrected f2               :   ", f2o[["bc.f2"]],
-            "\n", sep = "")
-      }
-
-      if (f2.type %in% c("all", "vc.exp.f2")) {
-        cat("Variance-corrected expected f2  :   ", f2o[["vc.exp.f2"]],
-            "\n", sep = "")
-      }
-
-      if (f2.type %in% c("all", "vc.bc.f2")) {
-        cat("Variance- and bias-corrected f2 :   ", f2o[["vc.bc.f2"]],
-            "\n", sep = "")
-      }
-
-      cat("Time Points Used                :   ", f2o[["tp"]], " (",
-          paste0(tpo[1:length(tpo) - 1], rep(", ", length(tpo) - 1)), "and ",
-          tpo[length(tpo)], " ", time.unit, ")\n", sep = "")
-      cat("-------------------------------------------------------",
-          "-------------------------\n\n", sep = "")
-
-      for (i in 1:n.boots) {
-        dimnames(boot.t[[i]])[[2]] <-
-          c("time", paste0("U", 1:(NCOL(boot.t[[i]]) - 1)))
-
-        dimnames(boot.r[[i]])[[2]] <-
-          c("time", paste0("U", 1:(NCOL(boot.r[[i]]) - 1)))
-
-        tpb <- boot.t[[i]][, 1][boot.t[[i]][, 1] > 0][1:boot.f2[i, "tp"]]
-
-        cat("Bootstrap data set for test       :       ", i, "\n", sep = "")
-        cat("-----------------------------------\n")
-        print(boot.t[[i]], row.names = FALSE)
-        cat("\n")
-        cat("Bootstrap data set for reference  :       ", i, "\n", sep = "")
-        cat("-----------------------------------\n")
-        print(boot.r[[i]], row.names = FALSE)
-
-        if (f2.type %in% c("all", "est.f2")) {
-          cat("\n\nEstimated f2                    :   ",
-              boot.f2[[i, "est.f2"]], "\n", sep = "")
-        }
-
-        if (f2.type %in% c("all", "exp.f2")) {
-          cat("Expected f2                     :   ",
-              boot.f2[[i, "exp.f2"]], "\n", sep = "")
-        }
-
-        if (f2.type %in% c("all", "bc.f2")) {
-          cat("Bias-corrected f2               :   ",
-              boot.f2[[i, "bc.f2"]], "\n", sep = "")
-        }
-
-        if (f2.type %in% c("all", "vc.exp.f2")) {
-          cat("Variance-corrected expected f2  :   ",
-              boot.f2[[i, "vc.exp.f2"]], "\n", sep = "")
-        }
-
-        if (f2.type %in% c("all", "vc.bc.f2")) {
-          cat("Variance- and bias-corrected f2 :   ",
-              boot.f2[[i, "vc.bc.f2"]], "\n", sep = "")
-        }
-
-        cat("Time Points Used                :   ", boot.f2[[i, "tp"]], " (",
-            paste0(tpo[1:length(tpo) - 1], rep(", ", length(tpo) - 1)), "and ",
-            tpo[length(tpo)], " ", time.unit, ")\n", sep = "")
-        cat("-------------------------------------------------------",
-            "-------------------------\n\n", sep = "")
-      } # end loop for i data set
-      cat("\n=====================================================",
-          "===========================\n\n", sep = "")
+      rpt.detailed(data.t, data.r, boot.t, boot.r, boot.f2, boot.info, f2o)
     } # end detailed report
-
     sink()
   } # end isTRUE(print.report)
 
   if (isTRUE(sim.data.out)) {
     invisible(list(boot.ci = boot.f2.ci[order(boot.f2.ci[, 1]), ],
                    boot.f2 = as.data.frame(boot.f2, row.names = ""),
-                   boot.info = boot.info, boot.t = boot.t, boot.r = boot.r))
+                   boot.info = boot.info, boot.summary = btsum,
+                   boot.t = boot.t, boot.r = boot.r))
   } else {# save some memory
     invisible(list(boot.ci = boot.f2.ci[order(boot.f2.ci[, 1]), ],
                    boot.f2 = as.data.frame(boot.f2, row.names = ""),
-                   boot.info = boot.info))
+                   boot.info = boot.info,  boot.summary = btsum))
   }
 }

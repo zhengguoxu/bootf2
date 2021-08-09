@@ -5,7 +5,7 @@ citEntry(entry = "Manual",
                        "of Dissolution Profiles"),
   author       = personList(as.person("Zhengguo Xu")),
   year         = "2021",
-  note         = "R package version 0.3.0",
+  note         = "R package version 0.4.0",
   url          = "https://github.com/zhengguoxu/bootf2",
   textVersion  =
   paste("Zhengguo Xu (2021). bootf2: A Package for Simulation and",

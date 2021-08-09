@@ -7,8 +7,6 @@
 * Modified the report generation of `bootf2()`.
 * Update source files and documentations.
 
-
-
 # bootf2 0.3.0.9001
 
 * Cosmetic changes of source files

@@ -4,89 +4,129 @@
 \alias{sim.dp}
 \title{Simulate Dissolution Profiles}
 \usage{
-sim.dp(tp, model = c("Weibull", "first-order"), model.par,
-       seed = NULL, product, dp, dp.cv = NULL, ascending = FALSE,
-       n.units = 12L, max.disso = 105, message = FALSE,
-       plot = TRUE, time.unit = c("min", "h"),
+sim.dp(tp, dp, dp.cv, model = c("Weibull", "first-order"),
+       model.par = NULL, seed = NULL, n.units = 12L, product,
+       max.disso = 100, ascending = FALSE, message = FALSE,
+       time.unit = c("min", "h"), plot = TRUE,
        plot.max.unit = 36L)
 }
 \arguments{
-\item{tp}{Numeric vector of time points for the dissolution profiles.}
+\item{tp}{\emph{Numeric} vector of time points for the dissolution profiles.
+See Details.}
 
-\item{model}{Character strings of model names. Currently only
-'Weibull' and 'first-order' models are supported.}
+\item{dp, dp.cv}{\emph{Numeric} vectors of the \emph{target mean dissolution profile}
+(\code{dp}) and its respective CV at time points \code{tp} (\code{dp.cv}). See Details.}
 
-\item{model.par}{A list with model parameters. If missing, a list of
+\item{model}{\emph{Character} strings of model names. Currently only \code{"Weibull"}
+and \code{"first-order"} models are supported.}
+
+\item{model.par}{A \emph{list} with model parameters. If missing, a list of
 random \code{model.par} will be generated. See Details.}
 
-\item{seed}{Numeric seed value for reproducibility. If missing,
-a random seed will be generated for reproducibility purpose.}
+\item{seed}{\emph{Integer} seed value for reproducibility. If missing, a random
+seed will be generated for reproducibility purpose.}
 
-\item{product}{Character strings indicating the product name of the
-simulated profiles. If missing, a random name with 3 letters and
-4 digits will be generated.}
-
-\item{dp, dp.cv}{Numeric vectors of mean dissolution profile (\code{dp})
-and its corresponding CV\% (\code{dp.cv}). See Details.}
-
-\item{ascending}{Logical. If \code{TRUE}, simulated profiles will
-always increase with time. Only applicable when multivariate normal
-distribution approach is used. See Details.}
-
-\item{n.units}{An integer indicating the number of individual profiles
+\item{n.units}{An \emph{integer} indicating the number of individual profiles
 to be simulated.}
 
-\item{max.disso}{Numeric value for the maximum possible dissolution.
-In theory, the maximum dissolution should be 100\%, but in practice,
-it is not uncommon to see higher values, such as 105\%.}
+\item{product}{\emph{Character} strings indicating the product name of the
+simulated profiles. If missing, a random name with 3 letters and 4 digits
+will be generated.}
 
-\item{message}{Logical. If \code{TRUE}, basic information of the
-simulation will be printed on screen.}
+\item{max.disso}{\emph{Numeric} value for the maximum possible dissolution.
+In theory, the maximum dissolution is 100\%, but in practice, it is not
+uncommon to see higher values, such as 105\%, or much lower values,
+especially for products with low solubility.}
 
-\item{plot}{Logical If \code{TRUE}, a plot will be included in the
-output.}
+\item{ascending}{\emph{Logical}. If \code{TRUE}, simulated profiles will always
+increase with time. Only applicable when the approach based on
+multivariate normal distribution is used. See Details.}
 
-\item{time.unit}{Character strings indicating the unit of time.
-It should be either \code{"min"} for minute or \code{"h"} for hour.
-It is mainly used for generating \code{model.par} and \code{dp.cv}
-when they are missing, and making plot. @seealso \code{\link[=calcf2]{calcf2()}}.}
+\item{message}{\emph{Logical}. If \code{TRUE}, basic information of the simulation
+will be printed on screen.}
 
-\item{plot.max.unit}{Integer. If the number of individual units is
-no more than this value, the mean and all individual profiles will
-be plotted; otherwise, individual profiles will represented by
-boxplots. Therefore, to avoid overplotting, this value should not
-be too large. @seealso \code{\link[=calcf2]{calcf2()}}.}
+\item{time.unit}{\emph{Character} strings indicating the unit of time. It should
+be either \code{"min"} for minute or \code{"h"} for hour. It is mainly used for
+and making plot and generating \code{model.par} and \code{dp.cv} when they are not
+provided by the user. @seealso \code{\link[=calcf2]{calcf2()}}.}
+
+\item{plot}{\emph{Logical}. If \code{TRUE}, a a dissolution versus time plot will be
+included in the output.}
+
+\item{plot.max.unit}{\emph{Integer}. If the number of individual units is no more
+than this value, the mean and all individual profiles will be plotted;
+otherwise, individual profiles will be represented by boxplots at each
+time point. Therefore, to avoid overplotting, this value should not be
+too large. @seealso \code{\link[=calcf2]{calcf2()}}.}
 }
 \value{
 A list of 3 to 5 components:
 \itemize{
-\item \code{sim.summary}: A data frame with summary statistics of all
-individual profiles.
-\item \code{sim.disso}: A data frame with all individual profiles.
-\item \code{sim.info}: A data frame with information of simulations
-such as the seed number. If modelling approach is used, the data
-frame contains model parameters; if multivariate normal
-distribution approach is used, it contains \code{dp/dp.cv}.
-\item \code{model.par.ind}: A data frame of all individual model
-parameters that were used for the simulation of individual
-dissolution profiles. Available only if the modelling approach
-is used, i.e., when \code{dp} is not missing.
-\item \code{sim.dp}: A plot. Available only if \code{plot = TRUE}.
+\item \code{sim.summary}: A \emph{data frame} with summary statistics of all
+individual dissolution profiles.
+\item \code{sim.disso}: A \emph{data frame} with all individual dissolution profiles.
+\item \code{sim.info}: A \emph{data frame} with information of the simulation such as
+the seed number and number of individual profiles. If modelling approach
+is used, the data frame will contain model parameters as well.
+\item \code{model.par.ind}: A \emph{data frame} of all individual model parameters
+that were used for the simulation of individual dissolution profiles.
+Available only if the modelling approach is used, i.e., when \code{dp}
+is missing.
+\item \code{sim.dp}: A plot. Available only if the argument \code{plot} is \code{TRUE}.
 }
 }
 \description{
-Function to simulate dissolution profiles based on mathematical
-models or multivariate normal distribution.
+Function to simulate dissolution profiles based on mathematical models or
+multivariate normal distribution.
 }
 \details{
-The approach used to simulate individual dissolution profiles
-depends on if the mean dissolution profile \code{dp} is provided
-by user or not. If it is not provided, \code{dp} and individual
-profiles will be simulated using mathematical models, otherwise,
-it will be simulated using multivariate normal distribution.
-For the latter, the CV at time points \code{dp.cv} should be
-supplier by user; if not, it will be generated automatically.
-\subsection{Use mathematical models (Recommended Approach)}{
+\subsection{Simulation approaches}{
+
+The approach used to simulate individual dissolution profiles depends on if
+the \emph{target mean dissolution profile} \code{dp} is provided by the user or not.
+\itemize{
+\item If \code{dp} is not provided, then it will be calculated using \code{tp}, \code{model},
+and \code{model.par}. The parameters defined by \code{model.par} are considered as
+the \emph{population parameter}; consequently, the calculated \code{dp} is
+considered as the \emph{targeted population profile}. In addition, \code{n.units}
+sets of \emph{individual model parameters} will be simulated based on
+exponential error model, and \emph{individual dissolution profiles} will be
+generated using those individual parameters. The mean of all simulated
+individual profiles, \code{sim.mean}, included in one of the outputs data
+frames, \code{sim.summary}, will be \emph{similar, but not identical, to \code{dp}}.
+The difference between \code{sim.mean} and \code{dp} is determined by the number of
+units and the variability of the model parameters. In general, the larger
+the number of units and the lower of the variability, the smaller the
+difference. Additional details on the mathematical models are given below.
+\item If \code{dp} is provided, then \code{n.units} of individual dissolution profiles
+will be simulated using multivariate normal distribution. The mean of all
+simulated individual profiles, \code{sim.mean}, will be \emph{identical to \code{dp}}.
+In such case, it is recommended that \code{dp.cv}, the CV at time points \code{tp},
+should also be provided by the user. If \code{dp.cv} is not provided, it will
+be generated automatically such that the CV is between 10\% and 20\% for time
+points up to 10 min, between 1\% and 3\% for time points where the
+dissolution is more than 95\%, between 3\% and 5\% for time points where the
+dissolution is between 90\% and 95\%, and between 5\% and 10\% for the rest of
+time points. Whether the \code{dp.cv} is provided or generated automatically,
+the CV calculated using all individual profiles will be equal to \code{dp.cv}.
+Additional details on this approach are given below.
+}
+}
+
+\subsection{Minimum required arguments that must be provided by the user}{
+
+If \code{dp} is provided by the user, logically, \code{tp} must also be provided, and
+the approach based on multivariate normal distribution is used, as explained
+above. If \code{dp} is not provided, \code{tp} could be missing, i.e., a simple
+function call such as \code{sim.dp()} will simulate dissolution profiles. In such
+case, a default \code{tp} will be generated depending on the \code{time.unit}: if the
+\code{time.unit} is \code{"min"}, then \code{tp} would be \code{c(5, 10, 15, 20, 30, 45, 60)};
+otherwise the \code{tp} would be \code{c(1, 2, 3, 4, 6, 8, 10, 12)}. The rest
+arguments are either optional, or required by the function but default
+values will be used.
+}
+
+\subsection{Notes on mathematical models}{
 
 The first-order model is expressed as
 \deqn{f_t = f_\mathrm{max} \left(1 - %
@@ -104,59 +144,56 @@ where \eqn{f_\mathrm{max}}{fmax} is the maximum dissolution,
 \eqn{\mathrm{MDT}}{MDT} is the mean dissolution time,
 \eqn{t_\mathrm{lag}}{tlag} is the lag time, \eqn{\alpha}{\alpha} and
 \eqn{\beta}{\beta} are the scale and shape factor in Weibull function,
-and \eqn{k}{k} is the rate constant in the first-order model.
-Obviously, The two Weibull models are mathematically equivalent by
-letting \eqn{\alpha = \mathrm{MDT}^\beta}{\alpha = MDT^\beta}.
+and \eqn{k}{k} is the rate constant in the first-order model. Obviously,
+The two Weibull models are mathematically equivalent by letting
+\eqn{\alpha = \mathrm{MDT}^\beta}{\alpha = MDT^\beta}.
 
 Individual model parameter were simulated according to the exponential
 error model
 \deqn{P_i = P_\mu e^{N\left(0, \sigma^2\right)}}{P(i) = P(\mu)%
   exp(N(0, \sigma^2)),}
-where \eqn{N\left(0, \sigma^2\right)}{N(0, \sigma^2)} represents the
-normal distribution with mean zero and variance \eqn{\sigma^2}
-(\eqn{\sigma = \mathrm{CV}/100}{\sigma = CV/100});
-\eqn{P_i}{P(i)} and \eqn{P_\mu}{P(\mu)} denote the individual and
-population model parameters.
+where \eqn{P_i}{P(i)} and \eqn{P_\mu}{P(\mu)} denote the individual and
+population model parameters; \eqn{N\left(0, \sigma^2\right)}{N(0, \sigma^2)}
+represents the normal distribution with mean zero and variance \eqn{\sigma^2}
+(\eqn{\sigma = \mathrm{CV}/100}{\sigma = CV/100}).
+}
 
-Therefore, \code{model.par} should be supplied as a named list of 6
-parameters for the first-order model (\code{fmax/fmax.cv},
-\code{k/k.cv}, and \code{tlag/tlag.cv}), and 8 parameters for Weibull
-model (\code{fmax/fmax.cv}, \code{tlag/tlag.cv}, \code{beta/beta.cv},
-and either \code{alpha/alpha.cv} or \code{mdt/mdt.cv}, depending on
-the mathematical formula used). For example:
+\subsection{How to supply \code{model.par}}{
+
+The argument \code{model.par} should be supplied as a \emph{named list} of model
+parameters as explained above, and their respective CV for simulation of
+individual parameters. Therefore, for the first-order model, three pairs of
+parameters should be specified: \code{fmax/fmax.cv}, \code{k/k.cv}, and \code{tlag/tlag.cv};
+and for Weibull model, four pairs: \code{fmax/fmax.cv}, \code{tlag/tlag.cv},
+\code{beta/beta.cv}, and either \code{alpha/alpha.cv} or \code{mdt/mdt.cv}, depending on
+the mathematical formula used. CV should be given in percentage, e.g., if
+CV for \code{beta} is 30\%, it should be specified as \code{beta.cv = 30}, \emph{not}
+\code{beta.cv = 0.3}. The order of the parameters does not matter, but the name
+of the parameters must be given \emph{exactly same} as described above.
+For example:
 \itemize{
-\item \code{model.par = list(fmax = 100, fmax.cv = 5, k = 0.6,
-    k.cv = 25, tlag = 0, tlag.cv = 0)} for the first-order model.
-\item \code{model.par = list(fmax = 100, fmax.cv = 5, tlag = 5,
-    tlag.cv = 10, mdt = 15, mdt.cv = 20, beta = 1.5, beta.cv = 5)}, or
-\item \code{model.par = list(fmax = 100, fmax.cv = 5, tlag = 5,
-    tlag.cv = 10, alpha = 60, alpha.cv = 20, beta = 1.5, beta.cv = 5)}
-for the Weibull model.
+\item \code{model.par = list(fmax = 100, fmax.cv = 5, k = 0.6, k.cv = 25, tlag = 0, tlag.cv = 0)} for the first-order model.
+\item \code{model.par = list(fmax = 100, fmax.cv = 5, tlag = 5, tlag.cv = 10, mdt = 15, mdt.cv = 20, beta = 1.5, beta.cv = 5)}, or
+\item \code{model.par = list(fmax = 100, fmax.cv = 5, tlag = 5, tlag.cv = 10, alpha = 60, alpha.cv = 20, beta = 1.5, beta.cv = 5)} for Weibull models.
 }
 }
 
-\subsection{Use multivariate normal distribution}{
+\subsection{Notes on multivariate normal distribution approach}{
 
-If \code{dp} is supplied by user, simulation will be done based on
-multivariate normal distribution, and \code{n.units} of individual
-profiles will be simulated with mean dissolution profile equals to
-\code{dp}. IF CV at time points (\code{dp.cv}) is supplier, the CV\%
-of simulated profiles will equal to \code{dp.cv}. If \code{dp.cv} is
-missing, it will be simulated such that the CV is 20\% for time points
-up to 10 min, 5\% for time points where dissolution is greater than
-90\% (more realistic), and 10\% for the rest time points.
-The length of \code{dp} and \code{dp.cv} should be the same.
-
-When this method is used, depending on \code{dp/dp.cv}, there is no
-guarantee that all individual profiles increase with time; near the
-end of the time points, some profiles may decrease. This is realistic
-for those drug substances that are unstable in the dissolution medium.
-To avoid this, set \code{ascending = TRUE}.
+When this approach is used, depending on \code{dp/dp.cv}, there is no guarantee
+that all individual profiles increase with time; near the end of the time
+points, some individual profiles may decrease, especially when the
+dissolution is close to the plateau and the variability is high. This can
+happen to real life data, especially for those products with drug substances
+that are unstable in dissolution medium. To force increase for all profiles,
+set \code{ascending = TRUE}. Depending on the data, the program may take long
+time to run, or may even fail.
 }
 }
 \examples{
 # time points
 tp <- c(5, 10, 15, 20, 30, 45, 60)
+
 # using all default values to simulate profiles
 d1 <- sim.dp(tp, plot = FALSE)
 
@@ -172,19 +209,21 @@ d1$sim.info
 #individual model parameters
 d1$mod.par.ind
 
-# using Weibull model to simulate 24 profiles without lag time
+# using Weibull model to simulate 100 profiles without lag time
 mod.par <- list(fmax = 100, fmax.cv = 2, tlag = 0, tlag.cv = 0,
                 mdt = 20, mdt.cv = 5, beta = 2.2, beta.cv = 5)
 d2 <- sim.dp(tp, model.par = mod.par, seed = 100, n.units = 100L,
              plot = FALSE)
 
 # using multivariate normal distribution approach
-# mean profile same length as tp
-dp <- c(5, 20, 42, 63, 88, 91, 99)
+# target mean profile with same length as tp
+\dontrun{
+dp <- c(39, 56, 67, 74, 83, 90, 94)
 
 # CV\% at each time point
-dp.cv <- c(20, 20, 10, 10, 10, 10, 5)
+dp.cv <- c(19, 15, 10, 8, 8, 5, 3)
 
-d3 <- sim.dp(tp, dp = dp, dp.cv = dp.cv, seed = 100, plot = FALSE)
+d3 <- sim.dp(tp, dp = dp, dp.cv = dp.cv, seed = 1234, plot = FALSE)
+}
 
 }

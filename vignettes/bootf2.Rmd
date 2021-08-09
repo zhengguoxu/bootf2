@@ -5,10 +5,10 @@ date: "`r format(Sys.Date())`"
 output: 
   rmarkdown::html_vignette:
     keep_md: true
-    toc: true
+    toc: false
     toc_depth: 3
-    fig_width: 6.5
-    fig_height: 4
+    fig_width: 7
+    fig_height: 4.5
   highlight: "tango"
 bibliography: ref.bib
 notes-after-punctuation: false
@@ -43,22 +43,15 @@ Nevertheless, there are several prerequisites for the use of f2 method according
 to the regulatory guidelines, such as no more than one time point above 85%
 dissolved should be used and the variability, expressed as coefficient of
 variation (CV), should be no more than 20% and 10% for early and later time
-points, respectively. See vignette [Introduction to bootf2](introduction.md)
-for details. 
+points, respectively. See vignette *Introduction to bootf2* for details. 
 
-Recently, several guidelines recommended the use of confidence interval 
-of $f_2$ approach using bootstrap when the traditional $f_2$ method 
-cannot be applied [@EMA-2018-09-QA.MSD.DISSO; @Davit-2013-03-BA;
-@Lum-2019-05-WS; @Mandula-2019-05-WS]. However, none of the guidelines
-specified in details which estimators or types of confidence
-intervals should be used. Therefore, the function `bootf2()` will
-output various confidence intervals by default for several $f_2$ estimators. 
-
-The following descriptions of the type of $f_2$ and intervals were modified
-based on the manuscript *Estimators and Confidence Intervals of $f_2$ Using
-Bootstrap Methodology for the Comparison of Dissolution Profiles*,
-submitted to the journal *Computer Methods and Programs in Biomedicine*
-[@Xu-2021-CMPB].
+Recently, several guidelines recommended the use of confidence interval of 
+$f_2$ approach using bootstrap when the traditional $f_2$ method cannot be
+applied [@EMA-2018-09-QA.MSD.DISSO; @Davit-2013-03-BA; @Lum-2019-05-WS;
+@Mandula-2019-05-WS]. However, none of the guidelines specified in details 
+which estimators or types of confidence intervals should be used. Therefore, 
+the function `bootf2()` will output various confidence intervals by default
+for several $f_2$ estimators. 
 
 ### Types of $f_2$
 
@@ -339,66 +332,68 @@ bootf2(test, ref, path.in, file.in, path.out, file.out,
 ### Notes on function arguments
 
 1. Data input: `test`, `ref`, `path.in`, `file.in`
-    - In the typical interactive use, `test` and `ref` are data frames with
+    - In the typical interactive use, `test` and `ref` are *data frames* with
       the time as the first column, and individual units for the rest of 
       columns. In such cases, arguments `path.in` and `file.in` should not 
-      be used. 
-    - Data can be read directly from an Excel file with extension `.xlsx` 
-      or `.xls`. In this case, data of test and reference should be 
-      stored in separate worksheets. The first column should be time, 
-      the rest columns are individual units. *The first row* is the 
-      column head indicating the names, such as 'time', 'unit 01', 
-      unit 02', .... It doesn't matter what the names are as columns 
-      will be renamed internally by the function. The important point 
-      is that *the first row will not be read, so do not put dissolution 
-      data on the first row*. 
+      be used.
+    - Data can be read directly from an Excel file with extension `.xlsx` or
+      `.xls`. In this case, data of test and reference should be stored in
+      separate worksheets. The first column should be time, the rest columns 
+      are individual units. *The first row* is the column head indicating the
+      names, such as 'time', 'unit 01', unit 02', .... It doesn't matter what
+      the names are as columns will be renamed internally by the function. The
+      important point is that *the first row will not be read, so do not put
+      dissolution data on the first row*. 
     - When `path.in` and `file.in` are provided, the argument `test` and
-      `ref` should be the worksheet names inside quotation mark, e.g., 
+      `ref` should be the *worksheet names inside quotation mark*, e.g., 
       `"lot ABCD1234 pH 6.8"`. 
     - `path.in` can be an absolute path such as`"/home/myname/my.project/dat/"`,
-      or a relative path such as `"../dat/"` if the working directory is 
-      in the folder `"/home/myname/my.project/analysis/"` and the data file
-      is in the folder `"/home/myname/my.project/dat/"`. 
+      or a relative path such as `"../dat/"` if the working directory is in the
+      folder `"/home/myname/my.project/analysis/"` and the data file is in the
+      folder `"/home/myname/my.project/dat/"`. 
     - One more note for Windows user: As Windows use "\" instead of "/" to
       separate path, you have to either escape it by an additional "\", 
       e.g., `"C:\user\myname\my.project\dat\"` *cannot* be the `path.in`, 
       you have to changed it to `"C:\\user\\myname\\my.project\\dat\\"`, or
       to `"C:/user/myname/my.project/dat/"`, the same format as used in Linux
       system.
-1. For such simple calculation, argument `path.out` and `file.out` are
-   really overkill. By default the result will be printed to screen. But if 
-   somehow you feel that you need it, the same principle for `path.in` and 
-   `file.in` applies here.
+1. Output: `path.out` and `file.out`, `output.to.screen`:
+    - If argument `path.out` and `file.out` are not provided, but argument
+      `print.report` is `TRUE`, then a plain text report will be generated
+      automatically in the current working directory with file name
+      `test_vs_ref_TZ_YYYY-MM-DD_HHMMSS.txt`, where `test` and `ref` are data
+      set names of test and reference, `TZ` is the time zone such as CEST, 
+      `YYYY-MM-DD` is the numeric date format and `HHMMSS` is the numeric time
+      format for hour, minute, and second.
+    - For a quick check, set argument `output.to.screen = TRUE`, a summary
+      report very similar to concise style report will be printed on screen.
 1. Argument `jackknife.type`
-
-    - For any sample with size $n$, the jackknife estimator is obtained 
-      by estimating the parameter for each subsample omitting the $i$th
-      observation. However, when two samples (e.g., test and reference) 
-      are involved, there are several possible ways to do it. Assuming 
-      sample size of test and reference are $n_\mathrm{T}$ and $n_\mathrm{R}$,
-      the following three possibility are considered:
-      - Estimated by removing one observation from both test and 
-        reference samples. In this case, the prerequisite is 
+    - For any sample with size $n$, the jackknife estimator is obtained by
+      estimating the parameter for each subsample omitting the $i$th 
+      observation. However, when two samples (e.g., test and reference) are
+      involved, there are several possible ways to do it. Assuming sample size
+      of test and reference are $n_\mathrm{T}$ and $n_\mathrm{R}$, the
+      following three possibility are considered:
+      - Estimated by removing one observation from both test and reference
+        samples. In this case, the prerequisite is 
         $n_\mathrm{T} = n_\mathrm{R}$, denoted by `nt=nr` in the function.
         So if there are 12 units in test and reference data sets, there will
         be 12 jackknife estimators.
-      - Estimate the jackknife for test sample while keeping the reference  
-        data unchanged; and then estimate jackknife for reference sample 
-        while keeping the test sample unchanged. This is denoted by 
-        `nt+nr` in the function. This is the default method.
-        So if there are 12 units in test and reference data sets, there will
-        be $12 + 12 = 24$ jackknife estimators.
-      - For each observation deleted from test sample, estimate jackknife
-        for reference sample. This is denoted by `nt*nr` in the function.
-        So if there are 12 units in test and reference data sets, there will
-        be $12 \times 12 = 144$ jackknife estimators.
+      - Estimate the jackknife for test sample while keeping the reference data
+        unchanged; and then estimate jackknife for reference sample while
+        keeping the test sample unchanged. This is denoted by `nt+nr` in the
+        function. This is the default method. So if there are 12 units in test
+        and reference data sets, there will be $12 + 12 = 24$ jackknife
+        estimators.
+      - For each observation deleted from test sample, estimate jackknife for
+        reference sample. This is denoted by `nt*nr` in the function. So if
+        there are 12 units in test and reference data sets, there will be 
+        $12 \times 12 = 144$ jackknife estimators.
 1. Arguments `f2.type` and `ci.type` are explained in the previous section.
-1. By default, the individual bootstrapped data set are not included in
-   the output as those data sets are only useful for validation purpose. 
-   To include the individual data sets, set the argument 
-   `sim.data.out = TRUE`. 
-1. Read the function manual `help("bootf2")` and refer to [Calculating
-   Similarity Factor $f_2$](calcf2.md) for more details of each argument.
+1. By default, the individual bootstrapped data set are not included in the
+   output as those data sets are only useful for validation purpose. To include
+   the individual data sets, set the argument `sim.data.out = TRUE`. 
+1. Read the function manual `help("bootf2")` for more details of each argument.
 
 ## Examples
 
@@ -427,9 +422,9 @@ dt <- sim.dp(tp, model.par = par.t, seed = 100, plot = FALSE)
 Use default setting for most arguments. To reduce the compilation time,
 bootstrap number is set to 100 only.
 
-```{r bootf2-ex01}
+```{r bootf2-ex01, eval=FALSE}
 # output file will be generated automatically
-bootf2(dt$sim.disso, dr$sim.disso, n.boots = 100)
+bootf2(dt$sim.disso, dr$sim.disso, n.boots = 100, print.report = FALSE)
 ```
 
 

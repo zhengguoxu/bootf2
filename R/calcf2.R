@@ -1,126 +1,179 @@
-#' Calculate Similarity Factor f2
+#' Calculate Similarity Factor \eqn{f_2}{f2}
 #'
-#' Main function to calculate f2 according to different regulatory guidelines.
+#' Main function to calculate \eqn{f_2}{f2} according to different regulatory
+#' guidelines.
 #'
-#' @importFrom readxl read_excel
+#' @importFrom readxl read_excel excel_sheets
 #' @importFrom stats quantile reshape var rnorm median quantile lm coef
 #' @import ggplot2
 #' @usage
-#' calcf2(test, ref, regulation = c("EMA", "FDA", "WHO"),
-#'        path.in, file.in, path.out, file.out, digits = 2L,
-#'        cv.rule = TRUE, min.points = 3L, both.TR.85 = FALSE,
+#' calcf2(test, ref, path.in, file.in, path.out, file.out,
+#'        regulation = c("EMA", "FDA", "WHO", "Canada", "ANVISA"),
+#'        cv.rule = TRUE, message = TRUE, min.points = 3L,
 #'        f2.type = c("est.f2", "exp.f2", "bc.f2", "vc.exp.f2",
-#'                    "vc.bc.f2", "all"), plot = TRUE,
-#'        message = TRUE, time.unit = c("min", "h"),
+#'                    "vc.bc.f2", "all"), both.TR.85 = FALSE,
+#'        digits = 2L, time.unit = c("min", "h"),  plot = TRUE,
 #'        plot.start.time = 0, plot.max.unit = 24L)
 #'
-#' @param test,ref Data frames of dissolution profiles of test and
-#'   reference product if \code{path.in} and \code{file.in} are not
-#'   specified; otherwise, they should be character strings indicating
-#'   the worksheet names of the Excel file where the dissolution data
-#'   is saved. Required format: the first column should be time and the
-#'   rest columns are dissolution data of each unit. See Input/Output
-#'   in Details.
-#' @param regulation Character strings indicating regulatory guidelines.
-#'   See Regulation in Details.
-#' @param path.in,file.in,path.out,file.out Character strings of input
-#'   and output directories and file names. See Input/Output in Details.
-#' @param digits An integer indicating the decimal points for the output.
-#' @param cv.rule Logical. If \code{TRUE}, CV rule will be checked
-#'   according to regulatory guidelines. See Regulation in Details.
-#' @param min.points An integer indicating the minimum time points to
-#'   be used to calculate f2. Do not change the default value (3) for
-#'   conventional f2 calculation. This parameter is mainly used for
-#'   bootstrap f2 method. See Regulation in Details.
-#' @param both.TR.85 Logical. If \code{TRUE}, the old (incorrect)
-#'   interpretation (that both the test and reference should release
-#'   more than 85%) will be used for f2 calculation when
-#'   \code{regulation = 'FDA'}. See Regulation in Details.
-#' @param message Logical. If \code{TRUE}, the results and messages
+#' @param test,ref *Data frames* of dissolution profiles of test and reference
+#'   product if `path.in` and `file.in` are not specified; otherwise, they
+#'   should be *character* strings indicating the worksheet names of the Excel
+#'   file where the dissolution data is saved. See Input/Output in Details.
+#' @param path.in,file.in,path.out,file.out *Character* strings of input and
+#'   output directories and file names. See Input/Output in Details.
+#' @param regulation *Character* strings indicating regulatory guidelines. See
+#'   Regulation in Details.
+#' @param cv.rule *Logical*. If `TRUE`, CV rule will be checked according
+#'   to regulatory guidelines. See Regulation in Details.
+#' @param message *Logical*. If `TRUE`, the results and messages
 #'   will be printed on screen.
-#' @param f2.type Character strings indicating which f2 estimators
-#'   should be calculated. For conventional f2 calculation, the default
-#'   'est.f2' should be used. Other estimators are mainly for the
-#'   bootstrap method.
-#' @param plot Logical. If \code{TRUE}, a dissolution versus time
-#'   plot will be printed.
-#' @param time.unit Character strings indicating the unit of time.
-#'   It should be either \code{"min"} for minute or \code{"h"} for hour.
-#'   It is mainly used for checking CV rules and making plot.
-#'   See Regulation in Details.
-#' @param plot.start.time Numeric value indicating the start time
-#'   for the plot.
-#' @param plot.max.unit Integer. If the number of individual units
-#'   is no more than this value, mean and all individual profiles
-#'   will be plotted, otherwise, individual profiles will represented
-#'   by boxplots. Therefore, the value should not be too large.
+#' @param min.points An *integer* indicating the minimum time points to be used
+#'   to calculate \eqn{f_2}{f2}. The default value 3 should be used for
+#'   conventional \eqn{f_2}{f2} calculation. This parameter is mainly used for
+#'   bootstrap \eqn{f_2}{f2} method. See Regulation in Details.
+#'   @seealso [bootf2()].
+#' @param f2.type *Character* strings indicating which \eqn{f_2}{f2} estimators
+#'   should be calculated. For conventional \eqn{f_2}{f2} calculation, the
+#'   default `"est.f2"` should be used. Other estimators are mainly for the
+#'   bootstrap method. @seealso [bootf2()].
+#' @param both.TR.85 *Logical*. If `TRUE`, and if `regulation = "FDA"`, all
+#'   measurements up to the time points at which both test and reference
+#'   products dissolve more than 85% will be used to calculate \eqn{f_2}{f2}.
+#'   This is the conventional, but incorrect, interpretation of the US FDA rule.
+#'   Therefore, the argument should only be set to `TRUE` for validation purpose
+#'   such as comparing the results from old literatures that use the wrong
+#'   interpretation to calculate \eqn{f_2}{f2}. See Regulation in Details.
+#' @param digits An *integer* indicating the decimal points for the output.
+#' @param time.unit *Character* strings indicating the unit of time. It should
+#'   be either `"min"` for minute or `"h"` for hour. It is mainly used for
+#'   checking CV rules and making plot. See Regulation in Details.
+#' @param plot *Logical*. If `TRUE`, a dissolution versus time plot will be
+#'   printed.
+#' @param plot.start.time *Numeric* value indicating the starting time for the
+#'   plot.
+#' @param plot.max.unit *Integer*. If the number of individual units is no more
+#'   than this value, the mean and all individual profiles will be plotted;
+#'   otherwise, individual profiles will be represented by boxplots at each
+#'   time point. Therefore, to avoid overplotting, this value should not be
+#'   too large. @seealso [calcf2()].
 #'
-#' @return A vector of f2 and number of time points used for the calculation.
+#' @return A *data frame* of \eqn{f_2}{f2} type and \eqn{f_2}{f2} value, the
+#'   number of time points used for the calculation (`f2.tp`), indication if
+#'   both test and reference dissolve more than 85% at 15 min (`d85at15`), and
+#'   other information used for the calculation.
 #'
 #' @details
+#' ## Minimum required arguments that must be provided by the user
+#' Arguments `test` and `ref` must be provided by the user. They should be `R`
+#' `data frames`, with *time as the first column*, and all individual profiles
+#' profiles as the rest columns, or mean profile as the second column if only
+#' mean profile is available. The actual names of the columns do not matter
+#' since they will be renamed internally.
 #'
 #' ## Input/Output
+#' The dissolution data of test and reference product can either be provided as
+#' *data frames* for `test` and `ref`, as explained above, or be read from an
+#' *Excel file* with data of test and reference stored in *separate worksheets*.
+#' In the latter case, the argument `path.in`, the directory where the Excel
+#' file is, and `file.in`, the name of the Excel file *including the file
+#' extension `.xls` or `.xlsx`*, must be provided. In such case, the argument
+#' `test` and `ref` must be *the names of the worksheets in quotation marks*.
+#' The first column of each Excel worksheet must be time, and the rest columns
+#' are individual dissolution profiles, or the second column must be mean
+#' profile if only mean data is available. The first row should be column names,
+#' such as time, unit01, unit02, ... The actual names of the columns do not
+#' matter as they will be renamed internally.
 #'
-#' - \code{path.in} is the directory where the input file is, and
-#'   \code{file.in} is the input data file. If they are both missing,
-#'   then the arguments \code{test} and \code{ref} must be specified,
-#'   and they should be R data frames, with 'time' in the first column and
-#'   dissolution data of individual units in the rest of the columns.
-#'   If only mean dissolution data is used, it should be the second column.
-#' - If \code{path.in} and \code{file.in} are specified, then \code{file.in}
-#'   should be the name of the Excel file where the dissolution data are saved.
-#'   The file name should include the extension 'xlsx' or 'xls', depending on
-#'   the version of the Excel. In that case, the argument \code{test} and
-#'   \code{ref} should be the names of the work sheets in the Excel,
-#'   given within the quotation marks.
-#' - \code{path.out} and \code{file.out} are the names of the output
-#'   directory and file. It is an overkill to output such simple calculations;
-#'   therefore, unless these two arguments are specified by the user,
-#'   results are printed on screen by default.
+#' Arguments `path.out` and `file.out` are the names of the output directory
+#' and file. It is an overkill to output such simple calculations; therefore,
+#' unless these two arguments are specified by the user, results are printed
+#' on screen by default.
 #'
 #' ## Regulation
 #'
-#' To use f2 method, different regulatory guidelines have slightly
-#' different requirements. Some requirements are almost universal,
-#' such as same time points for the test and reference product,
-#' minimum 3 time points (excluding time zero), and twelve individual
-#' profiles for each formulation. Other requirements are slightly
-#' different among different regulatory guidelines, or at least
-#' interpreted differently. Two main issues are the rules for the
-#' variability (CV Rule) and time points where dissolution is more
+#' To apply \eqn{f_2}{f2} method, different regulatory guidelines have slightly
+#' different requirements. Some requirements are almost universal, such as same
+#' time points for the test and reference product, minimum 3 time points
+#' (excluding time zero), and twelve individual profiles for each formulation.
+#' Other requirements are slightly different among different regulatory
+#' guidelines, or at least interpreted differently. Two main issues are the
+#' rules for the variability (CV Rule) and time points where dissolution is more
 #' than 85% (85% Rule).
 #'
 #' ### CV rule
+#' - `EMA`, `Canada`, and `ANVISA`: The CV of the *first time point* should not
+#'   be greater than 20%, and the CV of the rest time points should not be
+#'   greater than 10%.
+#' - `WHO`: The CV should not be greater than 20% for *time points up to
+#'   10 min*, and not greater than 10% for the rest time points.
+#' - `FDA`: US FDA is more flexible. The CV for the *early time points* should
+#'   not be greater than 20%, and for the rest time points, not greater than
+#'   10%.
 #'
-#' - EMA: The CV of the first time point should not be greater than 20%,
-#'   and the CV of the rest time points should not be greater than 10%.
-#'   The phrase 'the first time point' was later interpreted as all time
-#'   points up to 10 min. For example, if there are 5 min and 10 min time
-#'   points in the dissolution profiles, the CV for 5 min and 10 min should
-#'   not be greater than 20%.
-#' - WHO: Same as EMA rule, i.e., CV not greater than 20% for time points
-#'   up to 10 min, and not greater than 10% for the rest time points.
-#' - US FDA: More flexible. The CV for the early time points should not be
-#'   greater than 20%, and for the rest time points, not greater than 10%.
-#'   The phrase 'early time points' is typically interpreted as those points
-#'   up to 15 min, some times even up to 20 min according to unofficial
-#'   communication with FDA staff.
+#' The phrase *the first time point* in `EMA` rule was later interpreted as all
+#' time points up to 10 min, according to an unofficial communication with an
+#' European regulator. This makes the *`EMA` rule the same as `WHO` rule*. For
+#' example, if there are 5 min and 10 min time points in the dissolution
+#' profiles, the CV for both 5 min and 10 min should not be greater than 20%.
+#'
+#' The *first time point* in `ANVISA` rule corresponds to *40% of the total
+#' collected points*. For example, for a dissolution profile with five
+#' collection times, the first two collection times are considered first points.
+#'
+#' The phrase *early time points* in `FDA` rule is typically interpreted as
+#' those points up to 15 min, sometimes even up to 20 min according to
+#' an unofficial communication with FDA staff. In the function `calcf2()`, the
+#' cutting point for FDA rule is 15 min.
 #'
 #' ### 85% Rule
+#' This rule is implemented as follows:
+#' - `EMA`, `FDA`, `Canada`, and `ANVISA`: Only one measurement is considered
+#'   after 85% of dissolution for any product.
+#' - `WHO`: Dissolution profiles should be 'cut' at the time point where
+#'   the reference release more than 85%. Therefore, `WHO` rule only differs
+#'   from rule of `EMA`, `FDA`, `Canada`, and `ANVISA` when test product
+#'   dissolve faster than reference. If reference product dissolve faster, then
+#'   rules of all five regulatory bodies are same in this regard.
 #'
-#' - EMA: Dissolution profiles should be 'cut' at the time point where
-#'   either the test or reference release more than 85%.
-#' - WHO: Dissolution profiles should be 'cut' at the time point where
-#'   the reference release more than 85%.
-#' - US FDA: Only one measurement should be considered after 85%
-#'   dissolution of both the products.
-#'   Many interpreted that the dissolution profiles should be 'cut'
-#'   at the time point where both the test and reference release more
-#'   than 85%. However, this is a misunderstanding. Otherwise, when
-#'   the slower profile releases more than 85%, there might be many
-#'   measurements that are more than 85% in the faster profile,
-#'   which directly contradict to the statement that only one measurement
-#'   should be used after 85% dissolution.
+#' ### Notes on conventional FDA rule
+#' The exact phrase in the guidance of US FDA regarding this rule is that
+#' "*Only one measurement should be considered after 85% dissolution of both
+#' the products*." Due to the ambiguous word "both" used in the sentence, the
+#' conventional interpretation was that all measurements up to the time point
+#' at which both test and reference dissolved more than 85% should be included
+#' in the calculation of \eqn{f_2}{f2}. However, this is only true when both
+#' test and reference dissolve more than 85% at the same time points.
+#'
+#' Consider the following example:
+#'
+#' |time |test |reference|
+#' |---: |---: |---:     |
+#' | 5   | 7   |10       |
+#' |10   |15   |20       |
+#' |15   |50   |55       |
+#' |20   |69   |86       |
+#' |30   |82   |90       |
+#' |45   |84   |95       |
+#' |60   |86   |97       |
+#'
+#' According to conventional interpretation, all measurements up to 60 min
+#' should be included to calculate \eqn{f_2}{f2} because both test and reference
+#' dissolved more than 85% only at 60 min, not at any earlier time point.
+#' However, in such case, there would be 4 measurement of reference (20, 30, 45,
+#' and 60 min) included in the calculation, which would be a direct
+#' contradictory to the phrase "Only *one measurement* should be considered
+#' after 85% ..." in the same statement in the guidance!
+#'
+#' In an unofficial communication using this example, an FDA staff confirmed
+#' that only the first 4 time points (up to 20 min) would be used. In other
+#' words, *FDA rule in this regard is the same as EMA rule*.
+#'
+#' The statement in `ANVISA` guideline also uses the word "ambos" (means both),
+#' which could also lead to the similar confusion. Follow the same logic as
+#' demonstrated above, it should also be interpreted as the same rule in EMA
+#' guideline.
+#'
+#' Read vignette *Introduction to bootf2* for more details.
 #'
 #' @examples
 #' tp <- c(5, 10, 15, 20, 30, 45, 60)
@@ -129,58 +182,56 @@
 #'                   mdt = 20, mdt.cv = 5, beta = 2.2, beta.cv = 5)
 #'
 #' d.t <- sim.dp(tp, model.par = mod.par.t, seed = 100, n.units = 120L,
-#'               plot = FALSE)
+#'               plot = FALSE)$sim.disso
 #'
 #' mod.par.r <- list(fmax = 100, fmax.cv = 2, tlag = 0, tlag.cv = 0,
 #'                   mdt = 25, mdt.cv = 4, beta = 2.1, beta.cv = 3)
 #'
 #' d.r <- sim.dp(tp, model.par = mod.par.r, seed = 100, n.units = 120L,
-#'               plot = FALSE)
+#'               plot = FALSE)$sim.disso
 #'
-#' calcf2(d.t$sim.disso, d.r$sim.disso, plot = FALSE)
+#' calcf2(d.t, d.r, plot = FALSE)
 #'
 #' @export
-calcf2 <- function(test, ref, regulation = c("EMA", "FDA", "WHO"),
-                   path.in, file.in, path.out, file.out, digits = 2L,
-                   cv.rule = TRUE, min.points = 3L, both.TR.85 = FALSE,
+calcf2 <- function(test, ref, path.in, file.in, path.out, file.out,
+                   regulation = c("EMA", "FDA", "WHO", "Canada", "ANVISA"),
+                   cv.rule = TRUE, message = TRUE, min.points = 3L,
                    f2.type = c("est.f2", "exp.f2", "bc.f2", "vc.exp.f2",
-                               "vc.bc.f2", "all"), plot = TRUE,
-                   message = TRUE, time.unit = c("min", "h"),
+                               "vc.bc.f2", "all"), both.TR.85 = FALSE,
+                   digits = 2L, time.unit = c("min", "h"),  plot = TRUE,
                    plot.start.time = 0, plot.max.unit = 24L) {
   # initial check --------------------------------------------------------------
   regulation <- match.arg(regulation)
   f2.type    <- match.arg(f2.type)
   time.unit  <- match.arg(time.unit)
 
+  if (any(missing(test), missing(ref))) {
+    stop("Both 'test' and 'ref' have to be specified.")
+  }
+
   if (all(isTRUE(both.TR.85), regulation != "FDA")) {
-    stop("\n'both.TR.85 = TRUE' is only valid when 'regulation = FDA'.")
+    stop("'both.TR.85 = TRUE' is only applicable when 'regulation = FDA'.")
   }
 
   if (any(all(!missing(path.out), missing(file.out)),
           all(missing(path.out), !missing(file.out)))) {
-    stop("\nYou should provided both 'path.out' and 'file.out'.")
-  }
-
-  if (any(missing(test), missing(ref))) {
-    stop("\nBoth 'test' and 'ref' have to be specified.")
+    stop("You should provided both 'path.out' and 'file.out'.")
   }
 
   # read data ------------------------------------------------------------------
   if (all(missing(path.in), missing(file.in))) {
-    # test and ref should be data frames if path.in & file.in are missing
-    # they should be excel sheet names if path.in & file.in are not missing
     data.t <- as.matrix(test, rownames.force = FALSE)
     data.r <- as.matrix(ref, rownames.force = FALSE)
   } else if (all(missing(path.in), !missing(file.in))) {
-    stop("\nPlease provide the directory 'path.in' where the file is stored.")
+    stop("Please provide the directory 'path.in' where the file is stored.")
   } else {# for path.in not missing
     if (missing(file.in)) {
-      stop("\nPlease provide the name of the data file.")
+      stop("Please provide the name of the data file.")
     }
 
     # if path.in specified incorrectly
     if (!dir.exists(path.in)) {
-      stop("\nThe directory you specified does not exist. Check your spelling.")
+      stop("The directory you specified does not exist. Check your spelling.")
     }
 
     path.in <- normalizePath(path.in, winslash = "/")
@@ -188,11 +239,18 @@ calcf2 <- function(test, ref, regulation = c("EMA", "FDA", "WHO"),
                       path.in, paste0(path.in, "/"))
     file.in <- paste0(path.in, file.in)
     if (!file.exists(file.in)) {
-      stop(
-        paste0("\nThe file you specified does not exist. Don't forget to ",
-               "include\nthe extension 'xlsx' or 'xls' in the file name.")
-      )
+      stop(paste0("The file you specified does not exist. Don't forget to ",
+                  "include\nthe extension 'xlsx' or 'xls' in the file name."))
     }
+
+    sheet.names <- excel_sheets(file.in)
+    if (!(test %in% sheet.names)) (
+      stop("The name of the work sheet 'test' is wrong. Check your spelling.")
+    )
+
+    if (!(ref %in% sheet.names)) (
+      stop("The name of the work sheet 'ref' is wrong. Check your spelling.")
+    )
 
     # package readxl::read_excel
     data.t <- as.matrix(read_excel(file.in, test, col_types = "numeric"))
@@ -205,7 +263,7 @@ calcf2 <- function(test, ref, regulation = c("EMA", "FDA", "WHO"),
 
   # time points for T and R have to be same
   if (!all(data.t[, 1] == data.r[, 1])) {
-    stop("\nTime points of two data sets should be same! ",
+    stop("Time points of two data sets should be same! ",
          "Please check your data.\n\n")
   }
 
@@ -228,18 +286,36 @@ calcf2 <- function(test, ref, regulation = c("EMA", "FDA", "WHO"),
   # put time, mean T and R into same data frame
   mean.tr <- cbind(time = data.t[, 1], mean.t, mean.r)
 
+  # determine if mean dissolution >= 85% at 15 min -----------------------------
+  if (time.unit == "min") {
+    if (length(which(mean.tr[, 1] <= 15)) != 0) {
+      if (all(mean.tr[max(which(mean.tr[, 1] <= 15)), 2] > 85,
+              mean.tr[max(which(mean.tr[, 1] <= 15)), 3] > 85)) {
+        d85at15 <- "yes"
+      } else d85at15 <- "no"
+    } else d85at15 <- "no"
+  } else {# time unit h
+    if (length(which(mean.tr[, 1]*60 <= 15)) != 0) {
+      if (all(mean.tr[max(which(mean.tr[, 1]*60 <= 15)), 2] > 85,
+              mean.tr[max(which(mean.tr[, 1]*60 <= 15)), 3] > 85)) {
+        d85at15 <- "yes"
+      } else d85at15 <- "no"
+    } else d85at15 <- "no"
+  }
+
+
   # give all time points as initial value in case no dissolution > 85%
   tp85 <- NROW(mean.tr)
 
   # according to unofficial communication with FDA staff, EMA = FDA,
   # previous 'consensus' for both T and R > 85% is incorrect
-  if (all(regulation %in% c("EMA", "FDA"), isFALSE(both.TR.85))) {
+  if (all(regulation != "WHO", isFALSE(both.TR.85))) {
     for (i in 1:NROW(mean.tr)) {
       if (any(mean.tr[i, 2] > 85, mean.tr[i, 3] > 85)) {
         tp85 <- i
         break
       }
-    }# end EMA/FDA
+    }# end EMA/FDA/Canada/ANVISA
   } else {# WHO: cut where reference reach 85% release
     for (i in 1:NROW(mean.tr)) {# 3rd column ref
       if (mean.tr[i, 3] > 85) {
@@ -258,10 +334,10 @@ calcf2 <- function(test, ref, regulation = c("EMA", "FDA", "WHO"),
         break
       }
     }
-    msg1 <- paste0("*Note: Argument 'both.TR.85' is 'TRUE', which is the wrong ",
-                   "interpretation\nof the guidance. This should only be used ",
-                   "for cases such as checking the\ncalculation published in ",
-                   "the old literature.\n\n")
+    msg1 <- paste0("*Note: Argument 'both.TR.85' is 'TRUE', which is the ",
+                   "wrong interpretation\nof the guidance. This should only ",
+                   "be used for cases such as checking the\ncalculation ",
+                   "published in the old literature.\n\n")
   } else msg1 <- NULL
 
   # mean data points used for f2 calculation
@@ -295,10 +371,14 @@ calcf2 <- function(test, ref, regulation = c("EMA", "FDA", "WHO"),
     if (isTRUE(cv.rule)) {
       # CV cutting point, default 10 min for EMA/WHO, FDA rule more flexible,
       # could be 15 min or even 20 min according to unofficial communication
-      if (regulation %in% c("EMA", "WHO")) {
+      if (regulation %in% c("EMA", "WHO", "Canada")) {
         cv.cut.tp <- 10.0
-      } else {# TO DO: need better work for FDA here
+      } else if (regulation == "FDA") {# TO DO: need better work for FDA here
         cv.cut.tp <- 15.0
+      } else {# ANVISA: 1st 40% of total time points can have CV 20%.
+        cv.cut.tp <- ifelse(time.unit == "min",
+                            mean.tr[floor(NROW(mean.tr)*0.4), 1],
+                            mean.tr[floor(NROW(mean.tr)*0.4), 1]*60)
       }
 
       # check if there is any time point <= cv.cut.tp
@@ -329,6 +409,26 @@ calcf2 <- function(test, ref, regulation = c("EMA", "FDA", "WHO"),
     } else {# when mean profiles is used
       cv.ok <- FALSE
     }
+
+    # determine if individual dissolution > 85% at 15 min for Canadian rule
+    # determine if mean dissolution >= 85% at 15 min
+    if (regulation == "Canada") {
+      if (time.unit == "min") {
+        if (length(which(mean.tr[, 1] <= 15)) != 0) {
+          if(all(data.t[max(which(mean.tr[, 1] <= 15)), -1] > 85,
+                 data.r[max(which(mean.tr[, 1] <= 15)), -1] > 85)) {
+            d85at15 <- "yes"
+          } else  d85at15 <- "no"
+        } else  d85at15 <- "no"
+      } else {# time unit h
+        if (length(which(mean.tr[, 1]*60 <= 15)) != 0) {
+          if (all(data.t[max(which(mean.tr[, 1]*60 <= 15)), -1] > 85,
+                  data.r[max(which(mean.tr[, 1]*60 <= 15)), -1] > 85)) {
+            d85at15 <- "yes"
+          } else d85at15 <- "no"
+        } else d85at15 <- "no"
+      }
+    }# end Canadian rule for 85% at 15 min
 
     # for exp.f2, bc.f2, vc.exp.f2, vc.bc.f2 -----------------------------------
     # next section mainly for bootstrap f2, article Shah et al, 1998
@@ -370,13 +470,13 @@ calcf2 <- function(test, ref, regulation = c("EMA", "FDA", "WHO"),
   # overkill for simple f2 calculation but just in case someone need it
   if (all(!missing(path.out), !missing(file.out))) {
     if (!dir.exists(path.out)) {
-      stop("\nThe directory you specified does not exist. Check your spelling.")
+      stop("The directory you specified does not exist. Check your spelling.")
     }
 
     path.out <- normalizePath(path.out, winslash = "/")
     path.out <- ifelse(regmatches(path.out, regexpr(".$", path.out)) == "/",
                       path.out, paste0(path.out, "/"))
-    file.out <- ifelse(regmatches(file.out, regexpr(".{3}$", file.out)) == "txt",
+    file.out <- ifelse(regmatches(file.out, regexpr(".{3}$", file.out))=="txt",
                        file.out, paste0(file.out, ".txt"))
     file.out <- paste0(path.out, file.out)
 
@@ -440,14 +540,17 @@ calcf2 <- function(test, ref, regulation = c("EMA", "FDA", "WHO"),
       if (all(isTRUE(cv.rule), isTRUE(cv.ok))) {
         cat("CV criteria fulfilled; therefore, f2 method can be applied.\n\n")
       } else if (all(isTRUE(cv.rule), isFALSE(cv.ok))) {# cv not ok
-        cat("CV criteria not fulfilled; therefore, f2 method cannot",
-            "be applied.\n\n")
         if (regulation != "FDA") {
-          stop(paste0("\n\nYou should consider alternative methods such as ",
+          cat("CV criteria not fulfilled; therefore, f2 method cannot",
+              "be applied.\n\n")
+          stop(paste0("You should consider alternative methods such as ",
                       "bootstrap f2.\n\n"))
         } else {
-          warning("CV criteria not strictly fulfilled; you might want to ",
-                  "consider \nalternative method such as bootstrap f2.\n\n" )
+          warning(
+            paste0("f2 was calculated while CV criterion is not strictly ",
+                   "fulfilled; you \nmight want to consider an alternative ",
+                   "method such as bootstrap f2.\n\n")
+          )
         }
       } else if (isFALSE(cv.rule)) {
         cat("CV has not been checked.\n\n")
@@ -481,17 +584,33 @@ calcf2 <- function(test, ref, regulation = c("EMA", "FDA", "WHO"),
     # only necessary for est.f2
     if (f2.type == "est.f2") {
       if (tp85 >= 3L) {
-        cat("The time points above the dashed line are used in f2 calculation.\n")
-      } else {
-        cat("At least 3 time points are necessary to calculate f2, ",
-            "but you have\n", tp85,
-            ifelse(tp85 > 1, " points only.\n\n", " point only.\n\n"), sep = "")
-      }
-      cat("\nEstimated f2 = ", round(est.f2, digits),
-          ifelse(is.null(msg1), "\n\n", "*\n\n"), sep = "")
-      cat(msg1)
+        cat("The time points above the dashed line are used in f2",
+            "calculation.\n")
+        cat("\nEstimated f2 = ", round(est.f2, digits),
+            ifelse(is.null(msg1), "\n\n", "*\n\n"), sep = "")
+        cat(msg1)
+      } else {# tp85 < 3
+        if (d85at15 == "yes") {
+          cat("At least 3 time points are necessary to calculate f2, ",
+              "but you have\n", tp85, ifelse(tp85 > 1, " points ", " point "),
+              "only. However, ",
+              ifelse(regulation != "Canada", "mean ", "individual "),
+              "dissolution profiles of test and \nreference are more than ",
+              "85% at 15 min. If the products are immediate-release \n",
+              "formulations, then the profiles are considered similar ",
+              "without statistical \nevaluation.", sep = "")
+        } else {
+          cat("Estimated f2 = ", round(est.f2, digits),
+              ifelse(is.null(msg1), "\n\n", "*\n\n"), sep = "")
+          cat(msg1)
+          warning("Warning: f2 was calculated with less than 3 time points ",
+                  "for information\npurpose only. You should add more ",
+                  "earlier points in your dissolution method.")
+        }
+      }# end tp85 < 3
     } else {# not really useful. just for fun
-      cat("The following f2 estimators are applicable for bootstrap method only.\n")
+      cat("The following f2 estimators are applicable for bootstrap method",
+          "only.\n")
       cat("The time points above the dashed line are used in f2 calculation.\n")
       # exp.f2 --------------------------------------------------
       if (all(f2.type == "exp.f2", isFALSE(use.mean))) {
@@ -641,8 +760,8 @@ calcf2 <- function(test, ref, regulation = c("EMA", "FDA", "WHO"),
           scale_x_continuous(breaks = p.mt$time) +
           ylab("Dissolution (%)") +
           xlab(paste0("Time (", time.unit, ")")) +
-          ggtitle(paste0("Mean Dissolution Profiles of Test and Reference with ",
-                         "Estimated f2 = ", round(est.f2, digits)),
+          ggtitle(paste0("Mean Dissolution Profiles of Test and Reference ",
+                         "with Estimated f2 = ", round(est.f2, digits)),
                   subtitle = "Thin lines represent individual profiles")
       } else {# use boxplot
         p.dt <- data.frame(
@@ -735,17 +854,54 @@ calcf2 <- function(test, ref, regulation = c("EMA", "FDA", "WHO"),
   # return non-rounded result for further calculation if necessary--------------
   # same for bootstrap or non-bootstrap
   if (f2.type == "est.f2") {
-    invisible(c(est.f2 = est.f2, tp = tp85))
+    # invisible(c(est.f2 = est.f2, tp = tp85))
+    invisible(
+      data.frame(f2.type = "est.f2", f2.value = est.f2, f2.tp = tp85,
+                 d85at15 = d85at15, regulation = regulation,
+                 cv.rule = cv.rule, min.points = min.points,
+                 stringsAsFactors = FALSE)
+      )
   } else if (all(f2.type == "exp.f2", isFALSE(use.mean))) {
-    invisible(c(exp.f2 = exp.f2, tp = tp85))
+    # invisible(c(exp.f2 = exp.f2, tp = tp85))
+    invisible(
+      data.frame(f2.type = "exp.f2", f2.value = exp.f2, f2.tp = tp85,
+                 d85at15 = d85at15, regulation = regulation,
+                 cv.rule = cv.rule, min.points = min.points,
+                 stringsAsFactors = FALSE)
+    )
   } else if (all(f2.type == "bc.f2", isFALSE(use.mean))) {
-    invisible(c(bc.f2 = bc.f2, tp = tp85))
+    # invisible(c(bc.f2 = bc.f2, tp = tp85))
+    invisible(
+      data.frame(f2.type = "bc.f2", f2.value = bc.f2, f2.tp = tp85,
+                 d85at15 = d85at15, regulation = regulation,
+                 cv.rule = cv.rule, min.points = min.points,
+                 stringsAsFactors = FALSE)
+    )
   } else if (all(f2.type == "vc.exp.f2", isFALSE(use.mean))) {
-    invisible(c(exp.f2 = vc.exp.f2, tp = tp85))
+    # invisible(c(vc.exp.f2 = vc.exp.f2, tp = tp85))
+    invisible(
+      data.frame(f2.type = "vc.exp.f2", f2.value = vc.exp.f2, f2.tp = tp85,
+                 d85at15 = d85at15, regulation = regulation,
+                 cv.rule = cv.rule, min.points = min.points,
+                 stringsAsFactors = FALSE)
+    )
   } else if (all(f2.type == "vc.bc.f2", isFALSE(use.mean))) {
-    invisible(c(bc.f2 = vc.bc.f2, tp = tp85))
+    # invisible(c(vc.bc.f2 = vc.bc.f2, tp = tp85))
+    invisible(
+      data.frame(f2.type = "vc.bc.f2", f2.value = vc.bc.f2, f2.tp = tp85,
+                 d85at15 = d85at15, regulation = regulation,
+                 cv.rule = cv.rule, min.points = min.points,
+                 stringsAsFactors = FALSE)
+    )
   } else if (all(f2.type == "all", isFALSE(use.mean))) {
-    invisible(c(est.f2 = est.f2, exp.f2 = exp.f2, bc.f2 = bc.f2,
-                vc.exp.f2 = vc.exp.f2, vc.bc.f2 = vc.bc.f2, tp = tp85))
+    # invisible(c(est.f2 = est.f2, exp.f2 = exp.f2, bc.f2 = bc.f2,
+    #             vc.exp.f2 = vc.exp.f2, vc.bc.f2 = vc.bc.f2, tp = tp85))
+    invisible(
+      data.frame(
+        f2.type = c("est.f2", "exp.f2", "bc.f2", "vc.exp.f2", "vc.bc.f2"),
+        f2.value = c(est.f2, exp.f2, bc.f2, vc.exp.f2, vc.bc.f2),
+        f2.tp = tp85, d85at15 = d85at15, regulation = regulation,
+        cv.rule = cv.rule, min.points = min.points, stringsAsFactors = FALSE)
+    )
   }
 }

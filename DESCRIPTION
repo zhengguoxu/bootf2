@@ -1,8 +1,8 @@
 Package: bootf2
 Type: Package
 Title: Simulation and Comparison of Dissolution Profiles
-Version: 0.3.0.9001
-Date: 2021-07-26
+Version: 0.4.0
+Date: 2021-08-09
 Authors@R: person(given = "Zhengguo",
                   family = "Xu",
                   role = c("aut", "cre"),
@@ -25,6 +25,8 @@ Imports:
     readxl,
     stats
 Suggests: 
+    testthat (>= 3.0.0),
     knitr,
     rmarkdown
 VignetteBuilder: knitr
+Config/testthat/edition: 3

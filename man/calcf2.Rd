@@ -2,143 +2,204 @@
 % Please edit documentation in R/calcf2.R
 \name{calcf2}
 \alias{calcf2}
-\title{Calculate Similarity Factor f2}
+\title{Calculate Similarity Factor \eqn{f_2}{f2}}
 \usage{
-calcf2(test, ref, regulation = c("EMA", "FDA", "WHO"),
-       path.in, file.in, path.out, file.out, digits = 2L,
-       cv.rule = TRUE, min.points = 3L, both.TR.85 = FALSE,
+calcf2(test, ref, path.in, file.in, path.out, file.out,
+       regulation = c("EMA", "FDA", "WHO", "Canada", "ANVISA"),
+       cv.rule = TRUE, message = TRUE, min.points = 3L,
        f2.type = c("est.f2", "exp.f2", "bc.f2", "vc.exp.f2",
-                   "vc.bc.f2", "all"), plot = TRUE,
-       message = TRUE, time.unit = c("min", "h"),
+                   "vc.bc.f2", "all"), both.TR.85 = FALSE,
+       digits = 2L, time.unit = c("min", "h"),  plot = TRUE,
        plot.start.time = 0, plot.max.unit = 24L)
 }
 \arguments{
-\item{test, ref}{Data frames of dissolution profiles of test and
-reference product if \code{path.in} and \code{file.in} are not
-specified; otherwise, they should be character strings indicating
-the worksheet names of the Excel file where the dissolution data
-is saved. Required format: the first column should be time and the
-rest columns are dissolution data of each unit. See Input/Output
-in Details.}
+\item{test, ref}{\emph{Data frames} of dissolution profiles of test and reference
+product if \code{path.in} and \code{file.in} are not specified; otherwise, they
+should be \emph{character} strings indicating the worksheet names of the Excel
+file where the dissolution data is saved. See Input/Output in Details.}
 
-\item{regulation}{Character strings indicating regulatory guidelines.
-See Regulation in Details.}
+\item{path.in, file.in, path.out, file.out}{\emph{Character} strings of input and
+output directories and file names. See Input/Output in Details.}
 
-\item{path.in, file.in, path.out, file.out}{Character strings of input
-and output directories and file names. See Input/Output in Details.}
+\item{regulation}{\emph{Character} strings indicating regulatory guidelines. See
+Regulation in Details.}
 
-\item{digits}{An integer indicating the decimal points for the output.}
+\item{cv.rule}{\emph{Logical}. If \code{TRUE}, CV rule will be checked according
+to regulatory guidelines. See Regulation in Details.}
 
-\item{cv.rule}{Logical. If \code{TRUE}, CV rule will be checked
-according to regulatory guidelines. See Regulation in Details.}
-
-\item{min.points}{An integer indicating the minimum time points to
-be used to calculate f2. Do not change the default value (3) for
-conventional f2 calculation. This parameter is mainly used for
-bootstrap f2 method. See Regulation in Details.}
-
-\item{both.TR.85}{Logical. If \code{TRUE}, the old (incorrect)
-interpretation (that both the test and reference should release
-more than 85\%) will be used for f2 calculation when
-\code{regulation = 'FDA'}. See Regulation in Details.}
-
-\item{f2.type}{Character strings indicating which f2 estimators
-should be calculated. For conventional f2 calculation, the default
-'est.f2' should be used. Other estimators are mainly for the
-bootstrap method.}
-
-\item{plot}{Logical. If \code{TRUE}, a dissolution versus time
-plot will be printed.}
-
-\item{message}{Logical. If \code{TRUE}, the results and messages
+\item{message}{\emph{Logical}. If \code{TRUE}, the results and messages
 will be printed on screen.}
 
-\item{time.unit}{Character strings indicating the unit of time.
-It should be either \code{"min"} for minute or \code{"h"} for hour.
-It is mainly used for checking CV rules and making plot.
-See Regulation in Details.}
+\item{min.points}{An \emph{integer} indicating the minimum time points to be used
+to calculate \eqn{f_2}{f2}. The default value 3 should be used for
+conventional \eqn{f_2}{f2} calculation. This parameter is mainly used for
+bootstrap \eqn{f_2}{f2} method. See Regulation in Details.
+@seealso \code{\link[=bootf2]{bootf2()}}.}
 
-\item{plot.start.time}{Numeric value indicating the start time
-for the plot.}
+\item{f2.type}{\emph{Character} strings indicating which \eqn{f_2}{f2} estimators
+should be calculated. For conventional \eqn{f_2}{f2} calculation, the
+default \code{"est.f2"} should be used. Other estimators are mainly for the
+bootstrap method. @seealso \code{\link[=bootf2]{bootf2()}}.}
 
-\item{plot.max.unit}{Integer. If the number of individual units
-is no more than this value, mean and all individual profiles
-will be plotted, otherwise, individual profiles will represented
-by boxplots. Therefore, the value should not be too large.}
+\item{both.TR.85}{\emph{Logical}. If \code{TRUE}, and if \code{regulation = "FDA"}, all
+measurements up to the time points at which both test and reference
+products dissolve more than 85\% will be used to calculate \eqn{f_2}{f2}.
+This is the conventional, but incorrect, interpretation of the US FDA rule.
+Therefore, the argument should only be set to \code{TRUE} for validation purpose
+such as comparing the results from old literatures that use the wrong
+interpretation to calculate \eqn{f_2}{f2}. See Regulation in Details.}
+
+\item{digits}{An \emph{integer} indicating the decimal points for the output.}
+
+\item{time.unit}{\emph{Character} strings indicating the unit of time. It should
+be either \code{"min"} for minute or \code{"h"} for hour. It is mainly used for
+checking CV rules and making plot. See Regulation in Details.}
+
+\item{plot}{\emph{Logical}. If \code{TRUE}, a dissolution versus time plot will be
+printed.}
+
+\item{plot.start.time}{\emph{Numeric} value indicating the starting time for the
+plot.}
+
+\item{plot.max.unit}{\emph{Integer}. If the number of individual units is no more
+than this value, the mean and all individual profiles will be plotted;
+otherwise, individual profiles will be represented by boxplots at each
+time point. Therefore, to avoid overplotting, this value should not be
+too large. @seealso \code{\link[=calcf2]{calcf2()}}.}
 }
 \value{
-A vector of f2 and number of time points used for the calculation.
+A \emph{data frame} of \eqn{f_2}{f2} type and \eqn{f_2}{f2} value, the
+number of time points used for the calculation (\code{f2.tp}), indication if
+both test and reference dissolve more than 85\% at 15 min (\code{d85at15}), and
+other information used for the calculation.
 }
 \description{
-Main function to calculate f2 according to different regulatory guidelines.
+Main function to calculate \eqn{f_2}{f2} according to different regulatory
+guidelines.
 }
 \details{
-\subsection{Input/Output}{
-\itemize{
-\item \code{path.in} is the directory where the input file is, and
-\code{file.in} is the input data file. If they are both missing,
-then the arguments \code{test} and \code{ref} must be specified,
-and they should be R data frames, with 'time' in the first column and
-dissolution data of individual units in the rest of the columns.
-If only mean dissolution data is used, it should be the second column.
-\item If \code{path.in} and \code{file.in} are specified, then \code{file.in}
-should be the name of the Excel file where the dissolution data are saved.
-The file name should include the extension 'xlsx' or 'xls', depending on
-the version of the Excel. In that case, the argument \code{test} and
-\code{ref} should be the names of the work sheets in the Excel,
-given within the quotation marks.
-\item \code{path.out} and \code{file.out} are the names of the output
-directory and file. It is an overkill to output such simple calculations;
-therefore, unless these two arguments are specified by the user,
-results are printed on screen by default.
+\subsection{Minimum required arguments that must be provided by the user}{
+
+Arguments \code{test} and \code{ref} must be provided by the user. They should be \code{R}
+\verb{data frames}, with \emph{time as the first column}, and all individual profiles
+profiles as the rest columns, or mean profile as the second column if only
+mean profile is available. The actual names of the columns do not matter
+since they will be renamed internally.
 }
+
+\subsection{Input/Output}{
+
+The dissolution data of test and reference product can either be provided as
+\emph{data frames} for \code{test} and \code{ref}, as explained above, or be read from an
+\emph{Excel file} with data of test and reference stored in \emph{separate worksheets}.
+In the latter case, the argument \code{path.in}, the directory where the Excel
+file is, and \code{file.in}, the name of the Excel file \emph{including the file
+extension \code{.xls} or \code{.xlsx}}, must be provided. In such case, the argument
+\code{test} and \code{ref} must be \emph{the names of the worksheets in quotation marks}.
+The first column of each Excel worksheet must be time, and the rest columns
+are individual dissolution profiles, or the second column must be mean
+profile if only mean data is available. The first row should be column names,
+such as time, unit01, unit02, ... The actual names of the columns do not
+matter as they will be renamed internally.
+
+Arguments \code{path.out} and \code{file.out} are the names of the output directory
+and file. It is an overkill to output such simple calculations; therefore,
+unless these two arguments are specified by the user, results are printed
+on screen by default.
 }
 
 \subsection{Regulation}{
 
-To use f2 method, different regulatory guidelines have slightly
-different requirements. Some requirements are almost universal,
-such as same time points for the test and reference product,
-minimum 3 time points (excluding time zero), and twelve individual
-profiles for each formulation. Other requirements are slightly
-different among different regulatory guidelines, or at least
-interpreted differently. Two main issues are the rules for the
-variability (CV Rule) and time points where dissolution is more
+To apply \eqn{f_2}{f2} method, different regulatory guidelines have slightly
+different requirements. Some requirements are almost universal, such as same
+time points for the test and reference product, minimum 3 time points
+(excluding time zero), and twelve individual profiles for each formulation.
+Other requirements are slightly different among different regulatory
+guidelines, or at least interpreted differently. Two main issues are the
+rules for the variability (CV Rule) and time points where dissolution is more
 than 85\% (85\% Rule).
 \subsection{CV rule}{
 \itemize{
-\item EMA: The CV of the first time point should not be greater than 20\%,
-and the CV of the rest time points should not be greater than 10\%.
-The phrase 'the first time point' was later interpreted as all time
-points up to 10 min. For example, if there are 5 min and 10 min time
-points in the dissolution profiles, the CV for 5 min and 10 min should
-not be greater than 20\%.
-\item WHO: Same as EMA rule, i.e., CV not greater than 20\% for time points
-up to 10 min, and not greater than 10\% for the rest time points.
-\item US FDA: More flexible. The CV for the early time points should not be
-greater than 20\%, and for the rest time points, not greater than 10\%.
-The phrase 'early time points' is typically interpreted as those points
-up to 15 min, some times even up to 20 min according to unofficial
-communication with FDA staff.
+\item \code{EMA}, \code{Canada}, and \code{ANVISA}: The CV of the \emph{first time point} should not
+be greater than 20\%, and the CV of the rest time points should not be
+greater than 10\%.
+\item \code{WHO}: The CV should not be greater than 20\% for \emph{time points up to
+10 min}, and not greater than 10\% for the rest time points.
+\item \code{FDA}: US FDA is more flexible. The CV for the \emph{early time points} should
+not be greater than 20\%, and for the rest time points, not greater than
+10\%.
 }
+
+The phrase \emph{the first time point} in \code{EMA} rule was later interpreted as all
+time points up to 10 min, according to an unofficial communication with an
+European regulator. This makes the \emph{\code{EMA} rule the same as \code{WHO} rule}. For
+example, if there are 5 min and 10 min time points in the dissolution
+profiles, the CV for both 5 min and 10 min should not be greater than 20\%.
+
+The \emph{first time point} in \code{ANVISA} rule corresponds to \emph{40\% of the total
+collected points}. For example, for a dissolution profile with five
+collection times, the first two collection times are considered first points.
+
+The phrase \emph{early time points} in \code{FDA} rule is typically interpreted as
+those points up to 15 min, sometimes even up to 20 min according to
+an unofficial communication with FDA staff. In the function \code{calcf2()}, the
+cutting point for FDA rule is 15 min.
 }
 
 \subsection{85\% Rule}{
+
+This rule is implemented as follows:
 \itemize{
-\item EMA: Dissolution profiles should be 'cut' at the time point where
-either the test or reference release more than 85\%.
-\item WHO: Dissolution profiles should be 'cut' at the time point where
-the reference release more than 85\%.
-\item US FDA: Only one measurement should be considered after 85\%
-dissolution of both the products.
-Many interpreted that the dissolution profiles should be 'cut'
-at the time point where both the test and reference release more
-than 85\%. However, this is a misunderstanding. Otherwise, when
-the slower profile releases more than 85\%, there might be many
-measurements that are more than 85\% in the faster profile,
-which directly contradict to the statement that only one measurement
-should be used after 85\% dissolution.
+\item \code{EMA}, \code{FDA}, \code{Canada}, and \code{ANVISA}: Only one measurement is considered
+after 85\% of dissolution for any product.
+\item \code{WHO}: Dissolution profiles should be 'cut' at the time point where
+the reference release more than 85\%. Therefore, \code{WHO} rule only differs
+from rule of \code{EMA}, \code{FDA}, \code{Canada}, and \code{ANVISA} when test product
+dissolve faster than reference. If reference product dissolve faster, then
+rules of all five regulatory bodies are same in this regard.
 }
+}
+
+\subsection{Notes on conventional FDA rule}{
+
+The exact phrase in the guidance of US FDA regarding this rule is that
+"\emph{Only one measurement should be considered after 85\% dissolution of both
+the products}." Due to the ambiguous word "both" used in the sentence, the
+conventional interpretation was that all measurements up to the time point
+at which both test and reference dissolved more than 85\% should be included
+in the calculation of \eqn{f_2}{f2}. However, this is only true when both
+test and reference dissolve more than 85\% at the same time points.
+
+Consider the following example:\tabular{rrr}{
+   time \tab test \tab reference \cr
+   5 \tab 7 \tab 10 \cr
+   10 \tab 15 \tab 20 \cr
+   15 \tab 50 \tab 55 \cr
+   20 \tab 69 \tab 86 \cr
+   30 \tab 82 \tab 90 \cr
+   45 \tab 84 \tab 95 \cr
+   60 \tab 86 \tab 97 \cr
+}
+
+
+According to conventional interpretation, all measurements up to 60 min
+should be included to calculate \eqn{f_2}{f2} because both test and reference
+dissolved more than 85\% only at 60 min, not at any earlier time point.
+However, in such case, there would be 4 measurement of reference (20, 30, 45,
+and 60 min) included in the calculation, which would be a direct
+contradictory to the phrase "Only \emph{one measurement} should be considered
+after 85\% ..." in the same statement in the guidance!
+
+In an unofficial communication using this example, an FDA staff confirmed
+that only the first 4 time points (up to 20 min) would be used. In other
+words, \emph{FDA rule in this regard is the same as EMA rule}.
+
+The statement in \code{ANVISA} guideline also uses the word "ambos" (means both),
+which could also lead to the similar confusion. Follow the same logic as
+demonstrated above, it should also be interpreted as the same rule in EMA
+guideline.
+
+Read vignette \emph{Introduction to bootf2} for more details.
 }
 
 }
@@ -150,14 +211,14 @@ mod.par.t <- list(fmax = 100, fmax.cv = 2, tlag = 0, tlag.cv = 0,
                   mdt = 20, mdt.cv = 5, beta = 2.2, beta.cv = 5)
 
 d.t <- sim.dp(tp, model.par = mod.par.t, seed = 100, n.units = 120L,
-              plot = FALSE)
+              plot = FALSE)$sim.disso
 
 mod.par.r <- list(fmax = 100, fmax.cv = 2, tlag = 0, tlag.cv = 0,
                   mdt = 25, mdt.cv = 4, beta = 2.1, beta.cv = 3)
 
 d.r <- sim.dp(tp, model.par = mod.par.r, seed = 100, n.units = 120L,
-              plot = FALSE)
+              plot = FALSE)$sim.disso
 
-calcf2(d.t$sim.disso, d.r$sim.disso, plot = FALSE)
+calcf2(d.t, d.r, plot = FALSE)
 
 }

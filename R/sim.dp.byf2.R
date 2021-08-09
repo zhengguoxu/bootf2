@@ -1,108 +1,129 @@
-#' Simulate Dissolution Profiles by f2 Values
+#' Simulate Dissolution Profiles by \eqn{f_2}{f2} Values
 #'
-#' Given any mean dissolution profile \code{dp}, this function will simulate a
-#' mean dissolution profile such that when the newly simulated profile is
-#' compared to \code{dp}, the calculated f2 will be equal to the predefined
-#' target f2 value (within certain numeric precision).
+#' Given any mean dissolution profile `dp`, this function will simulate a mean
+#' dissolution profile such that when the newly simulated profile is compared
+#' to `dp`, the calculated \eqn{f_2}{f2} will be equal to the predefined target
+#' \eqn{f_2}{f2} value.
 #'
 #' @importFrom stats lm coef nls.control optim
 #' @importFrom minpack.lm nlsLM
 #' @usage
-#' sim.dp.byf2(tp, dp, sim.dp.out, target.f2, seed = NULL,
-#'             regulation = c("EMA", "FDA", "WHO"),
+#' sim.dp.byf2(tp, dp, target.f2, seed = NULL, min.points = 3L,
+#'             regulation = c("EMA", "FDA", "WHO", "Canada", "ANVISA"),
 #'             model = c("Weibull", "first-order"), digits = 2L,
-#'             min.points = 3L, both.TR.85 = FALSE, max.disso = 105,
-#'             model.par.cv = 50, fix.fmax.cv = 0, random.factor = 3,
+#'             max.disso = 100, message = TRUE, both.TR.85 = FALSE,
+#'             time.unit = c("min", "h"), plot = TRUE, sim.dp.out,
 #'             sim.target = c("ref.pop", "ref.median", "ref.mean"),
-#'             time.unit = c("min", "h"), message = TRUE, plot = TRUE)
+#'             model.par.cv = 50, fix.fmax.cv = 0, random.factor = 3)
 #'
-#' @param tp,dp Numeric vector of time points \code{tp} and their corresponding
-#'   mean dissolution profiles \code{dp}.
-#' @param sim.dp.out Output of function \code{sim.dp}. If this parameter is
-#'   supplied by users, then \code{tp/dp} will be ignored if they are provided.
-#' @param target.f2 Numeric value of target f2. It can be a single value, or a
-#'   vector of two values representing lower and upper limit of target f2 value.
-#'   See Details.
-#' @param seed Numeric seed value for reproducibility. If missing, a random
+#' @param tp,dp *Numeric* vector of time points `tp` and the mean dissolution
+#'   profiles `dp`.
+#' @param target.f2 *Numeric* value of target \eqn{f_2}{f2}. It can be a
+#'   *single value*, or a *vector of two values* that represent the lower and
+#'   upper limit of target \eqn{f_2}{f2} value. See Details.
+#' @param seed *Integer* seed value for reproducibility. If missing, a random
 #'   seed will be generated for reproducibility purpose.
-#' @param regulation Character strings indicating regulatory guidelines.
+#' @param min.points An *integer* indicating the minimum time points to be used
+#'   to calculate \eqn{f_2}{f2}. The default value 3 should be used for
+#'   conventional \eqn{f_2}{f2} calculation. See Details. @seealso [calcf2()].
+#' @param regulation *Character* strings indicating regulatory guidelines.
+#'   @seealso [calcf2()] for the discussion of those guidelines.
+#' @param model *Character* strings of model names. Currently only `"Weibull"`
+#'   and `"first-order"` models are supported. @seealso [sim.dp()] for the
+#'   description of models.
+#' @param digits An *integer* indicating the decimal points for the output.
+#' @param max.disso *Numeric* value for the maximum possible dissolution.
+#'   In theory, the maximum dissolution is 100%, but in practice, it is not
+#'   uncommon to see higher values, such as 105%, or much lower values,
+#'   especially for products with low solubility.
+#' @param message *Logical*. If `TRUE`, basic information of the simulation
+#'   will be printed on screen.
+#' @param both.TR.85 *Logical*. If `TRUE`, and if `regulation = "FDA"`, all
+#'   measurements up to the time points at which both test and reference
+#'   products dissolve more than 85% will be used to calculate \eqn{f_2}{f2}.
+#'   This is the conventional, but incorrect, interpretation of the US FDA rule.
+#'   Therefore, the argument should only be set to `TRUE` for validation purpose
+#'   such as comparing the results from old literatures that use the wrong
+#'   interpretation to calculate \eqn{f_2}{f2}. @seealso [calcf2()] for detailed
+#'   discussion.
+#' @param time.unit *Character* strings indicating the unit of time. It should
+#'   be either `"min"` for minute or `"h"` for hour. It is mainly used for
+#'   checking CV rules and making plot. See Regulation in Details.
 #'   @seealso [calcf2()].
-#' @param model Strings of model names. Currently only 'Weibull' and
-#'   'first-order' models are supported.
-#' @param digits An integer indicating the decimal points for the output.
-#' @param min.points An integer indicating the minimum time points to be used
-#'   to calculate f2. The default is 3 for conventional f2 calculation.
-#'   This parameter is mainly used for bootstrap f2 method. @seealso [calcf2()].
-#' @param both.TR.85 A logic value indicating if the old (incorrect)
-#'   interpretation (that both the test and reference should release more than
-#'   85%) should be used for f2 calculation when \code{regulation = 'FDA'}.
-#'   @seealso [calcf2()].
-#' @param max.disso Numeric value for the maximum possible dissolution.
-#'   In theory, the maximum dissolution should be 100%, but in practice,
-#'   it is not uncommon to see higher values, such as 105%, or even 110%.
-#' @param  model.par.cv,fix.fmax.cv Numeric value expressed as percentage.
-#'   Used for random generation of model parameters and fmax when optimization
-#'   algorithm is not used, i.e., when \code{target.f2} is a vector of two
-#'   numbers. See Details.
-#' @param random.factor Numeric value used for random generation of model
-#'   parameters when optimization algorithm is used, i.e., when \code{target.f2}
+#' @param plot *Logical*. If `TRUE`, a a dissolution versus time plot will be
+#'   included in the output.
+#' @param sim.dp.out Output of function `sim.dp()`. If this argument is
+#'   supplied by the user, then `tp/dp`, `regulation`, `model`, `max.disso`,
+#'   and `time.unit` will be ignored, if they are provided by the user, since
+#'   all those arguments are included in `sim.dp.out`.
+#' @param sim.target *Character* strings indicating to which target profile
+#'   should the newly simulated profile be compared for the calculation of
+#'   \eqn{f_2}{f2}. This argument is only applicable when `sim.dp.out` is
+#'   provided. See Details.
+#' @param  model.par.cv,fix.fmax.cv *Numeric* values expressed as percentages
+#'   used for random generation of model parameters and fmax when optimization
+#'   algorithm is not used, i.e., when `target.f2` is a vector of two numbers.
+#'   See Details.
+#' @param random.factor *Numeric* value used for random generation of model
+#'   parameters when optimization algorithm is used, i.e., when `target.f2`
 #'   is a single number. See Details.
-#' @param sim.target Character strings indicating to which target should the
-#'   newly simulated be used to calculate f2. Only applicable when
-#'   \code{sim.dp.out} is not missing.
-#' @param time.unit Character strings indicating the unit of time. It should
-#'   be either \code{"min"} for minute or \code{"h"} for hour. It is mainly
-#'   used for checking CV rules and making plot. @seealso [calcf2()].
-#' @param message Logic value. If \code{TRUE}, basic information of the
-#'   simulation will be printed on screen.
-#' @param plot A logic value indicating if the dissolution versus time plot
-#'   should be printed.
 #'
-#' @return A list of 2 components: a data frame of model parameters and a data
-#'   frame of mean dissolution generated using the said model parameters.
-#'   The output can be passed to function \code{sim.dp()} to simulate multiple
-#'   individual profiles.
+#' @return A *list* of 2 components: a *data frame of model parameters* and a
+#'   *data frame of mean dissolution profile* generated using the said model
+#'   parameters. The output can be passed to function `sim.dp()` to further
+#'   simulate multiple individual profiles.
 #'
 #' @details
 #'
-#'   The main principle of the function is as follows:
+#' The main principle of the function is as follows:
+#' 1. For any given mean dissolution profile `dp`, fit a suitable mathematical
+#'    model and obtain model parameters.
+#'    - No precise fitting is required since those parameters will be served as
+#'      *initial value* for further model fitting.
+#'    - If `sim.dp.out`, the output of the function `sim.dp()`, is available,
+#'      no initial fitting is necessary as model parameters can be read directly
+#'      from the output, unless multivariate normal distribution approach was
+#'      used in `sim.dp()`. In such case, initial model fitting will be done.
+#' 2. Find a suitable model parameters and simulate a new dissolution profile,
+#'    comparing the new profile to the provided reference profile `dp` by
+#'    calculating \eqn{f_2}{f2}. If the the obtained \eqn{f_2}{f2} is
+#'    *equal to*, or *within the lower and upper limit of*, the `target.f2`,
+#'    then the function will output the obtained model parameters and the new
+#'    profile.
 #'
-#'   1. For any given mean dissolution profile, fit a suitable mathematical
-#'      model and obtain model parameters.
-#'       - No precise fitting is required since those parameters will be
-#'         served as initial value for further model fitting.
-#'       - If the output of the function \code{sim.dp()} is available, no
-#'         initial fitting is necessary as model parameters can be read directly
-#'         from the output, unless multivariate normal distribution approach
-#'         is used. In such case, initial model fitting will be done.
-#'   2. Find a suitable model parameters and simulate a new data set, comparing
-#'      the new data to the provided reference data by calculating f2. If the
-#'      f2 is equal to the \code{target.f2}, or within the lower and upper
-#'      limit of the \code{target.f2} (see below), then output the obtained
-#'      model parameters. There are two approaches used to find the suitable
-#'      model parameters:
-#'       - If \code{target.f2} is a single value, optimization algorithm
-#'         will be used and the simulated dissolution profile will have f2
-#'         equal to \code{target.f2} when compared to \code{dp} (within
-#'         numeric precision defined by the tolerance).
-#'       - If \code{target.f2} is vector of two numbers representing the
-#'         lower and upper limit of target f2 value, such as \code{target.f2 =
-#'         c(lower, upper)}, then dissolution will be obtained by random
-#'         searching and the calculated f2 will be within the range of lower
-#'         and upper. For example, set \code{target.f2 = c(54.95, 55.04)} to
-#'         have target f2 of 55. Since f2 should be normally reported without
-#'         decimal, in practice, the precision is enough. You might be able to
-#'         do with \code{c(54.99, 55.01)} if you really need more precision.
-#'         However, the narrower the range, the longer time it takes to run.
-#'         With narrow range such as \code{c(54.999, 55.001)}, it is likely the
-#'         program will hang up. In such case, provide single value to use
-#'         optimization algorithm.
+#' There are two approaches used to find the suitable model parameters:
+#' - If `target.f2` is a single value, optimization algorithm will be used and
+#'   the newly simulated dissolution profile will have \eqn{f_2}{f2} equal to
+#'   `target.f2` when compared to `dp` (within numeric precision defined by the
+#'   tolerance).
+#' - If `target.f2` is a vector of two numbers representing the lower and upper
+#'   limit of target \eqn{f_2}{f2} value, such as `target.f2 = c(lower, upper)`,
+#'   then dissolution will be obtained by random searching and the calculated
+#'   \eqn{f_2}{f2} will be within the range of lower and upper.
 #'
-#' Arguments \code{model.par.cv}, \code{fix.fmax.cv}, and \code{random.factor}
-#' are certain numeric values used to better control the random generation of
-#' model parameters. The default values should work in most scenarios. Those
-#' values should be changed only when the function failed to return any value.
-#' A vignette will be produced later to give more details.
+#' For example, you can set `target.f2 = c(54.95, 55.04)` to have target
+#' \eqn{f_2}{f2} of 55. Since \eqn{f_2}{f2} should be normally reported without
+#' decimal, in practice, this precision is enough. You might be able to do with
+#' `c(54.99, 55.01)` if you really need more precision. However, the narrower
+#' the range, the longer it takes the function to run. With narrow range such as
+#' `c(54.999, 55.001)`, it is likely the program will fail. In such case,
+#' provide single value to use optimization algorithm.
+#'
+#' Arguments `model.par.cv`, `fix.fmax.cv`, and `random.factor` are certain
+#' numeric values used to better control the random generation of model
+#' parameters. The default values should work in most scenarios. Those values
+#' should be changed only when the function failed to return any value. Read
+#' vignette of the function (`vignette("sim.dp.byf2", package = "bootf2")`)
+#' for more details.
+#'
+#' The data frame `sim.summary` in `sim.dp.out`, the output of function
+#' `sim.dp()`, contains `dp`, the population profile, and `sim.mean` and
+#' `sim.median`, the mean and median profiles calculated with `n.units` of
+#' simulated individual profiles. All these three profiles could be used as the
+#' target profile that the newly simulated profile will be compare to. Argument
+#' `sim.target` defines which of the three will be used: `ref.pop`, `ref.mean`,
+#' and `ref.median` correspond to `dp`, `sim.mean` and `sim.median`,
+#' respectively.
 #'
 #' @examples
 #' tp <- c(5, 10, 15, 20, 30, 45, 60)
@@ -116,29 +137,20 @@
 #' model.par1 <- sim.dp.byf2(sim.dp.out = d.r, target.f2 = 60, seed = 123)
 #' model.par2 <- sim.dp.byf2(sim.dp.out = d.r, target.f2 = c(59.95, 60.04),
 #'                           seed = 123)
-#' model.par3 <- sim.dp.byf2(tp = d.r$sim.summary$time,
-#'                           dp = d.r$sim.summary$dp,
-#'                           target.f2 = c(59.99, 60.01), seed = 123)
 #'
 #' @export
-sim.dp.byf2 <- function(tp, dp, sim.dp.out, target.f2, seed = NULL,
-                        regulation = c("EMA", "FDA", "WHO"),
+sim.dp.byf2 <- function(tp, dp, target.f2, seed = NULL, min.points = 3L,
+                        regulation = c("EMA", "FDA", "WHO", "Canada", "ANVISA"),
                         model = c("Weibull", "first-order"), digits = 2L,
-                        min.points = 3L, both.TR.85 = FALSE, max.disso = 105,
-                        model.par.cv = 50, fix.fmax.cv = 0, random.factor = 3,
+                        max.disso = 100, message = TRUE, both.TR.85 = FALSE,
+                        time.unit = c("min", "h"), plot = TRUE, sim.dp.out,
                         sim.target = c("ref.pop", "ref.median", "ref.mean"),
-                        time.unit = c("min", "h"), message = TRUE, plot = TRUE){
+                        model.par.cv = 50, fix.fmax.cv = 0, random.factor = 3) {
   # initial check --------------------------------------------------------------
   regulation <- match.arg(regulation)
   model      <- match.arg(model)
-  sim.target <- match.arg(sim.target)
   time.unit  <- match.arg(time.unit)
-
-  # save state of the RNG
-  # if (exists(".Random.seed", .GlobalEnv))
-  #   oldseed <- .GlobalEnv$.Random.seed
-  # else
-  #   oldseed <- NULL
+  sim.target <- match.arg(sim.target)
 
   # if no seed is provided, generate one
   if (is.null(seed)) {
@@ -167,7 +179,7 @@ sim.dp.byf2 <- function(tp, dp, sim.dp.out, target.f2, seed = NULL,
   # get model parameters for ref------------------------------------------------
   # need tp + dp or sim.dp.out but not both. former: regression; latter: read
   if (!missing(sim.dp.out)) {# read info from sim.dp.out
-    if (all(!("sim.dp.out" %in% class(sim.dp.out)),
+    if (all(attr(sim.dp.out, "come.from") != "sim.dp",
             any(missing(tp), missing(dp)))) {
       stop("The input data 'sim.dp.out' is incorrect. Use either the output\n",
            "of 'sim.dp' function or provide 'tp' and 'dp'.\n")
@@ -179,10 +191,11 @@ sim.dp.byf2 <- function(tp, dp, sim.dp.out, target.f2, seed = NULL,
     }
 
     # get ref data for calcf2() function
-    tp         <- sim.dp.out$sim.summary$time[sim.dp.out$sim.summary$time > 0]
-    ref.dp     <- sim.dp.out$sim.summary$dp[sim.dp.out$sim.summary$time > 0]
-    ref.median <- sim.dp.out$sim.summary$sim.median[sim.dp.out$sim.summary$time > 0]
-    ref.mean   <- sim.dp.out$sim.summary$sim.mean[sim.dp.out$sim.summary$time > 0]
+    tp0        <- sim.dp.out$sim.summary$time
+    tp         <- tp0[tp0 > 0]
+    ref.dp     <- sim.dp.out$sim.summary$dp[tp0 > 0]
+    ref.median <- sim.dp.out$sim.summary$sim.median[tp0 > 0]
+    ref.mean   <- sim.dp.out$sim.summary$sim.mean[tp0 > 0]
     max.disso  <- sim.dp.out$sim.info$max.disso
     time.unit  <- sim.dp.out$sim.info$time.unit
 
@@ -195,10 +208,12 @@ sim.dp.byf2 <- function(tp, dp, sim.dp.out, target.f2, seed = NULL,
     }
 
     # for optimization later
-    fmax.t <- sim.dp.out$sim.info$fmax
-    tlag.t <- sim.dp.out$sim.info$tlag
-    tadj.t <- tp - tlag.t
-    tadj.t[tadj.t < 0] <- 0
+    if (!is.na(sim.dp.out$sim.info$model)) {
+      fmax.t <- sim.dp.out$sim.info$fmax
+      tlag.t <- sim.dp.out$sim.info$tlag
+      tadj.t <- tp - tlag.t
+      tadj.t[tadj.t < 0] <- 0
+    }
 
     if (sim.dp.out$sim.info$model == "Weibull") {# Weibull
       if ("mdt" %in% names(sim.dp.out$sim.info)) {# Weibull with mdt----
@@ -239,7 +254,8 @@ sim.dp.byf2 <- function(tp, dp, sim.dp.out, target.f2, seed = NULL,
     } else {# model == NA, simulated by multivariate normal distribution
       # use regression to get mod.par in this case. 'model' from function input.
       mod.par <- mod.ref(tp = tp, ref.dp = data.r$dp, digits = digits,
-                         model = model, time.unit = time.unit)
+                         model = model, max.disso = max.disso,
+                         time.unit = time.unit)
     }# end model == NA in sim.do.out
   } else {# for missing sim.dp.out, regression to get initial mod.par ---------
     if (any(missing(tp), missing(dp))) {
@@ -258,14 +274,14 @@ sim.dp.byf2 <- function(tp, dp, sim.dp.out, target.f2, seed = NULL,
 
     # function for modelling ref.pop to get parameters # add here mod.ref
     mod.par <- mod.ref(tp = data.r$tp, ref.dp = data.r$dp, digits = digits,
-                       model = model, time.unit = time.unit)
+                       model = model, max.disso = max.disso,
+                       time.unit = time.unit)
 
 
     fmax.t <- mod.par$fmax
     tlag.t <- mod.par$tlag
     tadj.t <- tp - tlag.t
     tadj.t[tadj.t < 0] <- 0
-
   }# end missing sim.dp.out
 
   # having mod.par for all scenarios, now find model.par for test---------------
@@ -285,7 +301,7 @@ sim.dp.byf2 <- function(tp, dp, sim.dp.out, target.f2, seed = NULL,
                            cv.rule = FALSE, min.points = min.points,
                            both.TR.85 = both.TR.85, message = FALSE,
                            plot = FALSE, time.unit = time.unit)
-          return(abs(tmp.f2[[1]] - target.f2))
+          return(abs(tmp.f2$f2.value - target.f2))
         }
 
         res.f2 <- optim(mpar, opt.weibull.mdt, target.f2 = target.f2,
@@ -307,7 +323,8 @@ sim.dp.byf2 <- function(tp, dp, sim.dp.out, target.f2, seed = NULL,
                                 fmax = fmax.t, tlag = tlag.t,
                                 mdt = res.f2$par[["mdt"]],
                                 beta = res.f2$par[["beta"]],
-                                f2 = f2.tmp[[1]], time.point = f2.tmp[[2]],
+                                f2 = f2.tmp$f2.value,
+                                f2.tp = f2.tmp$f2.tp,
                                 regulation = regulation,
                                 stringsAsFactors = FALSE)
       } else {# Weibull optim for alpha ----
@@ -323,7 +340,7 @@ sim.dp.byf2 <- function(tp, dp, sim.dp.out, target.f2, seed = NULL,
                            cv.rule = FALSE, min.points = min.points,
                            both.TR.85 = both.TR.85, message = FALSE,
                            plot = FALSE, time.unit = time.unit)
-          return(abs(tmp.f2[[1]] - target.f2))
+          return(abs(tmp.f2$f2.value - target.f2))
         }
 
         res.f2 <- optim(mpar, opt.weibull.alpha, target.f2 = target.f2,
@@ -344,7 +361,8 @@ sim.dp.byf2 <- function(tp, dp, sim.dp.out, target.f2, seed = NULL,
                                 fmax = fmax.t, tlag = tlag.t,
                                 alpha = res.f2$par[["alpha"]],
                                 beta = res.f2$par[["beta"]],
-                                f2 = f2.tmp[[1]], time.point = f2.tmp[[2]],
+                                f2 = f2.tmp$f2.value,
+                                f2.tp = f2.tmp$f2.tp,
                                 regulation = regulation,
                                 stringsAsFactors = FALSE)
       }
@@ -361,7 +379,7 @@ sim.dp.byf2 <- function(tp, dp, sim.dp.out, target.f2, seed = NULL,
                          cv.rule = FALSE, min.points = min.points,
                          both.TR.85 = both.TR.85, message = FALSE,
                          plot = FALSE, time.unit = time.unit)
-        return(abs(tmp.f2[[1]] - target.f2))
+        return(abs(tmp.f2$f2.value - target.f2))
       }
 
       res.f2 <- optim(mpar, opt.first.order, target.f2 = target.f2,
@@ -380,7 +398,8 @@ sim.dp.byf2 <- function(tp, dp, sim.dp.out, target.f2, seed = NULL,
       model.par <- data.frame(model = "first-order", seed = seed,
                               fmax = fmax.t, tlag = tlag.t,
                               k = res.f2$par[["k"]],
-                              f2 = f2.tmp[[1]], time.point = f2.tmp[[2]],
+                              f2 = f2.tmp$f2.value,
+                              f2.tp = f2.tmp$f2.tp,
                               regulation = regulation,
                               stringsAsFactors = FALSE)
     }# end optim first-order model
@@ -417,28 +436,28 @@ sim.dp.byf2 <- function(tp, dp, sim.dp.out, target.f2, seed = NULL,
                        cv.rule = FALSE, digits = digits, message = FALSE,
                        min.points = min.points, both.TR.85 = both.TR.85,
                        plot = FALSE, time.unit = time.unit)
-      if (all(is.finite(f2.tmp[[1]]), f2.tmp[[1]] >= f2.lower,
-              f2.tmp[[1]] <= f2.upper)) break
+      if (all(is.finite(f2.tmp$f2.value), f2.tmp$f2.value >= f2.lower,
+              f2.tmp$f2.value <= f2.upper)) break
     }# end repeat
 
     if (mod.par$model == "Weibull") {
       if ("mdt" %in% names(mod.par)) {
         model.par <- data.frame(model = "Weibull", seed = seed, fmax = fmax.2,
                                 tlag = tlag.2, mdt = mdt.2, beta = beta.2,
-                                f2 = f2.tmp[[1]], time.point = f2.tmp[[2]],
+                                f2 = f2.tmp$f2.value, f2.tp = f2.tmp$f2.tp,
                                 regulation = regulation,
                                 stringsAsFactors = FALSE)
       } else {
         model.par <- data.frame(model = "Weibull", seed = seed, fmax = fmax.2,
                                 tlag = tlag.2, alpha = alpha.2, beta = beta.2,
-                                f2 = f2.tmp[[1]], time.point = f2.tmp[[2]],
+                                f2 = f2.tmp$f2.value, f2.tp = f2.tmp$f2.tp,
                                 regulation = regulation,
                                 stringsAsFactors = FALSE)
       }
     } else {# first-order
       model.par <- data.frame(model = "first-order", seed = seed, fmax = fmax.2,
-                              tlag = tlag.2, k = k.2, f2 = f2.tmp[[1]],
-                              time.point = f2.tmp[[2]], regulation = regulation,
+                              tlag = tlag.2, k = k.2, f2 = f2.tmp$f2.value,
+                              f2.tp = f2.tmp$f2.tp, regulation = regulation,
                               stringsAsFactors = FALSE)
     }
   }# end random search
@@ -478,14 +497,15 @@ sim.dp.byf2 <- function(tp, dp, sim.dp.out, target.f2, seed = NULL,
       ylab("Dissolution (%)") +
       xlab(paste0("Time (", time.unit, ")"))+
       ggtitle(paste0("Simulated Population Dissolution Profiles with f2 = ",
-                     round(f2.tmp[[1]], digits)),
+                     round(f2.tmp$f2.value, digits)),
               subtitle = paste0("Blue is the target profile (reference) and ",
                                 "red is the simulated profile (test) with ",
                                 "the predefined f2."))
     print(p1)
-  }
 
-  sim.out <- list(model.par = model.par, sim.disso = sim.disso)
+    sim.out <- list(model.par = model.par, sim.disso = sim.disso,
+                    sim.plot = p1)
+  } else sim.out <- list(model.par = model.par, sim.disso = sim.disso)
 
   if (isTRUE(message)) {
     cat("Obtained model parameters and calculated f2 are:\n")
@@ -494,11 +514,6 @@ sim.dp.byf2 <- function(tp, dp, sim.dp.out, target.f2, seed = NULL,
     cat("\nAnd the difference between simulated test and reference is:\n")
     print(sim.out$sim.disso)
   }
-
-  # if (!is.null(oldseed))
-  #  .GlobalEnv$.Random.seed <- oldseed
-  # else
-  #   rm(".Random.seed", envir = .GlobalEnv)
 
   return(sim.out)
 }

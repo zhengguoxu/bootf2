@@ -6,30 +6,73 @@
 \alias{bpwhisker.u}
 \alias{ci.header}
 \alias{mod.ref}
+\alias{rpt.ci}
+\alias{rpt.f2}
+\alias{rpt.concise}
+\alias{rpt.detailed}
+\alias{rpt.info}
+\alias{rpt.intermediate}
+\alias{rpt.screen}
 \title{Helper Functions}
 \usage{
 bpwhisker.l(x)
 
 bpwhisker.u(x)
 
-ci.header(digits)
+ci.header(boot.info)
 
-mod.ref(tp, ref.dp, digits = 4, model, time.unit)
+mod.ref(tp, ref.dp, digits = 4, model, max.disso, time.unit)
+
+rpt.ci(f2type, btsum, boot.info)
+
+rpt.f2(f2type, f2o, boot.info, a.jack, btsum)
+
+rpt.concise(boot.f2.ci, boot.info, f2o, a.jack, btsum)
+
+rpt.detailed(data.t, data.r, boot.t, boot.r, boot.f2, boot.info, f2o)
+
+rpt.info(boot.info)
+
+rpt.intermediate(boot.info, boot.f2)
+
+rpt.screen(boot.f2.ci, boot.info, f2o, a.jack, btsum)
 }
 \arguments{
 \item{x}{Numeric vector}
 
-\item{digits}{An integer indicating the decimal points for the output.}
+\item{boot.info}{A data frame of bootstrap information from \code{bootf2}
+function.}
 
 \item{tp, ref.dp}{Numeric vector of time points \code{tp} and their
 corresponding mean dissolution profiles \code{ref.dp}.}
 
+\item{digits}{An integer indicating the decimal points for the output.}
+
 \item{model}{Strings of model names. Currently only 'Weibull' and
 'first-order' models are supported.}
+
+\item{max.disso}{Numeric value indicating the maximum dissolution.}
 
 \item{time.unit}{Character strings indicating the unit of time. It should
 be either \code{"min"} for minute or \code{"h"} for hour. It is mainly
 used for checking CV rules and making plot. @seealso \code{\link[=calcf2]{calcf2()}}.}
+
+\item{f2type}{Character strings indicating the f2 type.}
+
+\item{btsum}{A data frame of descriptive statistics of the bootstrap data
+set.}
+
+\item{f2o}{Vector of f2 values calculated with the original data set}
+
+\item{a.jack}{Data frame of acceleration from \code{jackf2} function}
+
+\item{boot.f2.ci}{Matrix of f2 values from bootstrap data sets}
+
+\item{data.t, data.r}{Input data sets for test and reference.}
+
+\item{boot.t, boot.r}{List of bootstrap data sets for test and reference.}
+
+\item{boot.f2}{Matrix of f2 calculated from bootstrap data sets.}
 }
 \description{
 Helper Functions

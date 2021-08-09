@@ -42,133 +42,137 @@ devtools::install_github("zhengguoxu/bootf2", build_vignettes = TRUE)
 <!-- badges: start -->
 <!-- badges: end -->
 
-The package `bootf2` was developed to compare the dissolution profiles
-using bootstrap $f_2$ method, as recommended recently by several 
-regulatory agencies [@EMA-2018-09-QA.MSD.DISSO;@Davit-2013-03-BA;
-@Lum-2019-05-WS;@Mandula-2019-05-WS]. Several additional functions 
-were included later for the simulation of the dissolution profiles.
+The package `bootf2` was developed to compare the dissolution profiles using
+bootstrap $f_2$ method, as recommended recently by several regulatory 
+guidelines [@EMA-2018-09-QA.MSD.DISSO; @Davit-2013-03-BA; @Lum-2019-05-WS; 
+@Mandula-2019-05-WS]. Several additional functions were included later for the
+simulation of the dissolution profiles.
 
 Currently, there are four main functions in the package:
 
-1. `sim.dp()` to simulate dissolution profiles using mathematical models
-    or multivariate normal distribution (see `vignette("sim.dp")`). 
-1. `calcf2()` to calculate similarity factor $f_2$ according to 
-    different regulatory rules (See `vignette("calcf2")`).
-1. `sim.dp.byf2()` to find a dissolution profile that, when compared to 
-    a given reference profile, has $f_2$ value equal to the predefined 
-    target $f_2$ (See `vignette("sim.dp.byf2")`).
-1. `bootf2()` to estimate the confidence intervals of $f_2$s using 
-    bootstrap method (See `vignette("bootf2")`).
+1. `sim.dp()` to simulate dissolution profiles using mathematical models or
+    multivariate normal distribution. 
+1. `calcf2()` to calculate similarity factor $f_2$ according to different
+    regulatory rules. 
+1. `sim.dp.byf2()` to find a dissolution profile that, when compared to a given
+    reference profile, has $f_2$ value equal to the predefined target $f_2$. 
+1. `bootf2()` to estimate the confidence intervals of $f_2$s using bootstrap
+    method. 
 
-The basic usage is given below as a brief demonstration. 
+The most basic usage is given below as a brief demonstration. 
 
 ## Examples
 
 ### Function `sim.dp()`
 
-The complete list of arguments are shown below. Read the function 
-manual with `?sim.dp`, or package vignette with `vignette("sim.dp")`, 
-for more details.
+The complete list of arguments are shown below. Read the function manual with
+`?sim.dp`, or package vignette with `vignette("sim.dp")`, for more details.
 
 ```{r simdp-code, eval = FALSE}
-dat <- sim.dp(tp, model = c("Weibull", "first-order"), model.par,
-              seed = NULL, product, dp, dp.cv, ascending = FALSE, 
-              n.units = 12L, max.disso = 105, message = FALSE, 
-              plot = TRUE,, time.unit = c("min", "h"), 
+dat <- sim.dp(tp, dp, dp.cv, model = c("Weibull", "first-order"),
+              model.par = NULL, seed = NULL, n.units = 12L, product,
+              max.disso = 100, ascending = FALSE, message = FALSE,
+              time.unit = c("min", "h"), plot = TRUE,
               plot.max.unit = 36L)
 ```
 
-For the most basic use, the minimum required argument is `tp`, 
-the vector of time points for the dissolution. To avoid changing the
-content of the README every time it is run, a seed number was specified.
-In practice. if it is not provided, each time when you run the function,
-a random seed will be generated and recorded in the output for 
-reproducibility purpose.
+For the most basic use, the function can be run without any user provided 
+arguments, e.g., `sim.dp()`. In such case, 12 units of individual dissolution
+profiles will be simulated using Weibull model with a typical sampling time
+points of 5, 10, 15, 20, 30, 45, and 60 min. A `seed` number will be randomly 
+generated, if not provided by the user, and included in the output for
+reproducibility purpose. 
+
 
 ```{r simdp-dat}
 library(bootf2)
-# time points
-tp <- c(5, 10, 15, 20, 30, 45, 60)
-
 # simulation. simple as that. 
-d.ref <- sim.dp(tp, seed = 1234)
+d.ref <- sim.dp(seed = 1234)
 ```
 
 The output of `sim.dp()` is a list of at least 3 components:
 
-1. `sim.summary`: a data frame with summary statistics of the simulated
-    profiles.
+1. `sim.summary`: A *data frame* with summary statistics of all individual
+    dissolution profiles.
 
 ```{r simdp-sum}
 print(d.ref$sim.summary)
 ```
 
-2. `sim.disso`: a data frame of dissolution profiles that has the 
-    correct format to be used as the input for the function `calcf2()`.
+1. `sim.disso`: A *data frame* with all individual dissolution profiles.
   
 ```{r simdp-disso}
 print(d.ref$sim.disso)
 ```
 
-3. `sim.info`: a data frame with information of the simulation.
+1. `sim.info`: A *data frame* with information of the simulation.
 
 ```{r simdp-info}
 print(d.ref$sim.info)
 ```
 
-Depending on the argument settings, there might be two additional components:
+Depending on the argument settings, there *might be* two additional components:
 
-4. `model.par.ind`: a data frame of individual model parameters that 
-    are used to simulate the individual dissolution profiles if 
-    mathematical models are used for the simulation.
+4. `model.par.ind`: A *data frame* of individual model parameters that are used
+    to simulate the individual dissolution profiles if mathematical models are
+    chosen for the simulation.
   
 ```{r simdp-modpar}
 print(d.ref$model.par.ind)
 ```
 
-5. `sim.plot`: a plot if `plot = TRUE`.
+5. `sim.plot`: A plot if `plot = TRUE`.
 
 ```{r simdp-plot}
 print(d.ref$sim.plot)
 ```
 
+Simple case like this might be useful in situations such as testing other
+programs where data with certain format is needed. In general, to have better
+controlled outcomes, argument `tp`, `model`, and `model.par` should be provided.
+
 ### Function `calcf2()`
 
-The complete list of arguments are shown below. Read the function 
-manual with `?calcf2`, or package vignette with `vignette("calcf2")`, 
-for more details.
+The complete list of arguments are shown below. Read the function manual with
+`?calcf2`, or package vignette with `vignette("calcf2")`, for more details. 
+In addition, refer to the introduction vignette for detailed discussion on 
+different regulatory requirements regarding to the applicability of $f_2$. 
 
 ```{r calcf2-code, eval = FALSE}
-calcf2(test, ref, regulation = c("EMA", "FDA", "WHO"),
-       path.in, file.in, path.out, file.out, digits = 2L,
-       cv.rule = TRUE, min.points = 3L, both.TR.85 = FALSE,
+calcf2(test, ref, path.in, file.in, path.out, file.out,
+       regulation = c("EMA", "FDA", "WHO", "Canada", "ANVISA"),
+       cv.rule = TRUE, message = TRUE, min.points = 3L,
        f2.type = c("est.f2", "exp.f2", "bc.f2", "vc.exp.f2",
-                   "vc.bc.f2", "all"), plot = TRUE,
-       message = TRUE, time.unit = c("min", "h"),
+                   "vc.bc.f2", "all"), both.TR.85 = FALSE,
+       digits = 2L, time.unit = c("min", "h"),  plot = TRUE,
        plot.start.time = 0, plot.max.unit = 24L)
 ```
 
-The minimum required arguments are `test` and `ref`. Data can be read
-from an Excel file. For interactive use, such as the examples below, 
-the `test` and `ref` should be data frames with the time as the first
-column and individual units as the rest columns. The `sim.disso` data
-frame in the output of `sim.dp()` comes with the correct format, 
-as shown above.
+The minimum required arguments are `test` and `ref`. Data can also be read from
+an Excel file. For interactive use, such as the examples below, the `test` and
+`ref` should be *data frames with the time as the first column and individual
+profiles as the rest columns*. The `sim.disso` data frame in the output of
+`sim.dp()` comes with the correct format, as shown above. This is the base 
+function used by function `bootf2()`.
 
 ```{r calcf2-good}
 # simulate a test data
-d.test <- sim.dp(tp, seed = 100)
+d.test <- sim.dp(seed = 100, plot = FALSE)
 
 # calculate f2 with default settings
-calcf2(d.test$sim.disso, d.ref$sim.disso)
+tmp.f2 <- calcf2(d.test$sim.disso, d.ref$sim.disso)
+
+print(tmp.f2)
 ```
 
-When the conditions to apply $f_2$ are not fulfilled, the function will
-stop and show some error messages. 
+
+When the conditions to apply $f_2$ are not fulfilled, the function will stop
+and, depending on the details of non-compliance of regulatory rules, show
+different error messages. 
 
 ```{r calcf2-bad, error=TRUE}
 # simulate reference profile with CV% criterion not fulfilled  
-d.ref2 <- sim.dp(tp, seed = 456)
+d.ref2 <- sim.dp(seed = 456)
 
 # output with error message
 calcf2(d.test$sim.disso, d.ref2$sim.disso)
@@ -176,72 +180,66 @@ calcf2(d.test$sim.disso, d.ref2$sim.disso)
 
 ### Function `sim.dp.byf2()`
 
-The complete list of arguments are shown below. Read the function 
-manual with `?sim.dp.byf2`, or package vignette with
-`vignette("sim.dp.byf2")`, for more details.
+The complete list of arguments are shown below. Read the function manual with
+`?sim.dp.byf2`, or package vignette with `vignette("sim.dp.byf2")`, for more 
+details.
 
 ```{r simdpbyf2-code, eval = FALSE}
-dat <- sim.dp.byf2(tp, dp, sim.dp.out, target.f2, seed = NULL,
-                   regulation = c("EMA", "FDA", "WHO"),
+dat <- sim.dp.byf2(tp, dp, target.f2, seed = NULL, min.points = 3L,
+                   regulation = c("EMA", "FDA", "WHO", "Canada", "ANVISA"),
                    model = c("Weibull", "first-order"), digits = 2L,
-                   min.points = 3L, both.TR.85 = FALSE, max.disso = 105,
-                   model.par.cv = 50, fix.fmax.cv = 0, random.factor = 3,
+                   max.disso = 100, message = TRUE, both.TR.85 = FALSE,
+                   time.unit = c("min", "h"), plot = TRUE, sim.dp.out,
                    sim.target = c("ref.pop", "ref.median", "ref.mean"),
-                   time.unit = c("min", "h"), message = TRUE, plot = TRUE)
+                   model.par.cv = 50, fix.fmax.cv = 0, random.factor = 3)
 ```
 
-Given any dissolution profile `dp` at time points `tp`, and target $f_2$ 
-value, this function will find another dissolution profile such that 
-when the newly simulated profile is compared to the `dp`, the 
-calculated $f_2$ will be equal to the target $f_2$. If `target.f2` is
-specified as a range, such as `target.f2 = c(52.05, 53.04)`, then the 
-calculated $f_2$ with simulated profile will be within this range. 
+Given any dissolution profile `dp` at time points `tp`, and target $f_2$ value
+(e.g., `target.f2 = 55`), this function will find another dissolution profile
+such that when the newly simulated profile is compared to the `dp`, the
+calculated $f_2$ will be equal to the target $f_2$. If `target.f2` is provided 
+as a range, such as `target.f2 = c(54.95, 55.04)`, then the calculated $f_2$
+with simulated profile will be within this range. 
 
 ```{r simdpbyf2-dat}
 # mean dissolution profile for tp
+tp <- c(5, 10, 15, 20, 30, 45, 60)
 dp <- c(51, 66, 75, 81, 88, 92, 95)
 
 # find another profile with target f2 = 60
 d.t2 <- sim.dp.byf2(tp, dp, target.f2 = 60, seed = 123)
 ```
 
-If you don't like the shape of the simulated profile, you can run the 
-function many times with different `seed` number until you get the 
-shape that you are willing to accept. 
-
-The model parameters in the output are more useful in simulation studies 
-since they can be used as initial model parameter input to the function
-`sim.dp()` to simulate a large population of dissolution profiles that 
-have known $f_2$ value when compared to target dissolution profile.
+The model parameters in the output are more useful in simulation studies since
+they can be used as initial model parameter input to the function `sim.dp()` to
+simulate a large population of individual dissolution profiles that have the
+known population $f_2$ value when compared to target dissolution profile.
 
 ### Function `bootf2()`
 
-The complete list of arguments are shown below. Read the function 
-manual with `?bootf2`, or package vignette with `vignette("bootf2")`, 
-for more details.
+The complete list of arguments are shown below. Read the function manual with
+`?bootf2`, or package vignette with `vignette("bootf2")`, for more details.
 
 ```{r bootf2-code, eval = FALSE}
 result <- bootf2(test, ref, path.in, file.in, path.out, file.out,
                  n.boots = 10000L, seed = 306L, digits = 2L, alpha = 0.05,
-                 regulation = c("EMA", "FDA", "WHO"), min.points = 1L,
-                 both.TR.85 = FALSE, print.report = TRUE,
-                 report.style = c("concise", "intermediate", "detailed"),
+                 regulation = c("EMA", "FDA", "WHO", "Canada", "ANVISA"),
+                 min.points = 1L, both.TR.85 = FALSE, print.report = TRUE,
+                 report.style = c("concise",  "intermediate", "detailed"),
                  f2.type = c("all", "est.f2", "exp.f2", "bc.f2",
                              "vc.exp.f2", "vc.bc.f2"),
                  ci.type = c("all", "normal", "basic", "percentile",
                              "bca.jackknife", "bca.boot"),
-                 quantile.type = c("all", 1:9, "boot"),
-                 jackknife.type = c("nt+nr", "nt*nr", "nt=nr"),
+                 quantile.type = c("all", as.character(1:9), "boot"),
+                 jackknife.type = c("all", "nt+nr", "nt*nr", "nt=nr"),
                  time.unit = c("min", "h"), output.to.screen = TRUE,
                  sim.data.out = FALSE)
 ```
 
 The minimum required arguments are dissolution profiles of `test` and `ref`.
 The function can output many different 90% confidence intervals for several
-$f_2$ estimators. 
-With default settings, the function prints all confidence intervals for all 
-$f_2$ estimators, and the result will be save in a text file. 
-
+$f_2$ estimators. With default settings, the function prints all confidence
+intervals for all $f_2$ estimators, and the result will be save in a text file. 
 
 ```{r bootf2-out}
 # get test and reference data set with correct format
@@ -250,8 +248,21 @@ ref  <- d.ref$sim.disso
 
 # use most default settings (output all) but small number of bootstrap
 # to have shorter run time for the example. default n.boots = 10000L
-t_vs_r <- bootf2(test, ref, n.boots = 100L)
+t_vs_r <- bootf2(test, ref, n.boots = 100L, print.report = FALSE)
 ```
+
+The output of the `bootf2()` is a *list* containing:
+1. `boot.ci`: A *data frame* of bootstrap $f_2$ confidence intervals.
+1. `boot.f2`: A *data frame* of all individual $f_2$ values for all bootstrap
+    data sets. This can be used to make plots for visual presentation.
+1. `boot.info`: A *data frame* with detailed information of bootstrap for
+    reproducibility purpose, such as all arguments used in the function, time
+    points used for calculation of \eqn{f_2}{f2}, and the number of `NA`s.
+1. `boot.summary`: A *data frame* with descriptive statistics of the bootstrap
+    $f_2$.
+
+And depending on the function settings, it might contains `boot.t` and `boot.r`,
+lists of all individual bootstrap data sets for the test and reference products.
 
 ## Disclaimer
 

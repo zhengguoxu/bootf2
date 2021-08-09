@@ -1,3 +1,13 @@
+# bootf2 0.4.0
+
+* Added data from article of Shah et al 1998 for validation.
+* Added regulatory rules of `Canada` (Health Canada) and `ANVISA` (Brazil).
+* Added test codes for all main functions using `testthat`.
+* Improved `sim.dp()`, `sim.dp.byf2()`, and `bootf2()`. 
+* Modified the report generation of `bootf2()`.
+* Cosmetic changes of source files and documentations.
+
+
 # bootf2 0.3.0.9001
 
 * Cosmetic changes of source files

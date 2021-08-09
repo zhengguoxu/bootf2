@@ -2,101 +2,355 @@
 % Please edit documentation in R/bootf2.R
 \name{bootf2}
 \alias{bootf2}
-\title{Estimate 90\% Confidence Intervals of f2 Using Bootstrap Methodology}
+\title{Estimate 90\% Confidence Intervals of \eqn{f_2}{f2} with Bootstrap Methodology}
 \usage{
 bootf2(test, ref, path.in, file.in, path.out, file.out,
-       n.boots = 10000L, seed = 306, digits = 2L, alpha = 0.05,
-       regulation = c("EMA", "FDA", "WHO"), min.points = 1L,
-       both.TR.85 = FALSE, print.report = TRUE,
+       n.boots = 10000L, seed = 306L, digits = 2L, alpha = 0.05,
+       regulation = c("EMA", "FDA", "WHO","Canada", "ANVISA"),
+       min.points = 1L, both.TR.85 = FALSE, print.report = TRUE,
        report.style = c("concise", "intermediate", "detailed"),
        f2.type = c("all", "est.f2", "exp.f2", "bc.f2",
                    "vc.exp.f2", "vc.bc.f2"),
        ci.type = c("all", "normal", "basic", "percentile",
                    "bca.jackknife", "bca.boot"),
-       quantile.type = c("all", 1:9, "boot"),
-       jackknife.type = c("nt+nr", "nt*nr", "nt=nr"),
+       quantile.type = c("all", as.character(1:9), "boot"),
+       jackknife.type = c("all", "nt+nr", "nt*nr", "nt=nr"),
        time.unit = c("min", "h"), output.to.screen = TRUE,
        sim.data.out = FALSE)
 }
 \arguments{
-\item{test, ref}{Data frames of dissolution profiles of test and reference
-product if \code{path.in} and \code{file.in} are not specified; otherwise,
-they should be character strings indicating the worksheet names of the
-Excel file where the dissolution data is saved. Required format:
-the first column should be time and the rest columns are dissolution
-data of each unit. See Input/Output in Details.}
+\item{test, ref}{\emph{Data frames} of dissolution profiles of test and reference
+product if \code{path.in} and \code{file.in} are not specified; otherwise, they
+should be \emph{character} strings indicating the worksheet names of the Excel
+file where the dissolution data is saved. See Input/Output in Details.}
 
-\item{path.in, file.in, path.out, file.out}{Character strings of input and
+\item{path.in, file.in, path.out, file.out}{\emph{Character} strings of input and
 output directories and file names. See Input/Output in Details.}
 
-\item{n.boots}{An integer indicating the number of bootstrap samples.}
+\item{n.boots}{An \emph{integer} indicating the number of bootstrap samples.}
 
-\item{seed}{Numeric seed value for reproducibility. If missing, a random
+\item{seed}{\emph{Integer} seed value for reproducibility. If missing, a random
 seed will be generated for reproducibility purpose.}
 
-\item{digits}{An integer indicating the decimal points for the output.}
+\item{digits}{An \emph{integer} indicating the decimal points for the output.}
 
-\item{alpha}{A numeric value between 0 and 1.
-\eqn{(1-2\times \alpha)\times 100}{(1 - 2*alpha)*100}
-confidence interval will be estimated.}
+\item{alpha}{A \emph{numeric} value between 0 and 1 to estimate
+\eqn{(1-2\times \alpha)\times 100}{(1 - 2*alpha)*100} confidence interval.}
 
-\item{regulation}{Character strings indicating regulatory guidelines.
-See Regulation in Details.}
+\item{regulation}{\emph{Character} strings indicating regulatory guidelines.
+@seealso \code{\link[=calcf2]{calcf2()}} for details on regulation rules.}
 
-\item{min.points}{An integer indicating the minimum time points to be used
-to calculate f2. See Regulation in Details.}
+\item{min.points}{An \emph{integer} indicating the minimum time points to be used
+to calculate \eqn{f_2}{f2}. For conventional \eqn{f_2}{f2} calculation, the
+default is 3, however, for bootstrap \eqn{f_2}{f2}, the value should be
+lower as there might be less time points available in certain bootstrap
+samples. The default is 1. @seealso \code{\link[=calcf2]{calcf2()}}.}
 
-\item{both.TR.85}{Logical. If \code{TRUE}, the old (incorrect)
-interpretation (that both the test and reference should release more than
-85\%) will be used for f2 calculation when \code{regulation = 'FDA'}.
-See Regulation in Details.}
+\item{both.TR.85}{\emph{Logical}. If \code{TRUE}, and if \code{regulation = "FDA"}, all
+measurements up to the time points at which both test and reference
+products dissolve more than 85\% will be used to calculate \eqn{f_2}{f2}.
+This is the conventional, but incorrect, interpretation of the US FDA rule.
+Therefore, the argument should only be set to \code{TRUE} for validation purpose
+such as comparing the results from old literatures that use the wrong
+interpretation to calculate \eqn{f_2}{f2}. @seealso \code{\link[=calcf2]{calcf2()}} for details
+on regulation rules.}
 
-\item{print.report}{Logical. If \code{TRUE}, a plain text report will be
-produced.}
+\item{print.report}{\emph{Logical}. If \code{TRUE}, a plain text report will be
+produced. See Input/Output in Details.}
 
-\item{report.style}{\code{'concise'} style will produce the confidence
-intervals for the f2 estimators; \code{'intermediate'} style will add
-a list of individual f2s for all bootstrap samples; \code{detailed}
-style will further add individual bootstrap samples along with their f2.
-See Input/Output in Details.}
+\item{report.style}{\code{"concise"} style produces the estimators and their
+confidence intervals; \code{"intermediate"} style adds a list of individual
+\eqn{f_2}{f2}s for all bootstrap samples in the end of \code{"concise"} report;
+\code{"detailed"} style further adds individual bootstrap samples along with
+their \eqn{f_2}{f2}s in the end of \code{"intermediate"} report. See
+Input/Output in Details.}
 
-\item{f2.type}{Character strings indicating which f2 estimators should be
-calculated.}
+\item{f2.type}{\emph{Character} strings indicating which type of \eqn{f_2}{f2}
+estimator should be calculated. See Types of estimators in Details.}
 
-\item{ci.type}{Character strings indicating which type of  confidence
-intervals should be estimated.}
+\item{ci.type}{\emph{Character} strings indicating which type of confidence
+interval should be estimated. See Types of confidence intervals in
+Details.}
 
-\item{quantile.type}{Character strings indicating the type of percentile.}
+\item{quantile.type}{\emph{Character} strings indicating the type of percentile.}
 
-\item{jackknife.type}{Character strings indicating the type for jackknife
-method.}
+\item{jackknife.type}{\emph{Character} strings indicating the type of jackknife
+method. See Details.}
 
-\item{time.unit}{Character strings indicating the unit of time.
-It should be either \code{"min"} for minute or \code{"h"} for hour.
-It is mainly used for checking CV rules and making plot.
-See Regulation in Details.}
+\item{time.unit}{\emph{Character} strings indicating the unit of time. It should
+be either \code{"min"} for minute or \code{"h"} for hour. It is mainly used for
+checking CV rules and making plot. @seealso \code{\link[=calcf2]{calcf2()}}.}
 
-\item{output.to.screen}{Logical. If \code{TRUE}, a concise style summary
-report will be printed to screen.}
+\item{output.to.screen}{\emph{Logical}. If \code{TRUE}, a \code{"concise"} style summary
+report will be printed on screen. See Input/Output in Details.}
 
-\item{sim.data.out}{Logical. If \code{TRUE}, all individual bootstrap data
+\item{sim.data.out}{\emph{Logical}. If \code{TRUE}, all individual bootstrap data
 sets will be included in the output.}
 }
 \value{
 A list of 3 or 5 components.
 \itemize{
-\item \code{boot.ci}: A data frame of bootstrap f2 confidence intervals.
-\item \code{boot.f2}: A data frame of all individual f2 values.
-\item \code{boot.info}: A data frame with detailed information of bootstrap,
-such as the time points used for calculation of f2 and the number of
-\code{NA}s.
-\item \code{boot.t} and \code{boot.r}: Individual bootstrap samples if
-\code{sim.data.out = TRUE}.
+\item \code{boot.ci}: A \emph{data frame} of bootstrap \eqn{f_2}{f2} confidence intervals.
+\item \code{boot.f2}: A \emph{data frame} of all individual \eqn{f_2}{f2} values for all
+bootstrap data set.
+\item \code{boot.info}: A \emph{data frame} with detailed information of bootstrap for
+reproducibility purpose, such as all arguments used in the function, time
+points used for calculation of \eqn{f_2}{f2}, and the number of \code{NA}s.
+\item \code{boot.summary}: A \emph{data frame} with descriptive statistics of the
+bootstrap \eqn{f_2}{f2}.
+\item \code{boot.t} and \code{boot.r}: \emph{Lists} of individual bootstrap samples for test
+and reference product if \code{sim.data.out = TRUE}.
 }
 }
 \description{
-Main function to estimate 90\% confidence intervals of f2 using bootstrap
-methodology.
+Main function to estimate 90\% confidence intervals of \eqn{f_2}{f2} using
+bootstrap methodology.
+}
+\details{
+\subsection{Minimum required arguments that must be provided by the user}{
+
+Arguments \code{test} and \code{ref} must be provided by the user. They should be \code{R}
+\verb{data frames}, with \emph{time as the first column}, and all individual profiles
+profiles as the rest columns. The actual names of the columns do not matter
+since they will be renamed internally.
+}
+
+\subsection{Input/Output}{
+
+The dissolution data of test and reference product can either be provided as
+\emph{data frames} for \code{test} and \code{ref}, as explained above, or be read from an
+\emph{Excel file} with data of test and reference stored in \emph{separate worksheets}.
+In the latter case, the argument \code{path.in}, the directory where the Excel
+file is, and \code{file.in}, the name of the Excel file \emph{including the file
+extension \code{.xls} or \code{.xlsx}}, must be provided. In such case, the argument
+\code{test} and \code{ref} must be \emph{the names of the worksheets in quotation marks}.
+The first column of each Excel worksheet must be time, and the rest columns
+are individual dissolution profiles. The first row should be column names,
+such as time, unit01, unit02, ... The actual names of the columns do not
+matter as they will be renamed internally.
+
+Arguments \code{path.out} and \code{file.out} are the names of the output directory
+and file. If they are not provided, but argument \code{print.report} is \code{TRUE},
+then a plain text report will be generated automatically in the current
+working directory with file name \code{test_vs_ref_TZ_YYYY-MM-DD_HHMMSS.txt},
+where \code{test} and \code{ref} are data set names of test and reference, \code{TZ} is the
+time zone such as \code{CEST}, \code{YYYY-MM-DD} is the numeric date format and
+\code{HHMMSS} is the numeric time format for hour, minute, and second.
+
+For a quick check, set argument \code{output.to.screen = TRUE}, a summary report
+very similar to \code{concise} style report will be printed on screen.
+}
+
+\subsection{Types of Estimators}{
+
+According to Shah et al, the population \eqn{f_2}{f2} for the inference is
+\deqn{f_2 = 100-25\log\left(1 + \frac{1}{P}\sum_{i=1}^P%
+  \left(\mu_{\mathrm{T},i} - \mu_{\mathrm{R},i}\right)^2 \right)\,,}{%
+  f2 = 100 - 25 log(1 + 1/P(\sum(\mu(Ti) - \mu(Ri))^2)),}
+where \eqn{P} is the number of time points; \eqn{\mu_{\mathrm{T},i}}{\mu(Ti)}
+and \eqn{\mu_{\mathrm{R},i}}{\mu(Ri)} are \emph{population mean} of test and
+reference product at time point \eqn{i}, respectively; \eqn{\sum_{i=1}^P}{%
+\sum} is the summation from \eqn{i = 1} to \eqn{P}.
+
+Five estimators for \eqn{f_2}{f2} are included in the function:
+\enumerate{
+\item The estimated \eqn{f_2}{f2}, denoted by \eqn{\hat{f}_2}{est.f2}, is the
+one written in various regulatory guidelines. It is expressed differently,
+but mathematically equivalently, as
+\deqn{\hat{f}_2 = 100-25\log\left(1 + \frac{1}{P}\sum_{i=1}^P\left(%
+     \bar{X}_{\mathrm{T},i} - \bar{X}_{\mathrm{R},i}\right)^2 \right)\:,}{%
+     est.f2 = 100 - 25 log(1 + 1/P(\sum(X(Ti) - X(Ri))^2)),}
+where \eqn{P} is the number of time points;
+\eqn{\bar{X}_{\mathrm{T},i}}{X(Ti)} and
+\eqn{\bar{X}_{\mathrm{R},i}}{X(Ri)} are mean dissolution data at the
+\eqn{i}th time point of \emph{random samples} chosen from the test and the
+reference population, respectively. Compared to the equation of population
+\eqn{f_2}{f2} above, the only difference is that in the equation of
+\eqn{\hat{f}_2}{est.f2} the \emph{sample means} of dissolution profiles replace
+the \emph{population means} for the approximation. \emph{In other words, a point
+estimate is used for the statistical inference in practice}.
+\item The Bias-corrected \eqn{f_2}{f2}, denoted by
+\eqn{\hat{f}_{2,\mathrm{bc}}}{bc.f2}, was described in the article of
+Shah et al, as
+\deqn{\hat{f}_{2,\mathrm{bc}} = 100-25\log\left(1 + \frac{1}{P}%
+     \left(\sum_{i=1}^P\left(\bar{X}_{\mathrm{T},i} - %
+     \bar{X}_{\mathrm{R},i}\right)^2 - \frac{1}{n}\sum_{i=1}^P%
+     \left(S_{\mathrm{T},i}^2 + S_{\mathrm{R},i}^2\right)\right)\right)\,,}{%
+     bc.f2 = 100 - 25 log(1 + 1/P(\sum(X(Ti) - X(Ri))^2 - 1/n\sum(S(Ti)^2 + %
+     S(Ri)^2))),}
+where \eqn{S_{\mathrm{T},i}^2}{S(Ti)^2} and
+\eqn{S_{\mathrm{R},i}^2}{S(Ri)^2} are unbiased estimates of variance at
+the \eqn{i}th time points of random samples chosen from test and reference
+population, respectively; and \eqn{n} is the sample size.
+\item The variance- and bias-corrected \eqn{f_2}{f2}, denoted by
+\eqn{\hat{f}_{2,\mathrm{vcbc}}}{vc.bc.f2}, does not assume equal weight of
+variance as \eqn{\hat{f}_{2,\mathrm{bc}}}{bc.f2} does.
+\deqn{\hat{f}_{2, \mathrm{vcbc}} = 100-25\log\left(1 +%
+     \frac{1}{P}\left(\sum_{i=1}^P \left(\bar{X}_{\mathrm{T},i} -%
+       \bar{X}_{\mathrm{R},i}\right)^2 - \frac{1}{n}\sum_{i=1}^P%
+       \left(w_{\mathrm{T},i}\cdot S_{\mathrm{T},i}^2 +%
+       w_{\mathrm{R},i}\cdot S_{\mathrm{R},i}^2\right)\right)\right)\,,}{%
+       vc.bc.f2 = 100 -25 log(1 + 1/P(\sum(X(Ti) - X(Ri))^2 - 1/n\sum(w(Ti)%
+       S(Ti)^2 + w(Ri)S(Ri)^2))),}
+where \eqn{w_{\mathrm{T},i}}{w(Ti)} and \eqn{w_{\mathrm{R},i}}{w(Ri)} are
+weighting factors for variance of test and reference products,
+respectively, which can be calculated as follows:
+\deqn{w_{\mathrm{T},i} = 0.5 + \frac{S_{\mathrm{T},i}^2}%
+     {S_{\mathrm{T},i}^2 + S_{\mathrm{R},i}^2}\,,}{w(Ti) = 0.5 + %
+    S(Ti)^2/(S(Ti)^2 + S(Ri)^2),} and
+\deqn{w_{\mathrm{R},i} = 0.5 + \frac{S_{\mathrm{R},i}^2}%
+     {S_{\mathrm{T},i}^2 + S_{\mathrm{R},i}^2}\,.}{w(Ri) = 0.5 + %
+     S(Ri)^2/(S(Ti)^2 + S(Ri)^2).}
+\item The expected \eqn{f_2}{f2}, denoted by \eqn{\hat{f}_{2, \mathrm{exp}}}{%
+   exp.f2}, is calculated based on the mathematical expectation of estimated
+\eqn{f_2}{f2},
+\deqn{\hat{f}_{2, \mathrm{exp}} = 100-25\log\left(1 + \frac{1}{P}%
+     \left(\sum_{i=1}^P\left(\bar{X}_{\mathrm{T},i} - %
+     \bar{X}_{\mathrm{R},i}\right)^2 + \frac{1}{n}\sum_{i=1}^P%
+     \left(S_{\mathrm{T},i}^2 + S_{\mathrm{R},i}^2\right)\right)\right)\,,}{%
+     exp.f2 = 100 - 25 log(1 + 1/P(\sum(X(Ti) - X(Ri))^2 + 1/n\sum(%
+     S(Ti)^2 + S(Ri)^2))),}
+using mean dissolution profiles and variance from samples for the
+approximation of population values.
+\item The variance-corrected expected \eqn{f_2}{f2}, denoted by
+\eqn{\hat{f}_{2, \mathrm{vcexp}}}{vc.exp.f2}, is calculated as
+\deqn{\hat{f}_{2, \mathrm{vcexp}} = 100-25\log\left(1 +%
+     \frac{1}{P}\left(\sum_{i=1}^P \left(\bar{X}_{\mathrm{T},i} -%
+       \bar{X}_{\mathrm{R},i}\right)^2 + \frac{1}{n}\sum_{i=1}^P%
+       \left(w_{\mathrm{T},i}\cdot S_{\mathrm{T},i}^2 +%
+       w_{\mathrm{R},i}\cdot S_{\mathrm{R},i}^2\right)\right)\right)\,.}{%
+      vc.exp.f2 = 100 - 25 log(1 + 1/P(\sum(X(Ti) - X(Ri))^2 + 1/n\sum(w(Ti)%
+       S(Ti)^2 + w(Ri)S(Ri)^2))).}
+}
+}
+
+\subsection{Types of Confidence Interval}{
+
+The following confidence intervals are included:
+\enumerate{
+\item The Normal interval with bias correction, denoted by \code{normal} in the
+function, is estimated according to Davison and Hinkley,
+\deqn{\hat{f}_{2, \mathrm{L,U}} = \hat{f}_{2, \mathrm{S}} - E_B \mp %
+     \sqrt{V_B}\cdot Z_{1-\alpha}\,,}{f2(L,U) = f2(S) - E(B) -/+ %
+     sqrt(V(B))Z(1-\alpha)),}
+where \eqn{\hat{f}_{2, \mathrm{L,U}}}{f2(L,U)} are the lower and upper
+limit of the confidence interval estimated from bootstrap samples;
+\eqn{\hat{f}_{2, \mathrm{S}}}{f2(S)} denotes the estimators described
+above; \eqn{Z_{1-\alpha}}{Z(1-\alpha)} represents the inverse of standard
+normal cumulative distribution function with type I error \eqn{\alpha};
+\eqn{E_B}{E(B)} and \eqn{V_B}{V(B)} are the \emph{resampling estimates} of bias
+and variance calculated as
+\deqn{E_B = \frac{1}{B}\sum_{b=1}^{B}\hat{f}_{2,b}^\star - %
+     \hat{f}_{2, \mathrm{S}} = \bar{f}_2^\star - \hat{f}_{2,\mathrm{S}}\,,}{%
+     E(B) = 1/B\sum(f2(b)) - f2(S) = f2(b,m) - f2(S),}
+and
+\deqn{V_B = \frac{1}{B-1}\sum_{b=1}^{B} \left(\hat{f}_{2,b}^\star
+     -\bar{f}_2^\star\right)^2\,,}{V(B) = 1/(B-1)\sum(f2(b) - f2(b,m))^2,}
+where \eqn{B} is the number of bootstrap samples;
+\eqn{\hat{f}_{2,b}^\star}{f2(b)} is the \eqn{f_2}{f2} estimate with
+\eqn{b}th bootstrap sample, and \eqn{\bar{f}_2^\star}{f2(b,m)} is the
+mean value.
+\item The basic interval, denoted by \code{basic} in the function, is estimated
+according to Davison and Hinkley,
+\deqn{\hat{f}_{2, \mathrm{L}} = 2\hat{f}_{2, \mathrm{S}} -%
+     \hat{f}_{2,(B+1)(1-\alpha)}^\star\,,}{f2(L) = 2*f2(S) - %
+     f2((B+1)(1-\alpha)),}
+and
+\deqn{\hat{f}_{2, \mathrm{U}} = 2\hat{f}_{2, \mathrm{S}} -%
+     \hat{f}_{2,(B+1)\alpha}^\star\,,}{f2(U) = 2*f2(S) - f2((B+1)\alpha),}
+where \eqn{\hat{f}_{2,(B+1)\alpha}^\star}{f2((B+1)\alpha)} and
+\eqn{\hat{f}_{2,(B+1)(1-\alpha)}^\star}{f2((B+1)(1-\alpha))} are the
+\eqn{(B+1)\alpha}th and \eqn{(B+1)(1-\alpha)}th \emph{ordered resampling
+estimates} of \eqn{f_2}{f2}, respectively. When \eqn{(B+1)\alpha} is not
+an integer, the following equation is used for interpolation,
+\deqn{\hat{f}_{2,(B+1)\alpha}^\star = \hat{f}_{2,k}^\star + %
+     \frac{\Phi^{-1}\left(\alpha\right)-\Phi^{-1}\left(\frac{k}{B+1}\right)}%
+     {\Phi^{-1}\left(\frac{k+1}{B+1}\right)-\Phi^{-1}%
+     \left(\frac{k}{B+1}\right)}\left(\hat{f}_{2,k+1}^\star-%
+     \hat{f}_{2,k}^\star\right),}{f2((B+1)\alpha) = f2(k) + %
+     (\Phi^(-1)(\alpha) - \Phi^(-1)(k/(B+1)))/(\Phi^(-1)((k+1)/(B+1)) - %
+     \Phi^(-1)(k/(B+1)))*(f2(k+1) - f2(k)),}
+where \eqn{k} is the \emph{integer part} of \eqn{(B+1)\alpha},
+\eqn{\hat{f}_{2,k+1}^\star}{f2(k+1)} and \eqn{\hat{f}_{2,k}^\star}{%
+   f2(k)} are the \eqn{(k+1)}th and the \eqn{k}th ordered resampling
+estimates of \eqn{f_2}{f2}, respectively.
+\item The percentile intervals, denoted by \code{percentile} in the function, are
+estimated using nine different types of quantiles, Type 1 to Type 9, as
+summarized in Hyndman and Fan's article and implemented in \code{R}'s
+\code{quantile} function. Using \code{R}'s \code{boot} package, program \code{bootf2BCA}
+outputs a percentile interval using the equation above for interpolation.
+To be able to compare the results among different programs, the same
+interval, denoted by \code{Percentile (boot)} in the function, is also
+included in the function.
+\item The bias-corrected and accelerated (BCa) intervals are estimated according
+to Efron and Tibshirani,
+\deqn{\hat{f}_{2, \mathrm{L}} = \hat{f}_{2, \alpha_1}^\star\,,}{%
+   f2(L) = f2(\alpha1),}
+\deqn{\hat{f}_{2, \mathrm{U}} = \hat{f}_{2, \alpha_2}^\star\,,}{%
+   f2(L) = f2(\alpha2),}
+where \eqn{\hat{f}_{2, \alpha_1}^\star}{f2(\alpha1)} and
+\eqn{\hat{f}_{2, \alpha_2}^\star}{f2(\alpha2)} are the \eqn{100\alpha_1}{%
+   100\alpha1}th and the \eqn{100\alpha_2}{100\alpha2}th percentile of the
+resampling estimates of \eqn{f_2}{f2}, respectively. Type I errors
+\eqn{\alpha_1}{\alpha1} and \eqn{\alpha_2}{\alpha2} are obtained as
+\deqn{\alpha_1 = \Phi\left(\hat{z}_0 + \frac{\hat{z}_0 + \hat{z}_\alpha}%
+     {1-\hat{a}\left(\hat{z}_0 + \hat{z}_\alpha\right)}\right),}{\alpha1 = %
+     \Phi(z0 + (z0 + za)/(1 - a(z0 + za))),}
+and
+\deqn{\alpha_2 = \Phi\left(\hat{z}_0 + \frac{\hat{z}_0 + %
+     \hat{z}_{1-\alpha}}{1-\hat{a}\left(\hat{z}_0 + %
+     \hat{z}_{1-\alpha}\right)}\right),}{\alpha2 = \Phi(z0 +
+     (z0 + z(1-\alpha))/(1 - a(z0 + z(1 - \alpha)))),}
+where \eqn{\hat{z}_0}{z0} and \eqn{\hat{a}}{a} are called
+\emph{bias-correction} and \emph{acceleration}, respectively.
+
+There are different methods to estimate \eqn{\hat{z}_0}{z0} and
+\eqn{\hat{a}}{a}. Shah et al. used jackknife technique, denoted by
+\code{bca.jackknife} in the function,
+\deqn{\hat{z}_0 = \Phi^{-1}\left(\frac{N\left\{\hat{f}_{2,b}^\star <%
+     \hat{f}_{2,\mathrm{S}} \right\}}{B}\right),}{z0 = %
+     \Phi^(-1)(N(f2(b) < f2(S))/B)}
+and
+\deqn{\hat{a} = \frac{\sum_{i=1}^{n}\left(\hat{f}_{2,\mathrm{m}} -%
+     \hat{f}_{2, i}\right)^3}{6\left(\sum_{i=1}^{n}\left(%
+     \hat{f}_{2,\mathrm{m}} - \hat{f}_{2, i}\right)^2\right)^{3/2}}\,,}{%
+     a = (\sum(f2(m) - f2(i)))^3/(6(\sum(f2(m) - f2(i))^2)^(3/2)),}
+where \eqn{N\left\{\cdot\right\}}{N(f2(b) < f2(S))} denotes the number of
+element in the set, \eqn{\hat{f}_{2, i}}{f2(i)} is the \eqn{i}th
+jackknife statistic, \eqn{\hat{f}_{2,\mathrm{m}}}{f2(m)} is the mean of
+the jackknife statistics, and \eqn{\sum} is the summation from 1 to
+sample size \eqn{n}.
+
+Program \code{bootf2BCA} gives a slightly different BCa interval with \code{R}'s
+\code{boot} package. This approach, denoted by \code{bca.boot} in the function, is
+also implemented in the function for estimating the interval.
+}
+}
+
+\subsection{Notes on the argument \code{jackknife.type}}{
+
+For any sample with size $n$, the jackknife estimator is obtained by
+estimating the parameter for each subsample omitting the \eqn{i}th
+observation. However, when two samples (e.g., test and reference) are
+involved, there are several possible ways to do it. Assuming sample size
+of test and reference are \eqn{n_\mathrm{T}}{nt} and \eqn{n_\mathrm{R}}{nr},
+the following three possibility are considered:
+\itemize{
+\item Estimated by removing one observation from both test and reference samples.
+In this case, the prerequisite is \eqn{n_\mathrm{T} = n_\mathrm{R}}{nt=nr},
+denoted by \code{nt=nr} in the function. So if there are 12 units in test and
+reference data sets, there will be 12 jackknife estimators.
+\item Estimate the jackknife for test sample while keeping the reference data
+unchanged; and then estimate jackknife for reference sample while keeping
+the test sample unchanged. This is denoted by \code{nt+nr} in the function.
+This is the default method. So if there are 12 units in test and reference
+data sets, there will be \eqn{12 + 12 = 24} jackknife estimators.
+\item For each observation deleted from test sample, estimate jackknife for
+reference sample. This is denoted by \code{nt*nr} in the function. So if there
+are 12 units in test and reference data sets, there will be \eqn{12 \times
+  12 = 144}{12*12 = 144} jackknife estimators.
+}
+}
 }
 \examples{
 \dontrun{
@@ -114,7 +368,23 @@ par.t <- list(fmax = 100, fmax.cv = 3, mdt = 12.29, mdt.cv = 12,
 dt <- sim.dp(tp, model.par = par.t, seed = 100, plot = FALSE)
 
 # bootstrap
-bootf2(dt$sim.disso, dr$sim.disso, n.boots = 100)
+bootf2(dt$sim.disso, dr$sim.disso, n.boots = 100, print.report = FALSE)
 }
 
+}
+\references{
+Shah, V. P.; Tsong, Y.; Sathe, P.; Liu, J.-P. In Vitro
+Dissolution Profile Comparison---Statistics and Analysis of the
+Similarity Factor, \eqn{f_2}{f2}. \emph{Pharmaceutical Research} 1998,
+\strong{15} (6), 889--896. DOI: 10.1023/A:1011976615750.
+
+Davison, A. C.; Hinkley, D. V. Bootstrap Methods and Their
+Application. Cambridge University Press, 1997.
+
+Hyndman, R. J.; Fan, Y. Sample Quantiles in Statistical Packages.
+\emph{The American Statistician} 1996, \strong{50} (4), 361--365. DOI:
+/10.1080/00031305.1996.10473566.
+
+Efron, B.; Tibshirani, R. An Introduction to the Bootstrap.
+Chapman & Hall, 1993.
 }

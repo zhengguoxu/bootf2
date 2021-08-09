@@ -356,9 +356,25 @@ dp <- c(39, 56, 67, 74, 83, 90, 94)
 dp.cv <- c(19, 15, 10, 8, 8, 5, 3)
 
 mvn.dat <- sim.dp(tp, dp = dp, dp.cv = dp.cv, seed = 1234)
-# Error in sim.dp(tp, dp = dp, dp.cv = dp.cv, seed = 1234): object 'tp' not found
 mvn.dat$sim.summary
-# Error in eval(expr, envir, enclos): object 'mvn.dat' not found
+#   product time dp dp.cv sim.mean sim.median sim.cv sim.var sim.sd  sim.min
+# 1 KFS7132    0  0     0        0    0.00000      0  0.0000   0.00  0.00000
+# 2 KFS7132    5 39    19       39   39.96268     19 54.9081   7.41 22.50088
+# 3 KFS7132   10 56    15       56   57.09130     15 70.5600   8.40 37.29655
+# 4 KFS7132   15 67    10       67   67.87044     10 44.8900   6.70 52.08177
+# 5 KFS7132   20 74     8       74   74.76911      8 35.0464   5.92 60.81852
+# 6 KFS7132   30 83     8       83   83.86265      8 44.0896   6.64 68.21537
+# 7 KFS7132   45 90     5       90   90.58463      5 20.2500   4.50 79.98029
+# 8 KFS7132   60 94     3       94   94.36637      3  7.9524   2.82 87.72098
+#    sim.max sim.qt05 sim.qt25 sim.qt75 sim.qt95
+# 1  0.00000  0.00000  0.00000  0.00000  0.00000
+# 2 50.21427 27.84993 36.17045 42.41837 48.87195
+# 3 68.71253 43.36024 52.79241 59.87508 67.19087
+# 4 77.13976 56.91829 64.44157 70.09084 75.92605
+# 5 82.95931 65.09198 71.73941 76.73101 81.88690
+# 6 93.04896 73.00857 80.46448 86.06316 91.84612
+# 7 96.81029 83.22870 88.28165 92.07593 95.99511
+# 8 98.26778 89.75665 92.92317 95.30092 97.75693
 ```
 Notice that the the mean and CV of the simulated individual profile (
 `sim.mean` and `sim.cv`) are equal to the target profile `dp` and `dp.cv`.
@@ -374,9 +390,25 @@ Another example with missing `dp.cv`.
 
 ```r
 mvn.dat2 <- sim.dp(tp, dp = dp, seed = 123)
-# Error in sim.dp(tp, dp = dp, seed = 123): object 'tp' not found
 mvn.dat2$sim.summary
-# Error in eval(expr, envir, enclos): object 'mvn.dat2' not found
+#   product time dp dp.cv sim.mean sim.median sim.cv sim.var sim.sd  sim.min
+# 1 JFG9080    0  0     0        0    0.00000      0  0.0000   0.00  0.00000
+# 2 JFG9080    5 39    12       39   39.12472     12 21.9024   4.68 31.86723
+# 3 JFG9080   10 56    12       56   56.17909     12 45.1584   6.72 45.75808
+# 4 JFG9080   15 67     7       67   67.12499      7 21.9961   4.69 59.85199
+# 5 JFG9080   20 74     7       74   74.13805      7 26.8324   5.18 66.10518
+# 6 JFG9080   30 83     7       83   83.15484      7 33.7561   5.81 74.14500
+# 7 JFG9080   45 90     4       90   90.09594      4 12.9600   3.60 84.51326
+# 8 JFG9080   60 94     4       94   94.10021      4 14.1376   3.76 88.26940
+#    sim.max sim.qt05 sim.qt25 sim.qt75 sim.qt95
+# 1  0.00000  0.00000  0.00000  0.00000  0.00000
+# 2 45.81756 32.10244 36.25681 43.06469 45.46386
+# 3 65.78932 46.09581 52.06105 61.83647 65.28145
+# 4 73.83213 60.08770 64.25094 71.07337 73.47768
+# 5 81.54593 66.36552 70.96373 78.49895 81.15445
+# 6 91.46368 74.43700 79.59445 88.04612 91.02458
+# 7 95.24428 84.69418 87.88985 93.12668 94.97220
+# 8 99.47736 88.45837 91.79607 97.26565 99.19319
 ```
 Notice that the `dp.cv` were generated automatically as explained in
 [Notes on function arguments].

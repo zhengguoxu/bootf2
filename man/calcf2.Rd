@@ -46,7 +46,7 @@ measurements up to the time points at which both test and reference
 products dissolve more than 85\% will be used to calculate \eqn{f_2}{f2}.
 This is the conventional, but incorrect, interpretation of the US FDA rule.
 Therefore, the argument should only be set to \code{TRUE} for validation purpose
-such as comparing the results from old literatures that use the wrong
+such as comparing the results from old literature that use the wrong
 interpretation to calculate \eqn{f_2}{f2}. See Regulation in Details.}
 
 \item{digits}{An \emph{integer} indicating the decimal points for the output.}

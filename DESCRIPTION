@@ -7,12 +7,13 @@ Authors@R: person(given = "Zhengguo",
                   family = "Xu",
                   role = c("aut", "cre"),
                   email = "zhengguoxu@gmail.com")
-Description: The main purpose of the package is to compare dissolution 
-  profiles using boostrap methodology. The package can also be used to 
-  simulate dissolution profiles based on mathematical modelling.
+Description: Compare dissolution profiles with confidence interval of similarity
+  factor f2 using boostrap methodology. The package can also be used to simulate
+  dissolution profiles based on mathematical modelling and multivariate normal
+  distribution.
 License: GPL (>=3) + file LICENSE
-URL: https://github.com/Zhengguo-Xu/bootf2
-BugReports: https://github.com/Zhengguo-Xu/bootf2/issues
+URL: https://github.com/zhengguoxu/bootf2
+BugReports: https://github.com/zhengguoxu/bootf2/issues
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

@@ -256,7 +256,7 @@ respectively.
 
 The percentile intervals (denoted by `percentile` in the function)
 were estimated using nine different types of
-quantiles, pencentile Type 1 to Type 9, as summarized in
+quantiles, percentile Type 1 to Type 9, as summarized in
 Hyndman and Fan's article [@Hyndman-1996-AS]
 and implemented in `R`'s `quantile` function.
 Using `R`'s `boot` package, program `bootf2BCA` outputs

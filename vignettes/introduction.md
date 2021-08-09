@@ -1,7 +1,7 @@
 ---
 title: "Introduction to bootf2"
 author: "Zhengguo XU"
-date: "2021-08-09"
+date: "2021-08-10"
 output: 
   rmarkdown::html_vignette:
     keep_md: true
@@ -112,7 +112,7 @@ The last two scenarios are detailed below with direct quotes from guidelines
       reference, but it is likely that the traditional $f_2$ method could
       still be used.
       
-    - *Healthh Canada*: 
+    - *Health Canada*: 
       
       The older guidance [@HealthCanada-2017] states that:
     
@@ -120,7 +120,7 @@ The last two scenarios are detailed below with direct quotes from guidelines
       time point should not be more than 20% and at other time points 
       should not be more than 10%."](https://www.canada.ca/en/health-canada/services/drugs-health-products/drug-products/applications-submissions/guidance-documents/canadian-reference-product-guidance.html#app2)
       
-      So that would be the same as the MEA's guideline when interpreted 
+      So that would be the same as the EMA's guideline when interpreted 
       strictly. However, the newer guidance [@HealthCanada-2019-07-Quality]
       has the following statement:
       
@@ -138,7 +138,7 @@ The last two scenarios are detailed below with direct quotes from guidelines
       time-points up to 10 minutes should be not more than 20% and at
       other time-points should be not more than 10%;"](https://apps.who.int/iris/bitstream/handle/10665/258720/9789241210034-eng.pdf?sequence=1&isAllowed=y#page=244)
       
-      This is the same as the "*new*" interpretaion of the EMA's guideline.
+      This is the same as the "*new*" interpretation of the EMA's guideline.
       
     - *Brazil* [@ANVISA2010]:
     
@@ -172,9 +172,9 @@ The next condition caused different interpretations among many.
       
       There is no ambiguity associated with EMA's rule. But because of
       the phrase "*both the products*" in FDA's guidance, many 
-      interpretated that all time points should be included until both 
-      test and reference dissoved more than 85%. For example, 
-      with the following dissolution profiles, many would interpretaed 
+      interpreted that all time points should be included until both 
+      test and reference dissolved more than 85%. For example, 
+      with the following dissolution profiles, many would interpret 
       that while time points 5, 10, 15, and 20 min should be included 
       according to EMA's rule, *all time points* should be included 
       according to FDA's rule because both test and reference dissolve 
@@ -202,7 +202,7 @@ The next condition caused different interpretations among many.
       confirmed that only the first 4 time points would be used. In
       other words, the same as EMA's rule.
       
-    - *Healthh Canada* [@HealthCanada-2019-07-Quality]: 
+    - *Health Canada* [@HealthCanada-2019-07-Quality]: 
       
     > ["Because f2 values are sensitive to the number of dissolution time
       points, only one measurement should be considered after 85% 
@@ -215,9 +215,9 @@ The next condition caused different interpretations among many.
       dissolution of the reference (comparator) product has been 
       reached;"](https://apps.who.int/iris/bitstream/handle/10665/258720/9789241210034-eng.pdf?sequence=1&isAllowed=y#page=244)
       
-      If reference disolves faster than test does, WHO's rule would 
+      If reference dissolves faster than test does, WHO's rule would 
       be the same as the EMA/FDA rule; if not, then there might be
-      several time points with more than 85% disolved for test product. 
+      several time points with more than 85% dissolved for test product. 
       This would be different from EMA/FDA approach, but at least the 
       guideline is very clear and leaves no room for ambiguity.
       
@@ -230,7 +230,7 @@ The next condition caused different interpretations among many.
       point on the curve after both drugs average 85% dissolution;)
 
     The phrasing is very similar to FDA's so it could also open to be 
-    misinterpretated. However, with the same logic as discussed above, 
+    misinterpreted. However, with the same logic as discussed above, 
     ANVISA's rule should also be the same as EMA's.
     
     To summarize, EMA, US FDA, Canada, and Brazil should have the same 
@@ -243,7 +243,7 @@ the *not use* of it.
 
     For immediate-release formulation, sometimes it is *unnecessary 
     to calculate $f_2$* and the profiles can still be declared similar
-    if the products disolve quick enough, typically more than 85% at
+    if the products dissolve quick enough, typically more than 85% at
     15 min. 
 
     - *EMA* [@EMA-2010-INV.BE]: 
@@ -261,7 +261,7 @@ the *not use* of it.
       comparison with an f2 test is unnecessary."](https://www.gmp-compliance.org/files/guidemgr/UCM070246.pdf#page=12)
       
       
-    - *Healthh Canada* [@HealthCanada-2019-07-Quality]: 
+    - *Health Canada* [@HealthCanada-2019-07-Quality]: 
       
     > ["If the individual data for both the test and reference 
       products show more than 85% dissolution within 15 minutes, 

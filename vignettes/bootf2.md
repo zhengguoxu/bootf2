@@ -1,7 +1,7 @@
 ---
 title: "Confidence Intervals of $f_2$ Using Bootstrap Method"
 author: "Zhengguo XU"
-date: "2021-08-09"
+date: "2021-08-10"
 output: 
   rmarkdown::html_vignette:
     keep_md: true
@@ -249,7 +249,7 @@ respectively.
 
 The percentile intervals (denoted by `percentile` in the function)
 were estimated using nine different types of
-quantiles, pencentile Type 1 to Type 9, as summarized in
+quantiles, percentile Type 1 to Type 9, as summarized in
 Hyndman and Fan's article [@Hyndman-1996-AS]
 and implemented in `R`'s `quantile` function.
 Using `R`'s `boot` package, program `bootf2BCA` outputs

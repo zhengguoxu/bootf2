@@ -49,8 +49,10 @@ ca4 <- paste0(ca1, ca2, ca3)
 who1 <- "https://apps.who.int/iris/bitstream/handle/10665/258720/"
 who2 <- "9789241210034-eng.pdf?sequence=1&isAllowed=y#page=244"
 who3 <- paste0(who1, who2)
-anvisa1 <- "https://bvsms.saude.gov.br/bvs/saudelegis/anvisa/2010/"
-anvisa2 <- paste0(anvisa1, "res0031_11_08_2010.html")
+#anvisa1 <- "https://bvsms.saude.gov.br/bvs/saudelegis/anvisa/2010/"
+anvisa1a <- "https://web.archive.org/web/20190806045126/http://bvsms.saude."
+anvisa1b <- "gov.br/bvs/saudelegis/anvisa/2010/res0031_11_08_2010.html"
+anvisa2  <- paste0(anvisa1a, anvisa1b)
 ```
 
 ## Introduction

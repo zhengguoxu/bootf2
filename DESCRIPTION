@@ -8,9 +8,9 @@ Authors@R: person(given = "Zhengguo",
                   role = c("aut", "cre"),
                   email = "zhengguoxu@gmail.com")
 Description: Compare dissolution profiles with confidence interval of similarity
-  factor f2 using boostrap methodology. The package can also be used to simulate
-  dissolution profiles based on mathematical modelling and multivariate normal
-  distribution.
+  factor f2 using bootstrap methodology. The package can also be used to 
+  simulate dissolution profiles based on mathematical modelling and multivariate
+  normal distribution.
 License: GPL (>=3) + file LICENSE
 URL: https://github.com/zhengguoxu/bootf2
 BugReports: https://github.com/zhengguoxu/bootf2/issues

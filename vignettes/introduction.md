@@ -148,7 +148,7 @@ The last two scenarios are detailed below with direct quotes from guidelines
       pontos de coleta o correspondente a 40% do total de pontos coletados.
       Por exemplo, para um perfil de dissolução com cinco tempos de coleta,
       consideram-se primeiros pontos os dois primeiros tempos de 
-      coleta."](https://bvsms.saude.gov.br/bvs/saudelegis/anvisa/2010/res0031_11_08_2010.html)
+      coleta."](https://web.archive.org/web/20190806045126/http://bvsms.saude.gov.br/bvs/saudelegis/anvisa/2010/res0031_11_08_2010.html)
       (Translation: to allow the use of averages, the coefficients of 
       variation for the first collection points cannot exceed 20%. 
       For the other points, a maximum of 10% is considered. The first
@@ -225,7 +225,7 @@ The next condition caused different interpretations among many.
     
     > ["para fins de cálculo F2, incluir apenas um ponto da curva 
       após ambos os medicamentos atingirem a média de 85% de 
-      dissolução;"](https://bvsms.saude.gov.br/bvs/saudelegis/anvisa/2010/res0031_11_08_2010.html)
+      dissolução;"](https://web.archive.org/web/20190806045126/http://bvsms.saude.gov.br/bvs/saudelegis/anvisa/2010/res0031_11_08_2010.html)
       (Translation: for F2 calculation purposes, include only one 
       point on the curve after both drugs average 85% dissolution;)
 
@@ -288,7 +288,7 @@ the *not use* of it.
       Nesses casos deve-se comprovar a dissolução muito rápida dos
       produtos, por meio do gráfico da curva, realizando coletas em,
       por exemplo: 5, 10, 15, 20 e 30 minutos. O coeficiente de variação
-      no ponto de 15 minutos que não pode exceder 10%."](https://bvsms.saude.gov.br/bvs/saudelegis/anvisa/2010/res0031_11_08_2010.html)
+      no ponto de 15 minutos que não pode exceder 10%."](https://web.archive.org/web/20190806045126/http://bvsms.saude.gov.br/bvs/saudelegis/anvisa/2010/res0031_11_08_2010.html)
       (Translation: When the active substance presents high solubility
       and the formulation is immediate release, presenting very fast
       dissolution for both drugs, the F2 factor loses its discriminative 

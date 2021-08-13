@@ -3,3 +3,5 @@
 ^README\.Rmd$
 ^.*\.txt$
 ^\.note/*\.*$
+^cran-comments.md$
+^CRAN-RELEASE$

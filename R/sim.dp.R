@@ -187,14 +187,13 @@
 #'
 #' # using multivariate normal distribution approach
 #' # target mean profile with same length as tp
-#' \dontrun{
 #' dp <- c(39, 56, 67, 74, 83, 90, 94)
 #'
 #' # CV% at each time point
 #' dp.cv <- c(19, 15, 10, 8, 8, 5, 3)
 #'
+#' # simulation
 #' d3 <- sim.dp(tp, dp = dp, dp.cv = dp.cv, seed = 1234, plot = FALSE)
-#' }
 #'
 #' @export
 sim.dp <- function(tp, dp, dp.cv, model = c("Weibull", "first-order"),

@@ -32,9 +32,6 @@ knitr::opts_chunk$set(
 ```{r install, echo=TRUE, eval=FALSE}
 # install.packages("devtools") 
 devtools::install_github("zhengguoxu/bootf2")
-
-# or if you prefer to read vignettes
-devtools::install_github("zhengguoxu/bootf2", build_vignettes = TRUE)
 ```
 
 ## Introduction

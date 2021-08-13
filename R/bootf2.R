@@ -44,7 +44,7 @@
 #'   products dissolve more than 85% will be used to calculate \eqn{f_2}{f2}.
 #'   This is the conventional, but incorrect, interpretation of the US FDA rule.
 #'   Therefore, the argument should only be set to `TRUE` for validation purpose
-#'   such as comparing the results from old literatures that use the wrong
+#'   such as comparing the results from old literature that use the wrong
 #'   interpretation to calculate \eqn{f_2}{f2}. @seealso [calcf2()] for details
 #'   on regulation rules.
 #' @param print.report *Logical*. If `TRUE`, a plain text report will be
@@ -327,7 +327,6 @@
 #'   Chapman & Hall, 1993.
 #'
 #' @examples
-#' \dontrun{
 #' # time points
 #' tp <- c(5, 10, 15, 20, 30, 45, 60)
 #' # model.par for reference with low variability
@@ -341,9 +340,10 @@
 #' # simulate test data with low variability
 #' dt <- sim.dp(tp, model.par = par.t, seed = 100, plot = FALSE)
 #'
-#' # bootstrap
+#' # bootstrap. to reduce test run time, n.boots of 100 was used in the example.
+#' # In practice, it is recommended to use n.boots of 5000--10000.
 #' bootf2(dt$sim.disso, dr$sim.disso, n.boots = 100, print.report = FALSE)
-#' }
+#'
 #'
 #' @export
 bootf2 <- function(test, ref, path.in, file.in, path.out, file.out,

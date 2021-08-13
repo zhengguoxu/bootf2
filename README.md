@@ -1,6 +1,6 @@
 bootf2: A Package for Simulation and Comparison of Dissolution Profiles
 ================
-2021-08-09
+2021-08-13
 
 -   [Installation](#installation)
 -   [Introduction](#introduction)
@@ -19,9 +19,6 @@ bootf2: A Package for Simulation and Comparison of Dissolution Profiles
 ``` r
 # install.packages("devtools") 
 devtools::install_github("zhengguoxu/bootf2")
-
-# or if you prefer to read vignettes
-devtools::install_github("zhengguoxu/bootf2", build_vignettes = TRUE)
 ```
 
 ## Introduction
@@ -628,7 +625,7 @@ t_vs_r <- bootf2(test, ref, n.boots = 100L, print.report = FALSE)
 #   - Machine Node Name       :   MyHomeLinuxPC
 #   - User Name               :   zhengguo
 #   - Time Zone               :   Europe/Madrid
-#   - R Version               :   4.1.0 (2021-05-18)
+#   - R Version               :   4.1.1 (2021-08-10)
 #   - Package bootf2 Version  :   0.4.0
 # ______________________________________________________________________
 ```
@@ -666,7 +663,7 @@ from the use of this package.***
 class="csl-right-inline">European Medicines Agency. Question and answer
 on the adequacy of the Mahalanobis distance to assess the comparability
 of drug dissolution profiles
-<https://www.ema.europa.eu/documents/scientific-guideline/question-answer-adequacy-mahalanobis-distance-assess-comparability-drug-dissolution-profiles_en.pdf>
+<https://www.ema.europa.eu/en/documents/scientific-guideline/question-answer-adequacy-mahalanobis-distance-assess-comparability-drug-dissolution-profiles_en.pdf>
 (accessed 2018 -12 -04).</span>
 
 </div>

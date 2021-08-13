@@ -9,6 +9,6 @@ citEntry(entry = "Manual",
   url          = "https://github.com/zhengguoxu/bootf2",
   textVersion  =
   paste("Zhengguo Xu (2021). bootf2: A Package for Simulation and",
-        "Comparison of Dissolution Profiles. R package version 0.3.0.",
+        "Comparison of Dissolution Profiles. R package version 0.4.0.",
         "URL https://github.com/zhengguoxu/bootf2.")
 )

@@ -2,17 +2,20 @@ Package: bootf2
 Type: Package
 Title: Simulation and Comparison of Dissolution Profiles
 Version: 0.4.0
-Date: 2021-08-09
+Date: 2021-08-13
 Authors@R: person(given = "Zhengguo",
                   family = "Xu",
                   role = c("aut", "cre"),
                   email = "zhengguoxu@gmail.com")
-Description: The main purpose of the package is to compare dissolution 
-  profiles using boostrap methodology. The package can also be used to 
-  simulate dissolution profiles based on mathematical modelling.
-License: GPL (>=3) + file LICENSE
-URL: https://github.com/Zhengguo-Xu/bootf2
-BugReports: https://github.com/Zhengguo-Xu/bootf2/issues
+Description: Compare dissolution profiles with confidence interval of similarity
+  factor f2 using bootstrap methodology as described in the literature, such as 
+  Efron and Tibshirani (1993, ISBN:9780412042317), Davison and Hinkley (1997,
+  ISBN:9780521573917), and Shah et al. (1998) <doi:10.1023/A:1011976615750>. 
+  The package can also be used to simulate dissolution profiles based on 
+  mathematical modelling and multivariate normal distribution.
+License: GPL (>=3)
+URL: https://github.com/zhengguoxu/bootf2
+BugReports: https://github.com/zhengguoxu/bootf2/issues
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

@@ -11,7 +11,7 @@
 #' sim.dp.byf2(tp, dp, target.f2, seed = NULL, min.points = 3L,
 #'             regulation = c("EMA", "FDA", "WHO", "Canada", "ANVISA"),
 #'             model = c("Weibull", "first-order"), digits = 2L,
-#'             max.disso = 100, message = TRUE, both.TR.85 = FALSE,
+#'             max.disso = 100, message = FALSE, both.TR.85 = FALSE,
 #'             time.unit = c("min", "h"), plot = TRUE, sim.dp.out,
 #'             sim.target = c("ref.pop", "ref.median", "ref.mean"),
 #'             model.par.cv = 50, fix.fmax.cv = 0, random.factor = 3)
@@ -142,7 +142,7 @@
 sim.dp.byf2 <- function(tp, dp, target.f2, seed = NULL, min.points = 3L,
                         regulation = c("EMA", "FDA", "WHO", "Canada", "ANVISA"),
                         model = c("Weibull", "first-order"), digits = 2L,
-                        max.disso = 100, message = TRUE, both.TR.85 = FALSE,
+                        max.disso = 100, message = FALSE, both.TR.85 = FALSE,
                         time.unit = c("min", "h"), plot = TRUE, sim.dp.out,
                         sim.target = c("ref.pop", "ref.median", "ref.mean"),
                         model.par.cv = 50, fix.fmax.cv = 0, random.factor = 3) {

@@ -15,7 +15,7 @@ bootf2(test, ref, path.in, file.in, path.out, file.out,
                    "bca.jackknife", "bca.boot"),
        quantile.type = c("all", as.character(1:9), "boot"),
        jackknife.type = c("all", "nt+nr", "nt*nr", "nt=nr"),
-       time.unit = c("min", "h"), output.to.screen = TRUE,
+       time.unit = c("min", "h"), output.to.screen = FALSE,
        sim.data.out = FALSE)
 }
 \arguments{
@@ -368,7 +368,8 @@ dt <- sim.dp(tp, model.par = par.t, seed = 100, plot = FALSE)
 
 # bootstrap. to reduce test run time, n.boots of 100 was used in the example.
 # In practice, it is recommended to use n.boots of 5000--10000.
-bootf2(dt$sim.disso, dr$sim.disso, n.boots = 100, print.report = FALSE)
+# Set `output.to.screen = TRUE` to view the result on screen
+d <- bootf2(dt$sim.disso, dr$sim.disso, n.boots = 100, print.report = FALSE)
 
 
 }

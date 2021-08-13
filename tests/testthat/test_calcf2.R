@@ -62,38 +62,42 @@ test_that("test calcf2 with CV OK", {
 
 ## test initial checking error -------------------------------------------------
 test_that("test initial checking", {
-  expect_error(calcf2(dt1.lv, regulation = "EMA"),
+  expect_error(calcf2(dt1.lv, regulation = "EMA", message = TRUE),
                "Both 'test' and 'ref' have to be specified.")
-  expect_error(calcf2(dt1.lv, dr1.lv, regulation = "EMA", both.TR.85 = TRUE),
+  expect_error(calcf2(dt1.lv, dr1.lv, regulation = "EMA", both.TR.85 = TRUE,
+                      message = TRUE),
                paste0("'both.TR.85 = TRUE' is only applicable when ",
                       "'regulation = FDA'."))
-  expect_error(calcf2(dt1.lv, dr1.lv, path.out = "weird/directory"),
+  expect_error(calcf2(dt1.lv, dr1.lv, path.out = "weird/directory",
+                      message = TRUE),
                "You should provided both 'path.out' and 'file.out'.")
-  expect_error(calcf2(dt1.lv, dr1.lv, file.out = "weird.filename"),
+  expect_error(calcf2(dt1.lv, dr1.lv, file.out = "weird.filename",
+                      message = TRUE),
                "You should provided both 'path.out' and 'file.out'.")
-  expect_error(calcf2(dt1.lv, dr1.lv, file.in = "weird.filename"),
+  expect_error(calcf2(dt1.lv, dr1.lv, file.in = "weird.filename",
+                      message = TRUE),
                paste0("Please provide the directory 'path.in' where ",
                       "the file is stored."))
-  expect_error(calcf2(dt1.lv, dr1.lv, path.in = getwd()),
+  expect_error(calcf2(dt1.lv, dr1.lv, path.in = getwd(),message = TRUE),
                "Please provide the name of the data file.")
   expect_error(calcf2(dt1.lv, dr1.lv, path.in = "weird/directory",
-                      file.in = "weird.filename"),
+                      file.in = "weird.filename", message = TRUE),
                paste0("The directory you specified does not exist. ",
                       "Check your spelling."))
   expect_error(calcf2(dt1.lv, dr1.lv, path.in = getwd(),
-                      file.in = "weird.filename"),
+                      file.in = "weird.filename", message = TRUE),
                paste0("The file you specified does not exist. Don't ",
                       "forget to include\nthe extension 'xlsx' or 'xls' ",
                       "in the file name."))
   expect_error(calcf2(dt1.lv, dr1.lv, path.out = "weird/directory",
-                      file.out = "weird.filename"),
+                      file.out = "weird.filename", message = TRUE),
                paste0("The directory you specified does not exist. ",
                       "Check your spelling."))
 })
 
 ## test unequal time points ------------------------------------------
 test_that("test unequal time points", {
-  expect_error(calcf2(dt1.lv[-2, ], dr1.lv[-3, ]),
+  expect_error(calcf2(dt1.lv[-2, ], dr1.lv[-3, ], message = TRUE),
                paste0("Time points of two data sets should be same! ",
                       "Please check your data.\n\n"))
 })
@@ -116,10 +120,12 @@ dt1.hv <- sim.dp(tp, model.par = par.t1.hv, seed = 100, plot = FALSE)$sim.disso
 
 
 test_that("test calcf2 with CV not OK", {
-  expect_error(calcf2(dt1.hv, dr1.hv, regulation = "EMA", plot = FALSE),
+  expect_error(calcf2(dt1.hv, dr1.hv, regulation = "EMA", plot = FALSE,
+                      message = TRUE),
                paste0("You should consider alternative methods such as ",
                       "bootstrap f2.\n\n"))
-  expect_warning(calcf2(dt1.hv, dr1.hv, regulation = "FDA", plot = FALSE),
+  expect_warning(calcf2(dt1.hv, dr1.hv, regulation = "FDA", plot = FALSE,
+                        message = TRUE),
                  paste0("f2 was calculated while CV criterion is not strictly ",
                         "fulfilled; you \nmight want to consider an alternative ",
                         "method such as bootstrap f2.\n\n"))
@@ -144,7 +150,7 @@ dr1.fast <- sim.dp(tp1, model.par = par.r1.fast, seed = 100,
                    plot = FALSE)$sim.disso
 test_that("test fast dissolution",{
   expect_warning(calcf2(dt1.fast, dr1.fast, cv.rule = FALSE,
-                        min.points = 2, plot = FALSE),
+                        min.points = 2, plot = FALSE, message = TRUE),
                  paste0("Warning: f2 was calculated with less than 3 time ",
                         "points for information\npurpose only. You should ",
                         "add more earlier points in your dissolution method."))

@@ -2,7 +2,7 @@ Package: bootf2
 Type: Package
 Title: Simulation and Comparison of Dissolution Profiles
 Version: 0.4.0
-Date: 2021-08-13
+Date: 2021-08-17
 Authors@R: person(given = "Zhengguo",
                   family = "Xu",
                   role = c("aut", "cre"),

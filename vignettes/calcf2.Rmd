@@ -48,7 +48,7 @@ The complete list of arguments of the function is as follows:
 ```{r calcf2-code0, eval=FALSE}
 calcf2(test, ref, path.in, file.in, path.out, file.out,
        regulation = c("EMA", "FDA", "WHO", "Canada", "ANVISA"),
-       cv.rule = TRUE, message = TRUE, min.points = 3L,
+       cv.rule = TRUE, message = FALSE, min.points = 3L,
        f2.type = c("est.f2", "exp.f2", "bc.f2", "vc.exp.f2",
                    "vc.bc.f2", "all"), both.TR.85 = FALSE,
        digits = 2L, time.unit = c("min", "h"),  plot = TRUE,
@@ -139,25 +139,28 @@ par.r1.lv <- list(fmax = 100, fmax.cv = 3, mdt = 15, mdt.cv = 13,
                   tlag = 0, tlag.cv = 0, beta = 1.5, beta.cv = 7)
 
 # simulate reference data
-dr1.lv <- sim.dp(tp, model.par = par.r1.lv, seed = 100, plot = FALSE)
+dr1.lv <- sim.dp(tp, model.par = par.r1.lv, seed = 100, plot = FALSE,
+                 message = TRUE)
 
 # model.par for test 
 par.t1.lv <- list(fmax = 100, fmax.cv = 3, mdt = 12.29, mdt.cv = 10,
                   tlag = 0, tlag.cv = 0, beta = 1.727, beta.cv = 8)
 
 # simulate test data with low variability
-dt1.lv <- sim.dp(tp, model.par = par.t1.lv, seed = 100, plot = FALSE)
+dt1.lv <- sim.dp(tp, model.par = par.t1.lv, seed = 100, plot = FALSE,
+                 message = TRUE)
 ```
 
 Calculate f2 with default setting (following EMA's guideline)
 ```{r calcf2-cvok01-a, error=TRUE}
-t_vs_r_ema <- calcf2(dt1.lv$sim.disso, dr1.lv$sim.disso)
+t_vs_r_ema <- calcf2(dt1.lv$sim.disso, dr1.lv$sim.disso,
+                     message = TRUE)
 ```
 
 calculate f2 following WHO guideline
 ```{r calcf2-cvok01-b, error=TRUE}
 t_vs_r_who <- calcf2(dt1.lv$sim.disso, dr1.lv$sim.disso, 
-                     regulation = "WHO")
+                     regulation = "WHO", message = TRUE)
 ```
 
 
@@ -165,7 +168,7 @@ Calculate f2 following FDA guidance, to confirm "old calculation" with
 *wrong interpretation*. See vignette *Introduction to bootf2* for details.
 ```{r calcf2-cvok01-c}
 t_vs_r <- calcf2(dt1.lv$sim.disso, dr1.lv$sim.disso, regulation = "FDA",
-                 both.TR.85 = TRUE)
+                 both.TR.85 = TRUE, message = TRUE)
 ```
 
 # Cases with high variability
@@ -190,13 +193,13 @@ dt1.hv <- sim.dp(tp, model.par = par.t1.hv, seed = 100, plot = FALSE)
 
 When CV conditions are not fulfilled, the function will stop running. 
 ```{r calcf2-cvko-a, error=TRUE}
-calcf2(dt1.hv$sim.disso, dr1.hv$sim.disso)
+calcf2(dt1.hv$sim.disso, dr1.hv$sim.disso, message = TRUE)
 ```
 
 There might be a time that you just want to check the $f_2$ regardless of the
 variability, option `cv.rule` can be set to `FALSE` in such case.
 ```{r calcf2-cvko-b, error=TRUE}
 dt1.hv_vs_dr1.hv <- calcf2(dt1.hv$sim.disso, dr1.hv$sim.disso,
-                           cv.rule = FALSE)
+                           cv.rule = FALSE, message = TRUE)
 ```
 

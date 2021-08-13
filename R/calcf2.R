@@ -9,7 +9,7 @@
 #' @usage
 #' calcf2(test, ref, path.in, file.in, path.out, file.out,
 #'        regulation = c("EMA", "FDA", "WHO", "Canada", "ANVISA"),
-#'        cv.rule = TRUE, message = TRUE, min.points = 3L,
+#'        cv.rule = TRUE, message = FALSE, min.points = 3L,
 #'        f2.type = c("est.f2", "exp.f2", "bc.f2", "vc.exp.f2",
 #'                    "vc.bc.f2", "all"), both.TR.85 = FALSE,
 #'        digits = 2L, time.unit = c("min", "h"),  plot = TRUE,
@@ -25,8 +25,8 @@
 #'   Regulation in Details.
 #' @param cv.rule *Logical*. If `TRUE`, CV rule will be checked according
 #'   to regulatory guidelines. See Regulation in Details.
-#' @param message *Logical*. If `TRUE`, the results and messages
-#'   will be printed on screen.
+#' @param message *Logical*. If `TRUE`, the results and messages will be
+#'   printed on screen. Users are recommended to set it to `TRUE`.
 #' @param min.points An *integer* indicating the minimum time points to be used
 #'   to calculate \eqn{f_2}{f2}. The default value 3 should be used for
 #'   conventional \eqn{f_2}{f2} calculation. This parameter is mainly used for
@@ -190,12 +190,13 @@
 #' d.r <- sim.dp(tp, model.par = mod.par.r, seed = 100, n.units = 120L,
 #'               plot = FALSE)$sim.disso
 #'
+#' # set `message = TRUE` to view the compliance of the regulatory guidelines.
 #' calcf2(d.t, d.r, plot = FALSE)
 #'
 #' @export
 calcf2 <- function(test, ref, path.in, file.in, path.out, file.out,
                    regulation = c("EMA", "FDA", "WHO", "Canada", "ANVISA"),
-                   cv.rule = TRUE, message = TRUE, min.points = 3L,
+                   cv.rule = TRUE, message = FALSE, min.points = 3L,
                    f2.type = c("est.f2", "exp.f2", "bc.f2", "vc.exp.f2",
                                "vc.bc.f2", "all"), both.TR.85 = FALSE,
                    digits = 2L, time.unit = c("min", "h"),  plot = TRUE,

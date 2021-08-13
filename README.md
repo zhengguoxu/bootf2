@@ -1,6 +1,6 @@
 bootf2: A Package for Simulation and Comparison of Dissolution Profiles
 ================
-2021-08-13
+2021-08-17
 
 -   [Installation](#installation)
 -   [Introduction](#introduction)
@@ -19,6 +19,9 @@ bootf2: A Package for Simulation and Comparison of Dissolution Profiles
 ``` r
 # install.packages("devtools") 
 devtools::install_github("zhengguoxu/bootf2")
+
+# or if you like to read vignettes
+devtools::install_github("zhengguoxu/bootf2", build_vignettes = TRUE)
 ```
 
 ## Introduction
@@ -186,7 +189,7 @@ applicability of *f*<sub>2</sub>.
 ``` r
 calcf2(test, ref, path.in, file.in, path.out, file.out,
        regulation = c("EMA", "FDA", "WHO", "Canada", "ANVISA"),
-       cv.rule = TRUE, message = TRUE, min.points = 3L,
+       cv.rule = TRUE, message = FALSE, min.points = 3L,
        f2.type = c("est.f2", "exp.f2", "bc.f2", "vc.exp.f2",
                    "vc.bc.f2", "all"), both.TR.85 = FALSE,
        digits = 2L, time.unit = c("min", "h"),  plot = TRUE,
@@ -203,10 +206,22 @@ function `bootf2()`.
 
 ``` r
 # simulate a test data
-d.test <- sim.dp(seed = 100, plot = FALSE)
+d.test <- sim.dp(seed = 100, plot = FALSE, message = TRUE)
+# Dissolution data was generated using Weibull model, with the 
+# following model parameters:
+# - fmax      = 98.75
+# - fmax.cv   = 3%
+# - tlag      = 0
+# - tlag.cv   = 0%
+# - mdt       = 10.4
+# - mdt.cv    = 30%
+# - beta      = 0.787472
+# - beta.cv   = 20%
+# 
+# Seed number used:  100
 
 # calculate f2 with default settings
-tmp.f2 <- calcf2(d.test$sim.disso, d.ref$sim.disso)
+tmp.f2 <- calcf2(d.test$sim.disso, d.ref$sim.disso, message = TRUE)
 # The f2 method was applied according to EMA's BE guideline.
 # 
 # Individual data was provided with option 'cv.rule = TRUE',
@@ -250,7 +265,7 @@ regulatory rules, show different error messages.
 d.ref2 <- sim.dp(seed = 456)
 
 # output with error message
-calcf2(d.test$sim.disso, d.ref2$sim.disso)
+calcf2(d.test$sim.disso, d.ref2$sim.disso, message = TRUE)
 # The f2 method was applied according to EMA's BE guideline.
 # 
 # Individual data was provided with option 'cv.rule = TRUE',
@@ -271,7 +286,7 @@ calcf2(d.test$sim.disso, d.ref2$sim.disso)
 # Number of units for reference is : nr = 12
 # 
 # CV criteria not fulfilled; therefore, f2 method cannot be applied.
-# Error in calcf2(d.test$sim.disso, d.ref2$sim.disso): You should consider alternative methods such as bootstrap f2.
+# Error in calcf2(d.test$sim.disso, d.ref2$sim.disso, message = TRUE): You should consider alternative methods such as bootstrap f2.
 ```
 
 ### Function `sim.dp.byf2()`
@@ -284,7 +299,7 @@ for more details.
 dat <- sim.dp.byf2(tp, dp, target.f2, seed = NULL, min.points = 3L,
                    regulation = c("EMA", "FDA", "WHO", "Canada", "ANVISA"),
                    model = c("Weibull", "first-order"), digits = 2L,
-                   max.disso = 100, message = TRUE, both.TR.85 = FALSE,
+                   max.disso = 100, message = FALSE, both.TR.85 = FALSE,
                    time.unit = c("min", "h"), plot = TRUE, sim.dp.out,
                    sim.target = c("ref.pop", "ref.median", "ref.mean"),
                    model.par.cv = 50, fix.fmax.cv = 0, random.factor = 3)
@@ -304,7 +319,7 @@ tp <- c(5, 10, 15, 20, 30, 45, 60)
 dp <- c(51, 66, 75, 81, 88, 92, 95)
 
 # find another profile with target f2 = 60
-d.t2 <- sim.dp.byf2(tp, dp, target.f2 = 60, seed = 123)
+d.t2 <- sim.dp.byf2(tp, dp, target.f2 = 60, seed = 123, message = TRUE)
 ```
 
 <img src="man/figures/README-simdpbyf2-dat-1.png" width="100%" />
@@ -348,7 +363,7 @@ result <- bootf2(test, ref, path.in, file.in, path.out, file.out,
                              "bca.jackknife", "bca.boot"),
                  quantile.type = c("all", as.character(1:9), "boot"),
                  jackknife.type = c("all", "nt+nr", "nt*nr", "nt=nr"),
-                 time.unit = c("min", "h"), output.to.screen = TRUE,
+                 time.unit = c("min", "h"), output.to.screen = FALSE,
                  sim.data.out = FALSE)
 ```
 
@@ -365,7 +380,8 @@ ref  <- d.ref$sim.disso
 
 # use most default settings (output all) but small number of bootstrap
 # to have shorter run time for the example. default n.boots = 10000L
-t_vs_r <- bootf2(test, ref, n.boots = 100L, print.report = FALSE)
+t_vs_r <- bootf2(test, ref, n.boots = 100L, print.report = FALSE,
+                 output.to.screen = TRUE)
 # =================================================================
 # |                                                               |
 # |  Comparison of Dissolution Profiles by Bootstrap f2 Method.   |

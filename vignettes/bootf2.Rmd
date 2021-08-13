@@ -325,7 +325,7 @@ bootf2(test, ref, path.in, file.in, path.out, file.out,
                    "bca.jackknife", "bca.boot"),
        quantile.type = c("all", 1:9, "boot"),
        jackknife.type = c("nt+nr", "nt*nr", "nt=nr"),
-       time.unit = c("min", "h"), output.to.screen = TRUE,
+       time.unit = c("min", "h"), output.to.screen = FALSE,
        sim.data.out = FALSE)
 ```
 
@@ -424,7 +424,8 @@ bootstrap number is set to 100 only.
 
 ```{r bootf2-ex01, eval=FALSE}
 # output file will be generated automatically
-bootf2(dt$sim.disso, dr$sim.disso, n.boots = 100, print.report = FALSE)
+bootf2(dt$sim.disso, dr$sim.disso, n.boots = 100, print.report = FALSE,
+       output.to.screen = TRUE)
 ```
 
 

@@ -1,6 +1,6 @@
-bootf2: A Package for Simulation and Comparison of Dissolution Profiles
+bootf2: Simulation and Comparison of Dissolution Profiles
 ================
-2021-08-17
+2021-08-18
 
 -   [Installation](#installation)
 -   [Introduction](#introduction)
@@ -16,12 +16,19 @@ bootf2: A Package for Simulation and Comparison of Dissolution Profiles
 
 ## Installation
 
-``` r
-# install.packages("devtools") 
-devtools::install_github("zhengguoxu/bootf2")
+-   To install the released version from CRAN:
 
-# or if you like to read vignettes
-devtools::install_github("zhengguoxu/bootf2", build_vignettes = TRUE)
+``` r
+install.packages("bootf2", repos = "https://cloud.r-project.org/")
+```
+
+-   To install the development version from Github, please install
+    [Rtools](https://cran.r-project.org/bin/windows/Rtools/) for
+    building R packages from sources if you use Windows, then
+
+``` r
+# Need devtools. if you don't have it, install.packages("devtools") 
+devtools::install_github("zhengguoxu/bootf2")
 ```
 
 ## Introduction
@@ -39,14 +46,30 @@ the dissolution profiles.
 Currently, there are four main functions in the package:
 
 1.  `sim.dp()` to simulate dissolution profiles using mathematical
-    models or multivariate normal distribution.
+    models or multivariate normal distribution. See vignette [Simulation
+    of Dissolution
+    Profiles](https://cran.r-project.org/web/packages/bootf2/vignettes/sim.dp.html)
+    for details.
 2.  `calcf2()` to calculate similarity factor *f*<sub>2</sub> according
-    to different regulatory rules.
+    to different regulatory rules. See vignette [Calculating Similarity
+    Factor
+    *f*<sub>2</sub>](https://cran.r-project.org/web/packages/bootf2/vignettes/calcf2.html)
+    for details.
 3.  `sim.dp.byf2()` to find a dissolution profile that, when compared to
     a given reference profile, has *f*<sub>2</sub> value equal to the
-    predefined target *f*<sub>2</sub>.
+    predefined target *f*<sub>2</sub>. See vignette [Simulation of
+    Dissolution Profiles with Predefined Target
+    *f*<sub>2</sub>](https://cran.r-project.org/web/packages/bootf2/vignettes/sim.dp.byf2.html)
+    for details.
 4.  `bootf2()` to estimate the confidence intervals of *f*<sub>2</sub>s
-    using bootstrap method.
+    using bootstrap method. See vignette [Confidence Intervals of f2
+    Using Bootstrap
+    Method](https://cran.r-project.org/web/packages/bootf2/vignettes/bootf2.html)
+    for details.
+
+In addition to the vignettes for the main functions, some common topics
+such as regulation rules are discussed in the vignette [Introduction to
+bootf2](https://cran.r-project.org/web/packages/bootf2/vignettes/introduction.html).
 
 The most basic usage is given below as a brief demonstration.
 
@@ -55,8 +78,7 @@ The most basic usage is given below as a brief demonstration.
 ### Function `sim.dp()`
 
 The complete list of arguments are shown below. Read the function manual
-with `?sim.dp`, or package vignette with `vignette("sim.dp")`, for more
-details.
+with `?sim.dp` for more details.
 
 ``` r
 dat <- sim.dp(tp, dp, dp.cv, model = c("Weibull", "first-order"),
@@ -181,10 +203,11 @@ should be provided.
 ### Function `calcf2()`
 
 The complete list of arguments are shown below. Read the function manual
-with `?calcf2`, or package vignette with `vignette("calcf2")`, for more
-details. In addition, refer to the introduction vignette for detailed
-discussion on different regulatory requirements regarding to the
-applicability of *f*<sub>2</sub>.
+with `?calcf2` for more details. In addition, refer to the [Introduction
+to
+bootf2](https://cran.r-project.org/web/packages/bootf2/vignettes/introduction.html)
+for detailed discussion on different regulatory requirements regarding
+to the applicability of *f*<sub>2</sub>.
 
 ``` r
 calcf2(test, ref, path.in, file.in, path.out, file.out,
@@ -292,8 +315,7 @@ calcf2(d.test$sim.disso, d.ref2$sim.disso, message = TRUE)
 ### Function `sim.dp.byf2()`
 
 The complete list of arguments are shown below. Read the function manual
-with `?sim.dp.byf2`, or package vignette with `vignette("sim.dp.byf2")`,
-for more details.
+with `?sim.dp.byf2` for more details.
 
 ``` r
 dat <- sim.dp.byf2(tp, dp, target.f2, seed = NULL, min.points = 3L,
@@ -348,8 +370,7 @@ compared to target dissolution profile.
 ### Function `bootf2()`
 
 The complete list of arguments are shown below. Read the function manual
-with `?bootf2`, or package vignette with `vignette("bootf2")`, for more
-details.
+with `?bootf2` for more details.
 
 ``` r
 result <- bootf2(test, ref, path.in, file.in, path.out, file.out,

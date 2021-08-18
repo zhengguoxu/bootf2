@@ -293,7 +293,7 @@
 #'    also implemented in the function for estimating the interval.
 #'
 #' ## Notes on the argument `jackknife.type`
-#' For any sample with size $n$, the jackknife estimator is obtained by
+#' For any sample with size \eqn{n}, the jackknife estimator is obtained by
 #' estimating the parameter for each subsample omitting the \eqn{i}th
 #' observation. However, when two samples (e.g., test and reference) are
 #' involved, there are several possible ways to do it. Assuming sample size

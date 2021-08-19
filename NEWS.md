@@ -1,5 +1,6 @@
-# bootf2 0.4.0.9000
-- Update documentations
+# bootf2 0.4.1
+- Corrected testthat file due to different precision in different OSs. 
+- Updated documentations and vignettes.
 
 # bootf2 0.4.0
 

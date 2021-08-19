@@ -168,7 +168,7 @@ Calculate f2 following FDA guidance, to confirm "old calculation" with
 *wrong interpretation*. See vignette *Introduction to bootf2* for details.
 ```{r calcf2-cvok01-c}
 t_vs_r <- calcf2(dt1.lv$sim.disso, dr1.lv$sim.disso, regulation = "FDA",
-                 both.TR.85 = TRUE, message = TRUE)
+                 both.TR.85 = TRUE, message = TRUE, plot = FALSE)
 ```
 
 # Cases with high variability

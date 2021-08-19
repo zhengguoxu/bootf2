@@ -54,10 +54,10 @@ test_that("test calcf2 with CV OK", {
                   message = FALSE, plot = FALSE, both.TR.85 = TRUE)
   f2who <- calcf2(dt1.lv, dr1.lv, regulation = "WHO",
                   message = FALSE, plot = FALSE)
-  expect_equal(format(f2ema$f2.value, digits = 10), "51.19595772")
-  expect_equal(format(f2fda$f2.value, digits = 10), "51.19595772")
-  expect_equal(format(f2fda2$f2.value, digits = 10), "53.00375646")
-  expect_equal(format(f2who$f2.value, digits = 10), "53.00375646")
+  expect_equal(round(f2ema$f2.value, digits = 1), 51.2)
+  expect_equal(round(f2fda$f2.value, digits = 1), 51.2)
+  expect_equal(round(f2fda2$f2.value, digits = 1), 53.0)
+  expect_equal(round(f2who$f2.value, digits = 1), 53.0)
 })
 
 ## test initial checking error -------------------------------------------------

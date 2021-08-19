@@ -161,7 +161,7 @@ Now find another (test) profile that has predefined $f_2$ of 50.
 
 ```{r simdpbyf2-f2-50a}
 df2_50_a <- sim.dp.byf2(sim.dp.out = dref, target.f2 = 50, seed = 123,
-                        message = TRUE)
+                        message = TRUE, plot = FALSE)
 ```
 We can check how close is the calculated $f_2$ to the target $f_2$.
 ```{r simdpbyf2-f2-50a1}

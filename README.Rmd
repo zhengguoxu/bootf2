@@ -27,17 +27,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r longlinks, echo=FALSE}
-vig_intro   <- paste0("https://cran.r-project.org/web/packages/",
-                    "bootf2/vignettes/introduction.html")
-vig_simdp   <- paste0("https://cran.r-project.org/web/packages/",
-                    "bootf2/vignettes/sim.dp.html")
-vig_calcf2  <- paste0("https://cran.r-project.org/web/packages/",
-                     "bootf2/vignettes/calcf2.html")
-vig_simdpf2 <- paste0("https://cran.r-project.org/web/packages/",
-                      "bootf2/vignettes/sim.dp.byf2.html")
-vig_bootf2  <- paste0("https://cran.r-project.org/web/packages/",
-                     "bootf2/vignettes/bootf2.html")
-  
+lcran <- "https://CRAN.R-project.org/package=bootf2"
 ```
 
 
@@ -72,22 +62,22 @@ Currently, there are four main functions in the package:
 
 1. `sim.dp()` to simulate dissolution profiles using mathematical models or
     multivariate normal distribution. See vignette 
-    [Simulation of Dissolution Profiles](`r vig_simdp`) for details.
+    *Simulation of Dissolution Profiles* on [CRAN](`r lcran`) for details.
 1. `calcf2()` to calculate similarity factor $f_2$ according to different
-    regulatory rules. See vignette 
-    [Calculating Similarity Factor $f_2$](`r vig_calcf2`) for details.
+    regulatory rules. See vignette *Calculating Similarity Factor $f_2$*
+    on [CRAN](`r lcran`) for details.
 1. `sim.dp.byf2()` to find a dissolution profile that, when compared to a given
-    reference profile, has $f_2$ value equal to the predefined target $f_2$. 
-    See vignette [Simulation of Dissolution Profiles with Predefined Target 
-    $f_2$](`r vig_simdpf2`) for details.
+    reference profile, has $f_2$ value equal to the predefined target $f_2$. See
+    vignette *Simulation of Dissolution Profiles with Predefined Target $f_2$* 
+    on [CRAN](`r lcran`) for details.
 1. `bootf2()` to estimate the confidence intervals of $f_2$s using bootstrap
     method. See vignette 
-    [Confidence Intervals of f2 Using Bootstrap Method](`r vig_bootf2`)
+    *Confidence Intervals of f2 Using Bootstrap Method* on [CRAN](`r lcran`)
     for details.
 
 In addition to the vignettes for the main functions, some common topics 
 such as regulation rules are discussed in the vignette 
-[Introduction to bootf2](`r vig_intro`). 
+*Introduction to bootf2* on [CRAN](`r lcran`). 
 
 The most basic usage is given below as a brief demonstration. 
 
@@ -164,9 +154,9 @@ controlled outcomes, argument `tp`, `model`, and `model.par` should be provided.
 ### Function `calcf2()`
 
 The complete list of arguments are shown below. Read the function manual with
-`?calcf2` for more details. In addition, refer to the 
-[Introduction to bootf2](`r vig_intro`) for detailed discussion on different
-regulatory requirements regarding to the applicability of $f_2$. 
+`?calcf2` for more details. In addition, refer to the vignette
+*Introduction to bootf2* on [CRAN](`r lcran`) for detailed discussion on
+different regulatory requirements regarding to the applicability of $f_2$. 
 
 ```{r calcf2-code, eval = FALSE}
 calcf2(test, ref, path.in, file.in, path.out, file.out,

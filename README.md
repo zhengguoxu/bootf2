@@ -1,6 +1,6 @@
 bootf2: Simulation and Comparison of Dissolution Profiles
 ================
-2021-08-18
+2021-08-19
 
 -   [Installation](#installation)
 -   [Introduction](#introduction)
@@ -46,30 +46,26 @@ the dissolution profiles.
 Currently, there are four main functions in the package:
 
 1.  `sim.dp()` to simulate dissolution profiles using mathematical
-    models or multivariate normal distribution. See vignette [Simulation
-    of Dissolution
-    Profiles](https://cran.r-project.org/web/packages/bootf2/vignettes/sim.dp.html)
-    for details.
+    models or multivariate normal distribution. See vignette *Simulation
+    of Dissolution Profiles* on
+    [CRAN](https://CRAN.R-project.org/package=bootf2) for details.
 2.  `calcf2()` to calculate similarity factor *f*<sub>2</sub> according
-    to different regulatory rules. See vignette [Calculating Similarity
-    Factor
-    *f*<sub>2</sub>](https://cran.r-project.org/web/packages/bootf2/vignettes/calcf2.html)
-    for details.
+    to different regulatory rules. See vignette *Calculating Similarity
+    Factor *f*<sub>2</sub>* on
+    [CRAN](https://CRAN.R-project.org/package=bootf2) for details.
 3.  `sim.dp.byf2()` to find a dissolution profile that, when compared to
     a given reference profile, has *f*<sub>2</sub> value equal to the
-    predefined target *f*<sub>2</sub>. See vignette [Simulation of
-    Dissolution Profiles with Predefined Target
-    *f*<sub>2</sub>](https://cran.r-project.org/web/packages/bootf2/vignettes/sim.dp.byf2.html)
-    for details.
+    predefined target *f*<sub>2</sub>. See vignette *Simulation of
+    Dissolution Profiles with Predefined Target *f*<sub>2</sub>* on
+    [CRAN](https://CRAN.R-project.org/package=bootf2) for details.
 4.  `bootf2()` to estimate the confidence intervals of *f*<sub>2</sub>s
-    using bootstrap method. See vignette [Confidence Intervals of f2
-    Using Bootstrap
-    Method](https://cran.r-project.org/web/packages/bootf2/vignettes/bootf2.html)
-    for details.
+    using bootstrap method. See vignette *Confidence Intervals of f2
+    Using Bootstrap Method* on
+    [CRAN](https://CRAN.R-project.org/package=bootf2) for details.
 
 In addition to the vignettes for the main functions, some common topics
-such as regulation rules are discussed in the vignette [Introduction to
-bootf2](https://cran.r-project.org/web/packages/bootf2/vignettes/introduction.html).
+such as regulation rules are discussed in the vignette *Introduction to
+bootf2* on [CRAN](https://CRAN.R-project.org/package=bootf2).
 
 The most basic usage is given below as a brief demonstration.
 
@@ -203,11 +199,11 @@ should be provided.
 ### Function `calcf2()`
 
 The complete list of arguments are shown below. Read the function manual
-with `?calcf2` for more details. In addition, refer to the [Introduction
-to
-bootf2](https://cran.r-project.org/web/packages/bootf2/vignettes/introduction.html)
-for detailed discussion on different regulatory requirements regarding
-to the applicability of *f*<sub>2</sub>.
+with `?calcf2` for more details. In addition, refer to the vignette
+*Introduction to bootf2* on
+[CRAN](https://CRAN.R-project.org/package=bootf2) for detailed
+discussion on different regulatory requirements regarding to the
+applicability of *f*<sub>2</sub>.
 
 ``` r
 calcf2(test, ref, path.in, file.in, path.out, file.out,
@@ -663,7 +659,7 @@ t_vs_r <- bootf2(test, ref, n.boots = 100L, print.report = FALSE,
 #   - User Name               :   zhengguo
 #   - Time Zone               :   Europe/Madrid
 #   - R Version               :   4.1.1 (2021-08-10)
-#   - Package bootf2 Version  :   0.4.0
+#   - Package bootf2 Version  :   0.4.0.9000
 # ______________________________________________________________________
 ```
 

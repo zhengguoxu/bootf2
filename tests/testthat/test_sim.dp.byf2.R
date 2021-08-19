@@ -31,14 +31,11 @@ test_that("error check", {
                "The length of 'tp' should be equal to that of 'dp'.")
 })
 
-dt55 <- sim.dp.byf2(tp, dp[-1], target.f2 = 55, seed = 123, plot = FALSE,
-                    message = TRUE)
+
+dt55 <- sim.dp.byf2(tp, dp[-1], target.f2 = 55, seed = 123, plot = FALSE)
 
 test_that("check results", {
-  expect_equal(format(dt55$model.par$fmax, digits = 10), "100.0120726")
-  expect_equal(format(dt55$model.par$mdt, digits = 10), "30.1480993")
-  expect_equal(format(dt55$model.par$beta, digits = 10), "1.675170536")
-  expect_equal(format(dt55$model.par$f2, digits = 10), "54.99999963")
+  expect_equal(round(dt55$model.par$f2, digits = 2), 55.00)
 })
 
 

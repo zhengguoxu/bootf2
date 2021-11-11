@@ -93,7 +93,7 @@ dat <- sim.dp(tp, dp, dp.cv, model = c("Weibull", "first-order"),
               model.par = NULL, seed = NULL, n.units = 12L, product,
               max.disso = 100, ascending = FALSE, message = FALSE,
               time.unit = c("min", "h"), plot = TRUE,
-              plot.max.unit = 36L)
+              plot.max.unit = 36L, empirical = TRUE, cv.tol = 1e-6)
 ```
 
 For the most basic use, the function can be run without any user provided 

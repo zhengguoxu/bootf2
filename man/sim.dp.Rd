@@ -8,7 +8,7 @@ sim.dp(tp, dp, dp.cv, model = c("Weibull", "first-order"),
        model.par = NULL, seed = NULL, n.units = 12L, product,
        max.disso = 100, ascending = FALSE, message = FALSE,
        time.unit = c("min", "h"), plot = TRUE,
-       plot.max.unit = 36L)
+       plot.max.unit = 36L, empirical = TRUE, cv.tol = 1e-6)
 }
 \arguments{
 \item{tp}{\emph{Numeric} vector of time points for the dissolution profiles.
@@ -58,6 +58,11 @@ than this value, the mean and all individual profiles will be plotted;
 otherwise, individual profiles will be represented by boxplots at each
 time point. Therefore, to avoid overplotting, this value should not be
 too large. @seealso \code{\link[=calcf2]{calcf2()}}.}
+
+\item{empirical}{\emph{Logical}. If \code{TRUE}, mean and CV in the simulated data
+will be the same as defined in the function.}
+
+\item{cv.tol}{\emph{Numeric} value for CV tolerance.}
 }
 \value{
 A list of 3 to 5 components:

@@ -9,7 +9,7 @@
 #'        model.par = NULL, seed = NULL, n.units = 12L, product,
 #'        max.disso = 100, ascending = FALSE, message = FALSE,
 #'        time.unit = c("min", "h"), plot = TRUE,
-#'        plot.max.unit = 36L)
+#'        plot.max.unit = 36L, empirical = TRUE, cv.tol = 1e-6)
 #'
 #' @param tp *Numeric* vector of time points for the dissolution profiles.
 #'   See Details.
@@ -46,6 +46,10 @@
 #'   otherwise, individual profiles will be represented by boxplots at each
 #'   time point. Therefore, to avoid overplotting, this value should not be
 #'   too large. @seealso [calcf2()].
+#' @param empirical *Logical*. If `TRUE`, mean and CV in the simulated data
+#'   will be the same as defined in the function.
+#' @param cv.tol *Numeric* value for CV tolerance.
+#'
 #'
 #' @return A list of 3 to 5 components:
 #'   - `sim.summary`: A *data frame* with summary statistics of all
@@ -200,7 +204,7 @@ sim.dp <- function(tp, dp, dp.cv, model = c("Weibull", "first-order"),
                    model.par = NULL, seed = NULL, n.units = 12L, product,
                    max.disso = 100, ascending = FALSE, message = FALSE,
                    time.unit = c("min", "h"), plot = TRUE,
-                   plot.max.unit = 36L) {
+                   plot.max.unit = 36L, empirical = TRUE, cv.tol = 1e-6) {
   # initial checking -----------------------------------------------------------
   model     <- match.arg(model)
   time.unit <- match.arg(time.unit)
@@ -513,10 +517,11 @@ sim.dp <- function(tp, dp, dp.cv, model = c("Weibull", "first-order"),
     ## generate individual data dp1 based on the mean profile dp -----
     if (length(dp) <= n.units) {
       repeat {# each row is a unit. use MASS::mvrnorm
-        dp1 <- mvrnorm(n = n.units, mu = dp, Sigma = covar, empirical = TRUE)
+        dp1 <- mvrnorm(n = n.units, mu = dp, Sigma = covar,
+                       empirical = empirical, tol = cv.tol)
 
         if (isFALSE(ascending)) {
-          if (max(dp1) < max.disso) break
+          if (all(max(dp1) < max.disso, min(dp1) >= 0)) break
         } else {# could be very slow! Need better solution!
           tmp0 <- matrix(rep(1:length(tp), n.units), nrow = n.units,
                          ncol = length(tp), byrow = TRUE)

@@ -1,6 +1,6 @@
 bootf2: Simulation and Comparison of Dissolution Profiles
 ================
-2021-08-19
+2021-09-26
 
 -   [Installation](#installation)
 -   [Introduction](#introduction)
@@ -81,7 +81,7 @@ dat <- sim.dp(tp, dp, dp.cv, model = c("Weibull", "first-order"),
               model.par = NULL, seed = NULL, n.units = 12L, product,
               max.disso = 100, ascending = FALSE, message = FALSE,
               time.unit = c("min", "h"), plot = TRUE,
-              plot.max.unit = 36L)
+              plot.max.unit = 36L, empirical = TRUE, cv.tol = 1e-6)
 ```
 
 For the most basic use, the function can be run without any user
@@ -654,12 +654,12 @@ t_vs_r <- bootf2(test, ref, n.boots = 100L, print.report = FALSE,
 # * System Information
 # ---------------------
 #   - OS Platform             :   x86_64-pc-linux-gnu (64-bit)
-#   - OS Name and Release     :   Ubuntu 20.04.2 LTS
+#   - OS Name and Release     :   Ubuntu 20.04.3 LTS
 #   - Machine Node Name       :   MyHomeLinuxPC
 #   - User Name               :   zhengguo
 #   - Time Zone               :   Europe/Madrid
 #   - R Version               :   4.1.1 (2021-08-10)
-#   - Package bootf2 Version  :   0.4.0.9000
+#   - Package bootf2 Version  :   0.4.1
 # ______________________________________________________________________
 ```
 
